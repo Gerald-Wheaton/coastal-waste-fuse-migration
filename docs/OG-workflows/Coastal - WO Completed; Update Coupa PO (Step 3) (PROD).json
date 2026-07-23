@@ -1,0 +1,2010 @@
+{
+    "name": "Coastal - WO Completed; Update Coupa PO (Step 3) (PROD)",
+    "flow": [
+        {
+            "id": 1,
+            "module": "gateway:CustomWebHook",
+            "version": 1,
+            "parameters": {
+                "hook": 777,
+                "maxResults": 1
+            },
+            "mapper": {},
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 300
+                },
+                "restore": {
+                    "parameters": {
+                        "hook": {
+                            "data": {
+                                "editable": "true"
+                            },
+                            "label": "Limble - WO Completed"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "hook",
+                        "type": "hook:gateway-webhook",
+                        "label": "Webhook",
+                        "required": true
+                    },
+                    {
+                        "name": "maxResults",
+                        "type": "number",
+                        "label": "Maximum number of results"
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "taskID",
+                        "type": "number"
+                    },
+                    {
+                        "name": "status",
+                        "type": "text"
+                    },
+                    {
+                        "name": "category",
+                        "type": "text"
+                    },
+                    {
+                        "name": "user",
+                        "type": "text"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "module": "fuse-limble-app:listTasks",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 2106
+            },
+            "filter": {
+                "name": "Is Completed?",
+                "conditions": [
+                    [
+                        {
+                            "a": "{{1.status}}",
+                            "b": "COMPLETE",
+                            "o": "text:equal"
+                        }
+                    ]
+                ]
+            },
+            "mapper": {
+                "limit": "1",
+                "tasks": "{{1.taskID}}",
+                "metadata": {},
+                "completed": {},
+                "last_edited": {}
+            },
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 300
+                },
+                "restore": {
+                    "expect": {
+                        "type": {
+                            "mode": "edit"
+                        },
+                        "tasks": {
+                            "mode": "edit"
+                        },
+                        "assets": {
+                            "mode": "edit"
+                        },
+                        "status": {
+                            "mode": "chose",
+                            "label": "Empty"
+                        },
+                        "locations": {
+                            "mode": "edit"
+                        },
+                        "lastEditedByUsers": {
+                            "mode": "edit"
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "fuse-limble-app"
+                            },
+                            "label": "Coastal Waste"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:fuse-limble-app",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    },
+                    {
+                        "name": "name",
+                        "type": "text",
+                        "label": "Name"
+                    },
+                    {
+                        "name": "status",
+                        "type": "select",
+                        "label": "Status",
+                        "validate": {
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "type",
+                        "type": "select",
+                        "label": "Type",
+                        "multiple": true,
+                        "validate": {
+                            "enum": [
+                                1,
+                                2,
+                                4,
+                                6,
+                                7,
+                                8
+                            ]
+                        }
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "tasks",
+                        "type": "select",
+                        "label": "Task IDs",
+                        "multiple": true
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "assets",
+                        "type": "select",
+                        "label": "Asset IDs",
+                        "multiple": true
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "locations",
+                        "type": "select",
+                        "label": "Location IDs",
+                        "multiple": true
+                    },
+                    {
+                        "name": "last_edited",
+                        "spec": [
+                            {
+                                "name": "start",
+                                "time": true,
+                                "type": "date",
+                                "label": "...after"
+                            },
+                            {
+                                "name": "end",
+                                "time": true,
+                                "type": "date",
+                                "label": "...before"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Last edited..."
+                    },
+                    {
+                        "name": "completed",
+                        "spec": [
+                            {
+                                "name": "start",
+                                "time": true,
+                                "type": "date",
+                                "label": "...after"
+                            },
+                            {
+                                "name": "end",
+                                "time": true,
+                                "type": "date",
+                                "label": "...before"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Completed..."
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "lastEditedByUsers",
+                        "type": "select",
+                        "label": "Last edited by IDs",
+                        "multiple": true
+                    },
+                    {
+                        "name": "metadata",
+                        "spec": [
+                            {
+                                "name": "meta1",
+                                "type": "text",
+                                "label": "Meta 1"
+                            },
+                            {
+                                "name": "meta2",
+                                "type": "text",
+                                "label": "Meta 2"
+                            },
+                            {
+                                "name": "meta3",
+                                "type": "text",
+                                "label": "Meta 3"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Metadata"
+                    },
+                    {
+                        "name": "statusID",
+                        "type": "number",
+                        "label": "Status ID"
+                    },
+                    {
+                        "name": "status",
+                        "type": "number",
+                        "label": "Status"
+                    },
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    },
+                    {
+                        "name": "name",
+                        "type": "text",
+                        "label": "Name"
+                    },
+                    {
+                        "name": "status",
+                        "type": "select",
+                        "label": "Status",
+                        "validate": {
+                            "enum": [
+                                0,
+                                1
+                            ]
+                        }
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "type",
+                        "type": "select",
+                        "label": "Type",
+                        "multiple": true,
+                        "validate": {
+                            "enum": [
+                                1,
+                                2,
+                                4,
+                                6,
+                                7,
+                                8
+                            ]
+                        }
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "tasks",
+                        "type": "select",
+                        "label": "Task IDs",
+                        "multiple": true
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "assets",
+                        "type": "select",
+                        "label": "Asset IDs",
+                        "multiple": true
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "locations",
+                        "type": "select",
+                        "label": "Location IDs",
+                        "multiple": true
+                    },
+                    {
+                        "name": "last_edited",
+                        "spec": [
+                            {
+                                "name": "start",
+                                "time": true,
+                                "type": "date",
+                                "label": "...after"
+                            },
+                            {
+                                "name": "end",
+                                "time": true,
+                                "type": "date",
+                                "label": "...before"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Last edited..."
+                    },
+                    {
+                        "name": "completed",
+                        "spec": [
+                            {
+                                "name": "start",
+                                "time": true,
+                                "type": "date",
+                                "label": "...after"
+                            },
+                            {
+                                "name": "end",
+                                "time": true,
+                                "type": "date",
+                                "label": "...before"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Completed..."
+                    },
+                    {
+                        "mode": "edit",
+                        "name": "lastEditedByUsers",
+                        "type": "select",
+                        "label": "Last edited by IDs",
+                        "multiple": true
+                    },
+                    {
+                        "name": "metadata",
+                        "spec": [
+                            {
+                                "name": "meta1",
+                                "type": "text",
+                                "label": "Meta 1"
+                            },
+                            {
+                                "name": "meta2",
+                                "type": "text",
+                                "label": "Meta 2"
+                            },
+                            {
+                                "name": "meta3",
+                                "type": "text",
+                                "label": "Meta 3"
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Metadata"
+                    },
+                    {
+                        "name": "statusID",
+                        "type": "number",
+                        "label": "Status ID"
+                    },
+                    {
+                        "name": "status",
+                        "type": "number",
+                        "label": "Status"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6,
+            "module": "fuse-limble-app:universalModule",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 2106
+            },
+            "filter": {
+                "name": "WO is Coupa related",
+                "conditions": [
+                    [
+                        {
+                            "a": "{{2.meta1}}",
+                            "o": "exist"
+                        },
+                        {
+                            "a": "{{2.meta2}}",
+                            "o": "exist"
+                        },
+                        {
+                            "a": "{{2.description}}",
+                            "b": "@CoupaWO;",
+                            "o": "text:contain"
+                        }
+                    ]
+                ]
+            },
+            "mapper": {
+                "url": "/v2/tasks/{{2.taskID}}/comments",
+                "method": "GET",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            },
+            "metadata": {
+                "designer": {
+                    "x": 600,
+                    "y": 300,
+                    "name": "Grab Task Comments"
+                },
+                "restore": {
+                    "expect": {
+                        "qs": {
+                            "mode": "chose"
+                        },
+                        "method": {
+                            "mode": "chose",
+                            "label": "GET"
+                        },
+                        "headers": {
+                            "mode": "chose",
+                            "items": [
+                                null
+                            ]
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "fuse-limble-app"
+                            },
+                            "label": "Coastal Waste"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:fuse-limble-app",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "url",
+                        "type": "text",
+                        "label": "URL",
+                        "required": true
+                    },
+                    {
+                        "name": "method",
+                        "type": "select",
+                        "label": "Method",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "headers",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Headers"
+                    },
+                    {
+                        "name": "qs",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Query String"
+                    },
+                    {
+                        "name": "body",
+                        "type": "any",
+                        "label": "Body"
+                    },
+                    {
+                        "name": "url",
+                        "type": "text",
+                        "label": "URL",
+                        "required": true
+                    },
+                    {
+                        "name": "method",
+                        "type": "select",
+                        "label": "Method",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "headers",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Headers"
+                    },
+                    {
+                        "name": "qs",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Query String"
+                    },
+                    {
+                        "name": "body",
+                        "type": "any",
+                        "label": "Body"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 8,
+            "module": "builtin:BasicFeeder",
+            "version": 1,
+            "parameters": {},
+            "mapper": {
+                "array": "{{6.body}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 900,
+                    "y": 300
+                },
+                "restore": {
+                    "expect": {
+                        "array": {
+                            "mode": "edit"
+                        }
+                    }
+                },
+                "expect": [
+                    {
+                        "mode": "edit",
+                        "name": "array",
+                        "spec": [],
+                        "type": "array",
+                        "label": "Array"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 9,
+            "module": "builtin:BasicAggregator",
+            "version": 1,
+            "parameters": {
+                "feeder": 6
+            },
+            "mapper": {
+                "comment": "{{8.comment}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 1200,
+                    "y": 300
+                },
+                "restore": {
+                    "extra": {
+                        "feeder": {
+                            "label": "Limble - Make an API Call [6]"
+                        },
+                        "target": {
+                            "label": "Custom"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": 3,
+            "module": "fuse-limble-app:listInstructions",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 2106
+            },
+            "mapper": {
+                "limit": "50",
+                "taskID": "{{2.taskID}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 1500,
+                    "y": 300
+                },
+                "restore": {
+                    "expect": {
+                        "taskID": {
+                            "mode": "edit"
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "fuse-limble-app"
+                            },
+                            "label": "Coastal Waste"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:fuse-limble-app",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    },
+                    {
+                        "name": "taskID",
+                        "type": "select",
+                        "label": "Task ID",
+                        "required": true
+                    },
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    },
+                    {
+                        "name": "taskID",
+                        "type": "select",
+                        "label": "Task ID",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "module": "builtin:BasicAggregator",
+            "version": 1,
+            "parameters": {
+                "feeder": 3
+            },
+            "mapper": {
+                "response": "{{3.response}}",
+                "instruction": "{{3.instruction}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 1800,
+                    "y": 300
+                },
+                "restore": {
+                    "extra": {
+                        "feeder": {
+                            "label": "Limble - List Instructions [3]"
+                        },
+                        "target": {
+                            "label": "Custom"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "id": 18,
+            "module": "datastore:SearchRecord",
+            "version": 2,
+            "parameters": {
+                "limit": null,
+                "datastore": 324,
+                "continueWhenNoRes": false
+            },
+            "mapper": {
+                "filter": [
+                    [
+                        {
+                            "a": "client",
+                            "b": "coastal_waste (PROD)",
+                            "o": "text:equal:ci"
+                        }
+                    ]
+                ]
+            },
+            "metadata": {
+                "designer": {
+                    "x": 2100,
+                    "y": 300,
+                    "name": "Grab Coastal's Coupa OAuth2 Token"
+                },
+                "restore": {
+                    "expect": {
+                        "sort": {
+                            "mode": "chose"
+                        }
+                    },
+                    "parameters": {
+                        "datastore": {
+                            "label": "CLIENTS - API Acct Information and Key"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "datastore",
+                        "type": "datastore",
+                        "label": "Data store",
+                        "required": true
+                    },
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    },
+                    {
+                        "name": "continueWhenNoRes",
+                        "type": "boolean",
+                        "label": "Continue the execution of the route even if the module returns no results"
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "filter",
+                        "type": "filter",
+                        "label": "Filter",
+                        "options": "rpc://datastore/2.0.5/RpcGetUDTKeys",
+                        "required": true
+                    },
+                    {
+                        "name": "sort",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "select",
+                                "label": "Key",
+                                "dynamic": true,
+                                "options": [],
+                                "required": true
+                            },
+                            {
+                                "name": "order",
+                                "type": "select",
+                                "label": "Order",
+                                "options": [
+                                    {
+                                        "label": "Ascending",
+                                        "value": 1
+                                    },
+                                    {
+                                        "label": "Descending",
+                                        "value": -1
+                                    }
+                                ],
+                                "required": true
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Sort"
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "key",
+                        "type": "text",
+                        "label": "Key"
+                    },
+                    {
+                        "name": "data",
+                        "spec": [
+                            {
+                                "name": "client",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": true,
+                                "multiline": false
+                            },
+                            {
+                                "name": "apiConnection",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": false,
+                                "multiline": false
+                            },
+                            {
+                                "name": "client_id",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": false,
+                                "multiline": false
+                            },
+                            {
+                                "name": "grant_type",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": false,
+                                "multiline": false
+                            },
+                            {
+                                "name": "scope",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": false,
+                                "multiline": false
+                            },
+                            {
+                                "name": "client_secret",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": false,
+                                "multiline": false
+                            },
+                            {
+                                "name": "oauth_token",
+                                "type": "text",
+                                "label": null,
+                                "default": null,
+                                "required": false,
+                                "multiline": false
+                            }
+                        ],
+                        "type": "collection",
+                        "label": "Record"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 25,
+            "module": "coupa:makeApiCall",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 1766
+            },
+            "mapper": {
+                "url": "/api/purchase_orders?po-number={{2.meta2}}",
+                "method": "GET",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            },
+            "metadata": {
+                "designer": {
+                    "x": 2400,
+                    "y": 300,
+                    "name": "Get PO ID"
+                },
+                "restore": {
+                    "expect": {
+                        "qs": {
+                            "mode": "chose"
+                        },
+                        "method": {
+                            "mode": "chose",
+                            "label": "GET"
+                        },
+                        "headers": {
+                            "mode": "chose",
+                            "items": [
+                                null
+                            ]
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "coupa2"
+                            },
+                            "label": "Coastal - Coupa Prod DB"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:coupa,coupa2",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "url",
+                        "type": "text",
+                        "label": "URL",
+                        "required": true
+                    },
+                    {
+                        "name": "method",
+                        "type": "select",
+                        "label": "Method",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "headers",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Headers"
+                    },
+                    {
+                        "name": "qs",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Query String"
+                    },
+                    {
+                        "name": "body",
+                        "type": "any",
+                        "label": "Body"
+                    },
+                    {
+                        "name": "url",
+                        "type": "text",
+                        "label": "URL",
+                        "required": true
+                    },
+                    {
+                        "name": "method",
+                        "type": "select",
+                        "label": "Method",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "headers",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Headers"
+                    },
+                    {
+                        "name": "qs",
+                        "spec": [
+                            {
+                                "name": "key",
+                                "type": "text",
+                                "label": "Key"
+                            },
+                            {
+                                "name": "value",
+                                "type": "text",
+                                "label": "Value"
+                            }
+                        ],
+                        "type": "array",
+                        "label": "Query String"
+                    },
+                    {
+                        "name": "body",
+                        "type": "any",
+                        "label": "Body"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 11,
+            "module": "util:SetVariable2",
+            "version": 1,
+            "parameters": {},
+            "mapper": {
+                "name": "invoiceResponse",
+                "scope": "roundtrip",
+                "value": "{{CoastalGetInvoiceInstResponse(12.array)}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 2700,
+                    "y": 300,
+                    "name": "Get Invoice File from WO"
+                },
+                "restore": {
+                    "expect": {
+                        "scope": {
+                            "label": "One cycle"
+                        }
+                    }
+                },
+                "expect": [
+                    {
+                        "name": "name",
+                        "type": "text",
+                        "label": "Variable name",
+                        "required": true
+                    },
+                    {
+                        "name": "scope",
+                        "type": "select",
+                        "label": "Variable lifetime",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "roundtrip",
+                                "execution"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "value",
+                        "type": "any",
+                        "label": "Variable value"
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "invoiceResponse",
+                        "type": "any",
+                        "label": "invoiceResponse"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 10,
+            "module": "builtin:BasicRouter",
+            "version": 1,
+            "parameters": {
+                "else": 1
+            },
+            "mapper": null,
+            "metadata": {
+                "designer": {
+                    "x": 3000,
+                    "y": 300
+                }
+            },
+            "routes": [
+                {
+                    "flow": [
+                        {
+                            "id": 14,
+                            "module": "json:CreateJSON",
+                            "version": 1,
+                            "parameters": {
+                                "type": 598,
+                                "space": ""
+                            },
+                            "filter": {
+                                "name": "Contains Invoice File",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{11.invoiceResponse.link}}",
+                                            "o": "exist"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "attachment": {
+                                    "file": "{{11.invoiceResponse.link}}",
+                                    "type": "file"
+                                }
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 3300,
+                                    "y": 150,
+                                    "name": "Prep Attachment Packet"
+                                },
+                                "restore": {
+                                    "parameters": {
+                                        "type": {
+                                            "label": "CoupaAttachmentsStructure"
+                                        },
+                                        "space": {
+                                            "label": "Empty"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "type",
+                                        "type": "udt",
+                                        "label": "Data structure",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "space",
+                                        "type": "select",
+                                        "label": "Indentation",
+                                        "validate": {
+                                            "enum": [
+                                                "tab",
+                                                "2",
+                                                "4"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "attachment",
+                                        "spec": [
+                                            {
+                                                "name": "file",
+                                                "type": "text",
+                                                "label": null,
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "type",
+                                                "type": "text",
+                                                "label": null,
+                                                "required": true
+                                            }
+                                        ],
+                                        "type": "collection",
+                                        "label": null,
+                                        "required": true,
+                                        "sequence": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 15,
+                            "module": "coupa:makeApiCall",
+                            "version": 1,
+                            "parameters": {
+                                "__IMTCONN__": 1766
+                            },
+                            "mapper": {
+                                "url": "/api/purchase_orders/{{25.body[1].id}}/attachments",
+                                "body": "{{14.json}}",
+                                "method": "POST",
+                                "headers": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{18.data.oauth_token}}"
+                                    }
+                                ]
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 3600,
+                                    "y": 150,
+                                    "name": "Add Invoice to PO"
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null,
+                                                null
+                                            ]
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "coupa2"
+                                            },
+                                            "label": "Coastal - Coupa Prod DB"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:coupa,coupa2",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "text",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "GET",
+                                                "POST",
+                                                "PUT",
+                                                "PATCH",
+                                                "DELETE"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "body",
+                                        "type": "any",
+                                        "label": "Body"
+                                    },
+                                    {
+                                        "name": "url",
+                                        "type": "text",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "GET",
+                                                "POST",
+                                                "PUT",
+                                                "PATCH",
+                                                "DELETE"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "body",
+                                        "type": "any",
+                                        "label": "Body"
+                                    }
+                                ]
+                            },
+                            "onerror": [
+                                {
+                                    "id": 16,
+                                    "module": "datastore:AddRecord",
+                                    "version": 2,
+                                    "parameters": {
+                                        "datastore": 326
+                                    },
+                                    "mapper": {
+                                        "data": {
+                                            "errorMsg": "{{15.error.message}}",
+                                            "errorCode": "{{15.error.type}}",
+                                            "timestamp": "{{formatDate(now; \"MM/DD/YY hh:mm A\"; \"EST\")}}",
+                                            "limbleWONum": "{{2.taskID}}"
+                                        },
+                                        "overwrite": false
+                                    },
+                                    "metadata": {
+                                        "designer": {
+                                            "x": 3900,
+                                            "y": 300,
+                                            "name": "Send to Error Log"
+                                        },
+                                        "restore": {
+                                            "expect": {
+                                                "overwrite": {
+                                                    "mode": "chose"
+                                                }
+                                            },
+                                            "parameters": {
+                                                "datastore": {
+                                                    "label": "Coastal - Coupa Integration Error Log"
+                                                }
+                                            }
+                                        },
+                                        "parameters": [
+                                            {
+                                                "name": "datastore",
+                                                "type": "datastore",
+                                                "label": "Data store",
+                                                "required": true
+                                            }
+                                        ],
+                                        "expect": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "overwrite",
+                                                "type": "boolean",
+                                                "label": "Overwrite an existing record",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "data",
+                                                "spec": [
+                                                    {
+                                                        "name": "limbleWONum",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "errorCode",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "errorMsg",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "timestamp",
+                                                        "type": "text",
+                                                        "label": null
+                                                    }
+                                                ],
+                                                "type": "collection",
+                                                "label": "Record"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 28,
+                            "module": "coupa:makeApiCall",
+                            "version": 1,
+                            "parameters": {
+                                "__IMTCONN__": 1766
+                            },
+                            "mapper": {
+                                "url": "api/purchase_orders/{{25.body[1].id}}/comments",
+                                "body": "{\"comments\": \"@{{25.body[1].`created-by`.fullname}}: PO is ready for receiving. Please review the invoice, update the PO (if necessary), and finish it out.\"}",
+                                "method": "POST",
+                                "headers": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{18.data.oauth_token}}"
+                                    }
+                                ]
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 3900,
+                                    "y": 0,
+                                    "name": "Send Comment to Site Manager"
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null,
+                                                null
+                                            ]
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "coupa2"
+                                            },
+                                            "label": "Coastal - Coupa Prod DB"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:coupa,coupa2",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "text",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "GET",
+                                                "POST",
+                                                "PUT",
+                                                "PATCH",
+                                                "DELETE"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "body",
+                                        "type": "any",
+                                        "label": "Body"
+                                    }
+                                ]
+                            },
+                            "onerror": [
+                                {
+                                    "id": 21,
+                                    "module": "datastore:AddRecord",
+                                    "version": 2,
+                                    "parameters": {
+                                        "datastore": 326
+                                    },
+                                    "mapper": {
+                                        "data": {
+                                            "errorMsg": "{{28.error.message}}: {{28.error.detail}}",
+                                            "errorCode": "{{28.error.type}}",
+                                            "timestamp": "{{formatDate(now; \"MM/DD/YY hh:mm A\"; \"EST\")}}",
+                                            "limbleWONum": "{{2.taskID}}"
+                                        },
+                                        "overwrite": false
+                                    },
+                                    "metadata": {
+                                        "designer": {
+                                            "x": 4200,
+                                            "y": 0,
+                                            "name": "Send to Error Log"
+                                        },
+                                        "restore": {
+                                            "expect": {
+                                                "overwrite": {
+                                                    "mode": "chose"
+                                                }
+                                            },
+                                            "parameters": {
+                                                "datastore": {
+                                                    "label": "Coastal - Coupa Integration Error Log"
+                                                }
+                                            }
+                                        },
+                                        "parameters": [
+                                            {
+                                                "name": "datastore",
+                                                "type": "datastore",
+                                                "label": "Data store",
+                                                "required": true
+                                            }
+                                        ],
+                                        "expect": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "overwrite",
+                                                "type": "boolean",
+                                                "label": "Overwrite an existing record",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "data",
+                                                "spec": [
+                                                    {
+                                                        "name": "limbleWONum",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "errorCode",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "errorMsg",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "timestamp",
+                                                        "type": "text",
+                                                        "label": null
+                                                    }
+                                                ],
+                                                "type": "collection",
+                                                "label": "Record"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "flow": [
+                        {
+                            "id": 29,
+                            "module": "coupa:makeApiCall",
+                            "version": 1,
+                            "parameters": {
+                                "__IMTCONN__": 1766
+                            },
+                            "mapper": {
+                                "url": "api/purchase_orders/{{25.body[1].id}}/comments",
+                                "body": "{\"comments\": \"@{{25.body[1].`created-by`.fullname}}: PO is ready for receiving. Please review the invoice, update the PO (if necessary), and finish it out.\"}",
+                                "method": "POST",
+                                "headers": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{18.data.oauth_token}}"
+                                    }
+                                ]
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 3300,
+                                    "y": 600,
+                                    "name": "Send Comment to Site Manager"
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null,
+                                                null
+                                            ]
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "coupa2"
+                                            },
+                                            "label": "Coastal - Coupa Prod DB"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:coupa,coupa2",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "text",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "GET",
+                                                "POST",
+                                                "PUT",
+                                                "PATCH",
+                                                "DELETE"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "body",
+                                        "type": "any",
+                                        "label": "Body"
+                                    }
+                                ]
+                            },
+                            "onerror": [
+                                {
+                                    "id": 20,
+                                    "module": "datastore:AddRecord",
+                                    "version": 2,
+                                    "parameters": {
+                                        "datastore": 326
+                                    },
+                                    "mapper": {
+                                        "data": {
+                                            "errorMsg": "{{29.error.message}}: {{29.error.detail}}",
+                                            "errorCode": "{{29.error.type}}",
+                                            "timestamp": "{{formatDate(now; \"MM/DD/YY hh:mm A\"; \"EST\")}}",
+                                            "limbleWONum": "{{2.taskID}}"
+                                        },
+                                        "overwrite": false
+                                    },
+                                    "metadata": {
+                                        "designer": {
+                                            "x": 3600,
+                                            "y": 600,
+                                            "name": "Send to Error Log"
+                                        },
+                                        "restore": {
+                                            "expect": {
+                                                "overwrite": {
+                                                    "mode": "chose"
+                                                }
+                                            },
+                                            "parameters": {
+                                                "datastore": {
+                                                    "label": "Coastal - Coupa Integration Error Log"
+                                                }
+                                            }
+                                        },
+                                        "parameters": [
+                                            {
+                                                "name": "datastore",
+                                                "type": "datastore",
+                                                "label": "Data store",
+                                                "required": true
+                                            }
+                                        ],
+                                        "expect": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key"
+                                            },
+                                            {
+                                                "name": "overwrite",
+                                                "type": "boolean",
+                                                "label": "Overwrite an existing record",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "data",
+                                                "spec": [
+                                                    {
+                                                        "name": "limbleWONum",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "errorCode",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "errorMsg",
+                                                        "type": "text",
+                                                        "label": null
+                                                    },
+                                                    {
+                                                        "name": "timestamp",
+                                                        "type": "text",
+                                                        "label": null
+                                                    }
+                                                ],
+                                                "type": "collection",
+                                                "label": "Record"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "instant": true,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false,
+            "freshVariables": false
+        },
+        "designer": {
+            "orphans": [],
+            "notes": [
+                {
+                    "id": 19,
+                    "text": "UPDATE: Don't change status to soft-close. Leave status alone and rather notify owner that the PO is ready to receive.",
+                    "filter": false
+                },
+                {
+                    "id": 17,
+                    "text": "UPDATE: Don't change status to soft-close. Leave status alone and rather notify owner that the PO is ready to receive.",
+                    "filter": false
+                }
+            ]
+        },
+        "zone": "fuse.limblecmms.com"
+    }
+}

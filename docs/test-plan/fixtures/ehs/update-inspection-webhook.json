@@ -1,0 +1,18 @@
+{
+  "__note": "Trigger payloads for the Update-Inspection workflow (8JvtesynrYtZbw7U). POST the chosen payload's body object (WITHOUT the __note wrappers) to the n8n webhook URL /webhook/coastal-ehs-update-inspection. n8n wraps the POST body under $json.body, which is exactly what the built nodes read: 'Is Completed?' reads $json.body.status; 'Get Task' reads $('Limble Webhook').first().json.body.taskID. Only status + taskID are consumed from the webhook; everything else about the task is fetched from Limble by taskID. Register the real production URL in Limble at cutover (OQ-020) - webhook delivery itself is not exercised by curl replay.",
+
+  "scenario_U1_parent_completed_with_children": {
+    "__desc": "Main path. Parent WO PT-9001 (tagged @EHSWO;, meta1=EHS-INSP-UPD-1) completed with 2 completed child WOs. Expect EHS capture row with UDFLimbleWOCompletionNotes = parent notes + both child notes concatenated.",
+    "body": { "status": "COMPLETE", "taskID": 9001 }
+  },
+
+  "scenario_U2_not_a_completion_event": {
+    "__desc": "Gate test: 'Is Completed?' must drop (status != COMPLETE). No Limble/EHS calls, no capture row.",
+    "body": { "status": "ADDED COMMENT TO TASK", "taskID": 9001 }
+  },
+
+  "scenario_U3_completed_but_not_an_EHS_WO": {
+    "__desc": "Gate test: completion of a non-EHS task PT-9002 (description lacks @EHSWO; and/or meta1 empty). 'WO is an EHS WO?' must drop after the task fetch. No EHS calls, no capture row.",
+    "body": { "status": "COMPLETE", "taskID": 9002 }
+  }
+}

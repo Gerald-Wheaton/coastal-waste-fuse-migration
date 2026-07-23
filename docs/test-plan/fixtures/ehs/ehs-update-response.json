@@ -1,0 +1,5 @@
+{
+  "__note": "Canned response the mock returns for POST /api/v4/entity/AuditInspection/update (Update source module 54, built node 'EHS: Update Inspection'). The workflow does not read the response body (it is the last node), so any 2xx JSON is fine. Before returning this, the mock MUST capture the inbound request body (the full mutated Entity) into the 'Coastal - Mock EHS Capture (TEST)' Data Table so the test can assert UDFLimbleWOCompletionNotes. OQ-009: real EHS update response shape unverified.",
+  "Success": true,
+  "Message": "Inspection updated (MOCK)"
+}

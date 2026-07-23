@@ -1,0 +1,149 @@
+{
+  "__note": "Keyed map for GET /api/v4/entity/AuditInspection/fetch/{RowUID}. The mock looks up the trailing RowUID path param and returns the matching value (which has the shape { Entity: {...} }). Used by BOTH workflows: Create WO source module 64 ('EHS: Fetch Inspection Detail' -> reads $json.Entity), and Update source module 4 ('EHS: Fetch Inspection' -> reads $json.Entity, then mutates UDFLimbleWOCompletionNotes and POSTs it back). Question fields consumed: Answer ('0'==unacceptable), Verification (deficiency text), FileAttachments[0].{AttachmentUID,FileName}. Entity fields consumed: RowUID, FormNumber, BusinessEntity, QuestionsSelector, UpdatedDtm, RecurringTaskCompleteDtm, Questions.",
+
+  "EHS-INSP-A1": {
+    "Entity": {
+      "RowUID": "EHS-INSP-A1",
+      "FormNumber": "FIC-1001",
+      "BusinessEntity": "BE-10",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T09:00:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T09:05:00Z",
+      "Questions": [
+        { "QuestionText": "Are all walkways clear?", "Answer": "1", "Verification": "", "FileAttachments": [] },
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "A1: Broken handrail on loading dock", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-A2": {
+    "Entity": {
+      "RowUID": "EHS-INSP-A2",
+      "FormNumber": "FIC-1002",
+      "BusinessEntity": "BE-10",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T15:00:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T15:05:00Z",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "A2: Fire extinguisher expired", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-B": {
+    "Entity": {
+      "RowUID": "EHS-INSP-B",
+      "FormNumber": "FIC-1200",
+      "BusinessEntity": "BE-12",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T11:00:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T11:10:00Z",
+      "Questions": [
+        { "QuestionText": "Spill kit present?", "Answer": "0", "Verification": "B-Q1: Spill kit missing (EARLIER deficiency - must be IGNORED per OQ-035 last-only)", "FileAttachments": [] },
+        { "QuestionText": "Eyewash station operational?", "Answer": "1", "Verification": "", "FileAttachments": [] },
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "B-Q3: Exit sign not illuminated", "FileAttachments": [ { "AttachmentUID": "ATT-B-1", "FileName": "deficiency-photo.png" } ] }
+      ]
+    }
+  },
+
+  "EHS-INSP-C": {
+    "Entity": {
+      "RowUID": "EHS-INSP-C",
+      "FormNumber": "FIC-2300",
+      "BusinessEntity": "BE-23",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T12:00:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T12:10:00Z",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "C: Guardrail corroded", "FileAttachments": [ { "AttachmentUID": "ATT-C-1", "FileName": "inspection-report.pdf" } ] }
+      ]
+    }
+  },
+
+  "EHS-INSP-D": {
+    "Entity": {
+      "RowUID": "EHS-INSP-D",
+      "FormNumber": "FIC-2400",
+      "BusinessEntity": "BE-24",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T13:00:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T13:10:00Z",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "D: Broken ladder rung", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-E": {
+    "Entity": {
+      "RowUID": "EHS-INSP-E",
+      "FormNumber": "FIC-3000",
+      "BusinessEntity": "BE-30",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T13:30:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T13:40:00Z",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "E: Blocked emergency exit", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-F": {
+    "Entity": {
+      "RowUID": "EHS-INSP-F",
+      "FormNumber": "FIC-9900",
+      "BusinessEntity": "BE-99",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T14:00:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T14:10:00Z",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "F: Trip hazard in lobby", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-G": {
+    "Entity": {
+      "RowUID": "EHS-INSP-G",
+      "FormNumber": "FIC-4000",
+      "BusinessEntity": "BE-40",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T14:30:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T14:40:00Z",
+      "Questions": [
+        { "QuestionText": "Fire door self-closing?", "Answer": "0", "Verification": "G-Q1: earlier deficiency - must be IGNORED (last-only)", "FileAttachments": [] },
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "1", "Verification": "", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-H": {
+    "Entity": {
+      "RowUID": "EHS-INSP-H",
+      "FormNumber": "VEH-5000",
+      "BusinessEntity": "BE-50",
+      "QuestionsSelector": "QS-VEH-002",
+      "UpdatedDtm": "2026-07-08T14:45:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T14:50:00Z",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "H: wrong question set - must NEVER be processed", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-UPD-1": {
+    "__note": "Consumed only by the Update-Inspection workflow (fetch by inspectionID == parent task meta1). Represents the pre-existing EHS inspection whose UDFLimbleWOCompletionNotes the write-back will populate. Extra fields simulate a 'full record' round-trip (read-modify-write): the workflow mutates only UDFLimbleWOCompletionNotes and POSTs the whole Entity back.",
+    "Entity": {
+      "RowUID": "EHS-INSP-UPD-1",
+      "FormNumber": "FIC-1001",
+      "BusinessEntity": "BE-10",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T09:05:00Z",
+      "RecurringTaskCompleteDtm": "2026-07-08T09:05:00Z",
+      "UDFLimbleWOCompletionNotes": "",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "A1: Broken handrail on loading dock", "FileAttachments": [] }
+      ]
+    }
+  }
+}

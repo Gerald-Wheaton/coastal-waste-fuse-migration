@@ -1,0 +1,7 @@
+{
+  "__note": "Canned response for GET /api/v4/entity/AuditInspectionQuestions/list?fields=Title,RowUID (Create WO source module 47). Built node 'EHS: List Question Sets' reads $json.List. 'Prepare Inspections' picks the RowUID where Title == 'Facility Inspection Checklist' as questionSetID. The Vehicle set exists only so the Title filter and the QuestionsSelector gate are exercised (inspection EHS-INSP-H uses QS-VEH-002 and must be dropped).",
+  "List": [
+    { "Title": "Facility Inspection Checklist", "RowUID": "QS-FIC-001" },
+    { "Title": "Vehicle Safety Inspection", "RowUID": "QS-VEH-002" }
+  ]
+}

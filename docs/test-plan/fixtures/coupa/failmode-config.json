@@ -1,0 +1,25 @@
+{
+  "_readme": "Error-injection config for the mock. The mock reads ONE row (key='default') from the 'Coastal - Coupa Mock Config (TEST)' Data Table before responding, and branches on failMode. Extends OQ-028's Step-1-only set (user/addr/acct/createreq) with values for Step 1 attach, Step 2, Step 3, and Token Regen. Set the value (updateRows) before firing an error scenario; reset to '' after. Supplier failure is NOT a failMode — it rides on the contractor name (see mock-responses.json suppliers.failWhenDisplayNameContains).",
+  "configTable": {
+    "name": "Coastal - Coupa Mock Config (TEST)",
+    "columns": [
+      { "name": "key", "type": "string" },
+      { "name": "failMode", "type": "string" }
+    ],
+    "seedRow": { "key": "default", "failMode": "" }
+  },
+  "failModes": [
+    { "failMode": "", "effect": "All routes answer normally (happy path).", "exercises": "s1/s2/s3/s4 (Step 1), S2-2/3/4 (Step 2), S3-1/S3-2 (Step 3), T1 (Token), E1 (Export)" },
+    { "failMode": "user", "effect": "GET /api/users -> [] (200).", "exercises": "Step 1 error path A (site-manager miss) — s6a" },
+    { "failMode": "addr", "effect": "GET /api/addresses -> [] (200).", "exercises": "Step 1 error path B (location miss) — s6b" },
+    { "failMode": "acct", "effect": "GET /api/accounts -> [] (200).", "exercises": "Step 1 error path C (account miss) — s6c" },
+    { "failMode": "createreq", "effect": "POST /api/requisitions/new/submit_for_approval -> 500.", "exercises": "Step 1 error path D (create-req onerror) — s7" },
+    { "failMode": "attachq", "effect": "POST /api/requisitions/424242/attachments -> 500.", "exercises": "Step 1 error path E (Add-Quote onerror; OQ-017 own-error fix) — s8" },
+    { "failMode": "reqpending", "effect": "GET /api/requisitions/424242 -> status 'requisition_pending' (not 'ordered').", "exercises": "Step 2 no-PR-yet branch — S2-1" },
+    { "failMode": "getreq", "effect": "GET /api/requisitions/424242 -> 500.", "exercises": "Step 2 GET-requisition failure — BLOCKED: Step 2 has no error subgraph (OQ-029); a failure aborts silently. Document only." },
+    { "failMode": "getpo", "effect": "GET /api/purchase_orders -> 500.", "exercises": "Step 2 GET-PO failure — same OQ-029 caveat. Step 3 GET-PO failure aborts before its covered POSTs (faithful, uncovered per OQ-032)." },
+    { "failMode": "poattach", "effect": "POST /api/purchase_orders/555001/attachments -> 500.", "exercises": "Step 3 attachment-POST onerror -> error-log write (OQ-032) — S3-3" },
+    { "failMode": "pocomment", "effect": "POST /api/purchase_orders/555001/comments -> 500.", "exercises": "Step 3 comment-POST onerror -> error-log write (OQ-032) — S3-4" },
+    { "failMode": "token", "effect": "POST /oauth2/token -> 500.", "exercises": "Token Regen HTTP-failure -> retry 3x -> Ionos alert email (sanctioned fix) — T2" }
+  ]
+}

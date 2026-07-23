@@ -1,0 +1,5 @@
+{
+  "__note": "Keyed map for GET /api/v4/attachment/fetch/{AttachmentUID} (Create WO source module 21). The mock looks up the trailing AttachmentUID path param and returns { data: <file bytes/base64> }. Built node 'EHS: Fetch Attachment' -> 'Update Instruction With Image' reads ($json.data || $json) as image.file_data. ONLY the last question's FileAttachments[0] is ever fetched, and ONLY when it is an image (.jpeg/.png/.jpg/.gif). ATT-B-1 (deficiency-photo.png) IS fetched. ATT-C-1 (inspection-report.pdf) is intentionally absent: it fails the 'Attachment is image file' filter so the workflow takes the No-Image branch and never calls this endpoint for it. The base64 value is a placeholder, not a real image; OQ-009 - the real EHS attachment response shape (raw bytes vs base64 vs wrapper) is unverified.",
+
+  "ATT-B-1": { "data": "TU9DSy1CQVNFNjQtSU1BR0UtREFUQS1ub3QtYS1yZWFsLWltYWdl" }
+}

@@ -1,0 +1,54 @@
+{
+  "_readme": "n8n Data Table seed rows required at test time. NO real secrets — the token is a placeholder (MOCK-TOKEN-COUPA). All rows written via n8n_manage_datatable at test phase only; purge at teardown. NOTE: writes require owner permission (currently READ-ONLY per OQ-003).",
+
+  "tokenTable": {
+    "tableId": "QAj62weJaWmRBJ76",
+    "tableName": "Coastal - Coupa OAuth Token",
+    "columns": ["client (string)", "oauth_token (string)", "refreshed_at (date)", "scope (string)"],
+    "existingRowLeaveInPlace": {
+      "client": "Coastal_Waste (TEST)",
+      "_note": "The standing row (real expired JWT from the Coupa TEST instance). Do NOT modify; Step1/2/3 + Token Regen filter on client='coastal_waste' so this row is never matched."
+    },
+    "seedRow": {
+      "client": "coastal_waste",
+      "oauth_token": "MOCK-TOKEN-COUPA",
+      "scope": "core.accounting.read core.purchase_order.read core.requisition.write core.supplier.read core.user.read",
+      "refreshed_at": "2026-07-08T00:00:00Z",
+      "_op": "upsert on client='coastal_waste'",
+      "_why": "Step 1/2/3 read the Bearer token from here (filter client='coastal_waste'); Token Regen reads 'scope' from here and upserts 'oauth_token' back. Analogue of OQ-028's dummy token row id 2. Without it, Step1/2/3 'Get Coupa Token' returns 0 items and the run halts (matches source continueWhenNoRes:false)."
+    }
+  },
+
+  "errorLogTable": {
+    "tableId": "6GbR5Rxezl7hqk9i",
+    "tableName": "Coastal - Coupa Integration Error Log",
+    "columns": ["limbleWONum (string)", "errorCode (string)", "errorMsg (string)", "timestamp (date)"],
+    "startState": "empty",
+    "seedRowsForExportTest": [
+      { "limbleWONum": "9001", "errorCode": "400", "errorMsg": "Location's Site Manager for Task# 9001 was not found in Coupa.", "timestamp": "2026-07-08T14:05:00Z" },
+      { "limbleWONum": "9002", "errorCode": "Missing Account", "errorMsg": "Selected Account (CWR-099-999-612200-Other Operating) does not exist in Coupa.", "timestamp": "2026-07-08T14:07:30Z" }
+    ],
+    "raceProofRow": {
+      "limbleWONum": "9003",
+      "errorCode": "500",
+      "errorMsg": "Inserted BETWEEN the export's read and delete to prove OQ-006 partial-delete (this row must SURVIVE the run).",
+      "timestamp": "2026-07-08T14:09:00Z",
+      "_op": "insert AFTER triggering the export, during the Ionos send window"
+    },
+    "_note": "Step 1 (error paths A-E) and Step 3 (attach/comment failures) also WRITE rows here at runtime during their error scenarios. Those are runtime writes, not seeds."
+  },
+
+  "mockConfigTable": {
+    "tableName": "Coastal - Coupa Mock Config (TEST)",
+    "_op": "createTable (new; OQ-028's bZ78rLHH8sJfDbtN was deleted at teardown)",
+    "columns": ["key (string)", "failMode (string)"],
+    "seedRow": { "key": "default", "failMode": "" }
+  },
+
+  "mockCaptureTable": {
+    "tableName": "Coastal - Coupa Mock Capture (TEST)",
+    "_op": "createTable (new; OQ-028's u7iAudMydWyhl7BJ was deleted at teardown)",
+    "columns": ["endpoint (string)", "method (string)", "query (string)", "body (string)", "receivedAt (date)"],
+    "seedRows": "none — populated by the mock at runtime, one row per inbound Coupa call, for diffing payloads against the build specs."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "_readme": "Webhook trigger payloads for the two webhook-triggered Coupa workflows (Step 1, Step 3). Shape reverse-engineered from the built webhook + gate nodes: the blueprint gateway consumes only {status, taskID}; n8n exposes the POST body under $json.body (confirmed: gates read $json.body.status / $json.body.taskID). Replace <TASKID> with the seeded sandbox task's real taskID. Fire with tools/sandbox-seed/fire.sh <taskID> <webhook-url>, or curl directly. Use the /webhook-test/ URL + 'Listen for test event' while the workflow is inactive; /webhook/ requires the workflow ACTIVE.",
+
+  "step1": {
+    "workflowId": "WJSs6apAdVH5yKkq",
+    "webhookPath": "coastal-coupa-create-requisition-step1",
+    "prodUrl": "https://fm360.n8n.fm360consulting.com/webhook/coastal-coupa-create-requisition-step1",
+    "testUrl": "https://fm360.n8n.fm360consulting.com/webhook-test/coastal-coupa-create-requisition-step1",
+    "method": "POST",
+    "headers": { "Content-Type": "application/json" },
+    "payload": { "status": "ADDED COMMENT TO TASK", "taskID": "<TASKID>" },
+    "_gateNotes": "Gate chain requires, in order: body.status=='ADDED COMMENT TO TASK'; task.description contains '@CoupaWO;' AND task.statusID == '%PO Create%' statusID; latest comment contains 'status was changed' (ci) AND 'to PO Create'; task.meta1 EMPTY (idempotency guard). For the idempotency re-fire scenario, seed meta1 populated so 'No Existing Requisition?' exits early.",
+    "curl": "./tools/sandbox-seed/fire.sh <TASKID> https://fm360.n8n.fm360consulting.com/webhook-test/coastal-coupa-create-requisition-step1"
+  },
+
+  "step3": {
+    "workflowId": "NH1giNups8iICMZe",
+    "webhookPath": "coastal-coupa-wo-completed-step3",
+    "prodUrl": "https://fm360.n8n.fm360consulting.com/webhook/coastal-coupa-wo-completed-step3",
+    "testUrl": "https://fm360.n8n.fm360consulting.com/webhook-test/coastal-coupa-wo-completed-step3",
+    "method": "POST",
+    "headers": { "Content-Type": "application/json" },
+    "payload": { "status": "COMPLETE", "taskID": "<TASKID>" },
+    "_gateNotes": "Gate chain requires: body.status=='COMPLETE'; task.meta1 notEmpty AND task.meta2 notEmpty AND task.description contains '@CoupaWO;'. Seed the completed WO with meta1 populated and meta2=555001 (matches the mock PO id). The 'Upload Invoice Here' instruction present with a file for S3-1/S3-3/S3-4, without a file for S3-2.",
+    "curl": "curl -sS -X POST https://fm360.n8n.fm360consulting.com/webhook-test/coastal-coupa-wo-completed-step3 -H 'Content-Type: application/json' -d '{\"status\":\"COMPLETE\",\"taskID\":<TASKID>}'"
+  }
+}

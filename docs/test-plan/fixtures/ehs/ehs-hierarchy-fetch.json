@@ -1,0 +1,11 @@
+{
+  "__note": "Keyed map for GET /api/v4/hierarchy/fetch/{BusinessEntity} (Create WO source module 54). The mock looks up the trailing BusinessEntity path param and returns { Hierarchy: { Title } }. Built node 'EHS: Get Hierarchy' -> Create task reads $json.Hierarchy.Title. Title is the EHS site name fed to EHSLimbleLocationMapping; the resulting Limble location name (shown in __maps_to) is what the Limble sandbox must contain (see test plan, Limble fixtures). Hierarchy is fetched for every form that enters the per-form loop, BEFORE the acceptable-answer and region gates, so BE-40 (drops at Answer gate) still needs an entry. BE-50 is NOT included: EHS-INSP-H is dropped at the QuestionsSelector filter before the loop, so its hierarchy is never fetched.",
+
+  "BE-10": { "Hierarchy": { "Title": "10 Fort Lauderdale", "__maps_to": "Coastal 10" } },
+  "BE-12": { "Hierarchy": { "Title": "12 Naples", "__maps_to": "Coastal 12" } },
+  "BE-23": { "Hierarchy": { "Title": "23 East Miami Hauling", "__maps_to": "Coastal 23 - Miami Hauling East (Coastal 23 special case)" } },
+  "BE-24": { "Hierarchy": { "Title": "24 Lake Worth Facility", "__maps_to": "Coastal 24 - Lake Worth Hauling (Coastal 24 special case)" } },
+  "BE-30": { "Hierarchy": { "Title": "30 Savannah", "__maps_to": "Coastal 30" } },
+  "BE-40": { "Hierarchy": { "Title": "40 Orlando", "__maps_to": "Coastal 40 (never looked up in Limble - form drops at Answer gate)" } },
+  "BE-99": { "Hierarchy": { "Title": "Corporate Office", "__maps_to": "Corporate Office (no-digit passthrough branch of EHSLimbleLocationMapping)" } }
+}

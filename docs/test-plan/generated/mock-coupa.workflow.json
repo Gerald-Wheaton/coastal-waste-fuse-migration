@@ -1,0 +1,975 @@
+{
+  "name": "Coastal - Mock Coupa API (TEST)",
+  "nodes": [
+    {
+      "id": "wh_token",
+      "name": "WH: token",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mock-coupa/oauth2/token",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_token",
+      "name": "EP: token",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_token_1",
+              "name": "endpoint",
+              "value": "token",
+              "type": "string"
+            },
+            {
+              "id": "as_token_2",
+              "name": "method",
+              "value": "POST",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_users",
+      "name": "WH: users",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        160
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-coupa/api/users",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_users",
+      "name": "EP: users",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        160
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_users_1",
+              "name": "endpoint",
+              "value": "users",
+              "type": "string"
+            },
+            {
+              "id": "as_users_2",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_addresses",
+      "name": "WH: addresses",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        320
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-coupa/api/addresses",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_addresses",
+      "name": "EP: addresses",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        320
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_addresses_1",
+              "name": "endpoint",
+              "value": "addresses",
+              "type": "string"
+            },
+            {
+              "id": "as_addresses_2",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_accounts",
+      "name": "WH: accounts",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        480
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-coupa/api/accounts",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_accounts",
+      "name": "EP: accounts",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        480
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_accounts_1",
+              "name": "endpoint",
+              "value": "accounts",
+              "type": "string"
+            },
+            {
+              "id": "as_accounts_2",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_suppliers",
+      "name": "WH: suppliers",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        640
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-coupa/api/suppliers",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_suppliers",
+      "name": "EP: suppliers",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        640
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_suppliers_1",
+              "name": "endpoint",
+              "value": "suppliers",
+              "type": "string"
+            },
+            {
+              "id": "as_suppliers_2",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_createRequisition",
+      "name": "WH: createRequisition",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        800
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mock-coupa/api/requisitions/new/submit_for_approval",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_createRequisition",
+      "name": "EP: createRequisition",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        800
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_createRequisition_1",
+              "name": "endpoint",
+              "value": "createRequisition",
+              "type": "string"
+            },
+            {
+              "id": "as_createRequisition_2",
+              "name": "method",
+              "value": "POST",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_requisitionAttachment",
+      "name": "WH: requisitionAttachment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        960
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mock-coupa/api/requisitions/424242/attachments",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_requisitionAttachment",
+      "name": "EP: requisitionAttachment",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        960
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_requisitionAttachment_1",
+              "name": "endpoint",
+              "value": "requisitionAttachment",
+              "type": "string"
+            },
+            {
+              "id": "as_requisitionAttachment_2",
+              "name": "method",
+              "value": "POST",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_getRequisition",
+      "name": "WH: getRequisition",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1120
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-coupa/api/requisitions/424242",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_getRequisition",
+      "name": "EP: getRequisition",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1120
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_getRequisition_1",
+              "name": "endpoint",
+              "value": "getRequisition",
+              "type": "string"
+            },
+            {
+              "id": "as_getRequisition_2",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_purchaseOrders",
+      "name": "WH: purchaseOrders",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1280
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-coupa/api/purchase_orders",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_purchaseOrders",
+      "name": "EP: purchaseOrders",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1280
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_purchaseOrders_1",
+              "name": "endpoint",
+              "value": "purchaseOrders",
+              "type": "string"
+            },
+            {
+              "id": "as_purchaseOrders_2",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_poAttachment",
+      "name": "WH: poAttachment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1440
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mock-coupa/api/purchase_orders/555001/attachments",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_poAttachment",
+      "name": "EP: poAttachment",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1440
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_poAttachment_1",
+              "name": "endpoint",
+              "value": "poAttachment",
+              "type": "string"
+            },
+            {
+              "id": "as_poAttachment_2",
+              "name": "method",
+              "value": "POST",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_poComment",
+      "name": "WH: poComment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1600
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mock-coupa/api/purchase_orders/555001/comments",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_poComment",
+      "name": "EP: poComment",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1600
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "as_poComment_1",
+              "name": "endpoint",
+              "value": "poComment",
+              "type": "string"
+            },
+            {
+              "id": "as_poComment_2",
+              "name": "method",
+              "value": "POST",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "route",
+      "name": "Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        800
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const j = $input.first().json;\nreturn [{ json: {\n  endpoint: j.endpoint,\n  method: j.method,\n  query: JSON.stringify(j.query || {}),\n  body: JSON.stringify(j.body || {})\n} }];"
+      }
+    },
+    {
+      "id": "capture",
+      "name": "Capture",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        760,
+        800
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "eB9oFDjZNW9wkXrh",
+          "cachedResultName": "Coastal - Coupa Mock Capture (TEST)"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "endpoint": "={{ $json.endpoint }}",
+            "method": "={{ $json.method }}",
+            "query": "={{ $json.query }}",
+            "body": "={{ $json.body }}",
+            "receivedAt": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "endpoint",
+              "displayName": "endpoint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "method",
+              "displayName": "method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "receivedAt",
+              "displayName": "receivedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "getfailmode",
+      "name": "Get failMode",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        800
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YkCIlyx7lUUNs7vG",
+          "cachedResultName": "Coastal - Coupa Mock Config (TEST)"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "key",
+              "keyValue": "default"
+            }
+          ]
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        800
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const j = $('Route').first().json;\nconst endpoint = j.endpoint;\nlet q = {};\ntry { q = JSON.parse(j.query || '{}'); } catch (e) {}\nconst failMode = ($('Get failMode').first().json.failMode || '').toString().trim();\n\nlet statusCode = 200;\nlet responseBody;\n\nif (endpoint === 'token') {\n  if (failMode === 'token') { statusCode = 500; responseBody = { errors: { base: ['Mock /oauth2/token failure'] } }; }\n  else responseBody = { access_token: 'MOCK-TOKEN-COUPA-REFRESHED', token_type: 'bearer', expires_in: 3600, scope: 'core.accounting.read core.purchase_order.read core.requisition.write core.supplier.read core.user.read' };\n} else if (endpoint === 'users') {\n  responseBody = (failMode === 'user') ? [] : [{ id: 1001, login: 'gerald+sm99@fm360consulting.com', email: 'gerald+sm99@fm360consulting.com', active: true }];\n} else if (endpoint === 'addresses') {\n  responseBody = (failMode === 'addr') ? [] : [{ id: 2001, name: 'Coastal Ninety Nine', 'custom-fields': { entity: { 'external-ref-code': 'CWR' }, location: { 'external-ref-code': '099' } } }];\n} else if (endpoint === 'accounts') {\n  responseBody = (failMode === 'acct') ? [] : [{ id: 3001, name: 'CWR-099-999-160999-OtherOperating', 'account-type': { name: 'Coastal Waste COA' } }];\n} else if (endpoint === 'suppliers') {\n  const dn = (q['display-name'] || '').toString();\n  responseBody = dn.includes('FAIL-SUPPLIER') ? [] : [{ id: 4001, 'display-name': 'Sandbox Contractor LLC' }];\n} else if (endpoint === 'createRequisition') {\n  if (failMode === 'createreq') { statusCode = 500; responseBody = { errors: { base: ['Mock create-requisition failure'] } }; }\n  else responseBody = { id: 424242, status: 'pending_approval', 'requisition-lines': [{ 'line-num': '1' }] };\n} else if (endpoint === 'requisitionAttachment') {\n  if (failMode === 'attachq') { statusCode = 500; responseBody = { errors: { base: ['Mock requisition-attachment failure'] } }; }\n  else responseBody = { id: 500001, type: 'file', file: 'attached' };\n} else if (endpoint === 'getRequisition') {\n  if (failMode === 'getreq') { statusCode = 500; responseBody = { errors: { base: ['Mock get-requisition failure'] } }; }\n  else if (failMode === 'reqpending') responseBody = { id: 424242, status: 'requisition_pending' };\n  else responseBody = { id: 424242, status: 'ordered' };\n} else if (endpoint === 'purchaseOrders') {\n  if (failMode === 'getpo') { statusCode = 500; responseBody = { errors: { base: ['Mock get-purchase_orders failure'] } }; }\n  else responseBody = [{ id: 555001, 'po-number': 'PO-555001', status: 'issued', 'requisition-header': { id: 424242 }, 'created-by': { fullname: 'Jordan Buyer' } }];\n} else if (endpoint === 'poAttachment') {\n  if (failMode === 'poattach') { statusCode = 500; responseBody = { errors: { base: ['Mock PO-attachment failure'] } }; }\n  else responseBody = { id: 500002, type: 'file' };\n} else if (endpoint === 'poComment') {\n  if (failMode === 'pocomment') { statusCode = 500; responseBody = { errors: { base: ['Mock PO-comment failure'] } }; }\n  else responseBody = { id: 600001, comments: 'posted' };\n} else {\n  statusCode = 500; responseBody = { errors: { base: ['Unknown mock endpoint: ' + endpoint] } };\n}\n\nreturn [{ json: { endpoint, failMode, statusCode, responseBody } }];"
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1480,
+        800
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.responseBody }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WH: token": {
+      "main": [
+        [
+          {
+            "node": "EP: token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: token": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: users": {
+      "main": [
+        [
+          {
+            "node": "EP: users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: users": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: addresses": {
+      "main": [
+        [
+          {
+            "node": "EP: addresses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: addresses": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: accounts": {
+      "main": [
+        [
+          {
+            "node": "EP: accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: accounts": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: suppliers": {
+      "main": [
+        [
+          {
+            "node": "EP: suppliers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: suppliers": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: createRequisition": {
+      "main": [
+        [
+          {
+            "node": "EP: createRequisition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: createRequisition": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: requisitionAttachment": {
+      "main": [
+        [
+          {
+            "node": "EP: requisitionAttachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: requisitionAttachment": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: getRequisition": {
+      "main": [
+        [
+          {
+            "node": "EP: getRequisition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: getRequisition": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: purchaseOrders": {
+      "main": [
+        [
+          {
+            "node": "EP: purchaseOrders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: purchaseOrders": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: poAttachment": {
+      "main": [
+        [
+          {
+            "node": "EP: poAttachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: poAttachment": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: poComment": {
+      "main": [
+        [
+          {
+            "node": "EP: poComment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EP: poComment": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Capture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture": {
+      "main": [
+        [
+          {
+            "node": "Get failMode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get failMode": {
+      "main": [
+        [
+          {
+            "node": "Build",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

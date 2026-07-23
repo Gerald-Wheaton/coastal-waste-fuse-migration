@@ -1,0 +1,1762 @@
+{
+  "name": "Coastal - Mock EHS Insight API (TEST)",
+  "nodes": [
+    {
+      "id": "wh_list_inspections_x_0",
+      "name": "WH: list_inspections",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/list",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_list_inspections_x_0",
+      "name": "SET: list_inspections",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_0_1",
+              "name": "endpoint",
+              "value": "list_inspections",
+              "type": "string"
+            },
+            {
+              "id": "a_0_2",
+              "name": "key",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a_0_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_list_questionsets_x_140",
+      "name": "WH: list_questionsets",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        140
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspectionQuestions/list",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_list_questionsets_x_140",
+      "name": "SET: list_questionsets",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        140
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_140_1",
+              "name": "endpoint",
+              "value": "list_questionsets",
+              "type": "string"
+            },
+            {
+              "id": "a_140_2",
+              "name": "key",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a_140_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-A1_280",
+      "name": "WH: fetch EHS-INSP-A1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        280
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-A1",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-A1_280",
+      "name": "SET: fetch EHS-INSP-A1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        280
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_280_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_280_2",
+              "name": "key",
+              "value": "EHS-INSP-A1",
+              "type": "string"
+            },
+            {
+              "id": "a_280_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-A2_420",
+      "name": "WH: fetch EHS-INSP-A2",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        420
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-A2",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-A2_420",
+      "name": "SET: fetch EHS-INSP-A2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        420
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_420_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_420_2",
+              "name": "key",
+              "value": "EHS-INSP-A2",
+              "type": "string"
+            },
+            {
+              "id": "a_420_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-B_560",
+      "name": "WH: fetch EHS-INSP-B",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        560
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-B",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-B_560",
+      "name": "SET: fetch EHS-INSP-B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        560
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_560_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_560_2",
+              "name": "key",
+              "value": "EHS-INSP-B",
+              "type": "string"
+            },
+            {
+              "id": "a_560_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-C_700",
+      "name": "WH: fetch EHS-INSP-C",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        700
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-C",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-C_700",
+      "name": "SET: fetch EHS-INSP-C",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        700
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_700_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_700_2",
+              "name": "key",
+              "value": "EHS-INSP-C",
+              "type": "string"
+            },
+            {
+              "id": "a_700_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-D_840",
+      "name": "WH: fetch EHS-INSP-D",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        840
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-D",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-D_840",
+      "name": "SET: fetch EHS-INSP-D",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        840
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_840_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_840_2",
+              "name": "key",
+              "value": "EHS-INSP-D",
+              "type": "string"
+            },
+            {
+              "id": "a_840_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-E_980",
+      "name": "WH: fetch EHS-INSP-E",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        980
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-E",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-E_980",
+      "name": "SET: fetch EHS-INSP-E",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        980
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_980_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_980_2",
+              "name": "key",
+              "value": "EHS-INSP-E",
+              "type": "string"
+            },
+            {
+              "id": "a_980_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-F_1120",
+      "name": "WH: fetch EHS-INSP-F",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1120
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-F",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-F_1120",
+      "name": "SET: fetch EHS-INSP-F",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1120
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1120_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_1120_2",
+              "name": "key",
+              "value": "EHS-INSP-F",
+              "type": "string"
+            },
+            {
+              "id": "a_1120_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-G_1260",
+      "name": "WH: fetch EHS-INSP-G",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1260
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-G",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-G_1260",
+      "name": "SET: fetch EHS-INSP-G",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1260
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1260_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_1260_2",
+              "name": "key",
+              "value": "EHS-INSP-G",
+              "type": "string"
+            },
+            {
+              "id": "a_1260_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-H_1400",
+      "name": "WH: fetch EHS-INSP-H",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1400
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-H",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-H_1400",
+      "name": "SET: fetch EHS-INSP-H",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1400
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1400_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_1400_2",
+              "name": "key",
+              "value": "EHS-INSP-H",
+              "type": "string"
+            },
+            {
+              "id": "a_1400_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_inspection_EHS-INSP-UPD-1_1540",
+      "name": "WH: fetch EHS-INSP-UPD-1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1540
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/fetch/EHS-INSP-UPD-1",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_inspection_EHS-INSP-UPD-1_1540",
+      "name": "SET: fetch EHS-INSP-UPD-1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1540
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1540_1",
+              "name": "endpoint",
+              "value": "fetch_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_1540_2",
+              "name": "key",
+              "value": "EHS-INSP-UPD-1",
+              "type": "string"
+            },
+            {
+              "id": "a_1540_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-10_1680",
+      "name": "WH: hier BE-10",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1680
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-10",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-10_1680",
+      "name": "SET: hier BE-10",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1680
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1680_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_1680_2",
+              "name": "key",
+              "value": "BE-10",
+              "type": "string"
+            },
+            {
+              "id": "a_1680_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-12_1820",
+      "name": "WH: hier BE-12",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1820
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-12",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-12_1820",
+      "name": "SET: hier BE-12",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1820
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1820_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_1820_2",
+              "name": "key",
+              "value": "BE-12",
+              "type": "string"
+            },
+            {
+              "id": "a_1820_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-23_1960",
+      "name": "WH: hier BE-23",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1960
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-23",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-23_1960",
+      "name": "SET: hier BE-23",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        1960
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_1960_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_1960_2",
+              "name": "key",
+              "value": "BE-23",
+              "type": "string"
+            },
+            {
+              "id": "a_1960_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-24_2100",
+      "name": "WH: hier BE-24",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        2100
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-24",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-24_2100",
+      "name": "SET: hier BE-24",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        2100
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_2100_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_2100_2",
+              "name": "key",
+              "value": "BE-24",
+              "type": "string"
+            },
+            {
+              "id": "a_2100_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-30_2240",
+      "name": "WH: hier BE-30",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        2240
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-30",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-30_2240",
+      "name": "SET: hier BE-30",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        2240
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_2240_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_2240_2",
+              "name": "key",
+              "value": "BE-30",
+              "type": "string"
+            },
+            {
+              "id": "a_2240_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-40_2380",
+      "name": "WH: hier BE-40",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        2380
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-40",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-40_2380",
+      "name": "SET: hier BE-40",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        2380
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_2380_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_2380_2",
+              "name": "key",
+              "value": "BE-40",
+              "type": "string"
+            },
+            {
+              "id": "a_2380_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_hierarchy_BE-99_2520",
+      "name": "WH: hier BE-99",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        2520
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/hierarchy/fetch/BE-99",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_hierarchy_BE-99_2520",
+      "name": "SET: hier BE-99",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        2520
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_2520_1",
+              "name": "endpoint",
+              "value": "fetch_hierarchy",
+              "type": "string"
+            },
+            {
+              "id": "a_2520_2",
+              "name": "key",
+              "value": "BE-99",
+              "type": "string"
+            },
+            {
+              "id": "a_2520_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_fetch_attachment_ATT-B-1_2660",
+      "name": "WH: att ATT-B-1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        2660
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mock-ehs/api/v4/attachment/fetch/ATT-B-1",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_fetch_attachment_ATT-B-1_2660",
+      "name": "SET: att ATT-B-1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        2660
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_2660_1",
+              "name": "endpoint",
+              "value": "fetch_attachment",
+              "type": "string"
+            },
+            {
+              "id": "a_2660_2",
+              "name": "key",
+              "value": "ATT-B-1",
+              "type": "string"
+            },
+            {
+              "id": "a_2660_3",
+              "name": "method",
+              "value": "GET",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "wh_update_inspection_x_2800",
+      "name": "WH: update",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        2800
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mock-ehs/api/v4/entity/AuditInspection/update",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ep_update_inspection_x_2800",
+      "name": "SET: update",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        2800
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a_2800_1",
+              "name": "endpoint",
+              "value": "update_inspection",
+              "type": "string"
+            },
+            {
+              "id": "a_2800_2",
+              "name": "key",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a_2800_3",
+              "name": "method",
+              "value": "POST",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "route",
+      "name": "Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        800
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const j = $input.first().json;\nconst body = j.body || {};\nconst query = j.query || {};\nlet inspectionID = '';\nlet udf = '';\nif (j.endpoint === 'update_inspection') {\n  const ent = body.Entity || {};\n  inspectionID = ent.RowUID || '';\n  udf = ent.UDFLimbleWOCompletionNotes || '';\n} else if (j.endpoint === 'fetch_inspection') {\n  inspectionID = j.key || '';\n}\nconst hasBody = body && Object.keys(body).length > 0;\nreturn [{ json: {\n  endpoint: j.endpoint,\n  method: j.method,\n  key: j.key || '',\n  inspectionID,\n  udfCompletionNotes: udf,\n  rawBody: JSON.stringify(hasBody ? body : query)\n} }];"
+      }
+    },
+    {
+      "id": "capture",
+      "name": "Capture",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        760,
+        800
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "XOFGDj3LkZ7jO7CQ",
+          "cachedResultName": "Coastal - Mock EHS Capture (TEST)"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "endpoint": "={{ $json.endpoint }}",
+            "method": "={{ $json.method }}",
+            "inspectionID": "={{ $json.inspectionID }}",
+            "udfCompletionNotes": "={{ $json.udfCompletionNotes }}",
+            "rawBody": "={{ $json.rawBody }}",
+            "receivedAt": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "endpoint",
+              "displayName": "endpoint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "method",
+              "displayName": "method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "inspectionID",
+              "displayName": "inspectionID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "udfCompletionNotes",
+              "displayName": "udfCompletionNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rawBody",
+              "displayName": "rawBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "receivedAt",
+              "displayName": "receivedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        800
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const j = $('Route').first().json;\nconst ep = j.endpoint;\nconst key = j.key;\nconst LIST = {\"List\": [{\"RowUID\": \"EHS-INSP-A1\", \"BusinessEntity\": \"BE-10\", \"FormNumber\": \"FIC-1001\"}, {\"RowUID\": \"EHS-INSP-A2\", \"BusinessEntity\": \"BE-10\", \"FormNumber\": \"FIC-1002\"}, {\"RowUID\": \"EHS-INSP-B\", \"BusinessEntity\": \"BE-12\", \"FormNumber\": \"FIC-1200\"}, {\"RowUID\": \"EHS-INSP-C\", \"BusinessEntity\": \"BE-23\", \"FormNumber\": \"FIC-2300\"}, {\"RowUID\": \"EHS-INSP-D\", \"BusinessEntity\": \"BE-24\", \"FormNumber\": \"FIC-2400\"}, {\"RowUID\": \"EHS-INSP-E\", \"BusinessEntity\": \"BE-30\", \"FormNumber\": \"FIC-3000\"}, {\"RowUID\": \"EHS-INSP-F\", \"BusinessEntity\": \"BE-99\", \"FormNumber\": \"FIC-9900\"}, {\"RowUID\": \"EHS-INSP-G\", \"BusinessEntity\": \"BE-40\", \"FormNumber\": \"FIC-4000\"}, {\"RowUID\": \"EHS-INSP-H\", \"BusinessEntity\": \"BE-50\", \"FormNumber\": \"VEH-5000\"}]};\nconst QSETS = {\"List\": [{\"Title\": \"Facility Inspection Checklist\", \"RowUID\": \"QS-FIC-001\"}, {\"Title\": \"Vehicle Safety Inspection\", \"RowUID\": \"QS-VEH-002\"}]};\nconst INSP = {\"EHS-INSP-A1\": {\"Entity\": {\"RowUID\": \"EHS-INSP-A1\", \"FormNumber\": \"FIC-1001\", \"BusinessEntity\": \"BE-10\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T09:00:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T09:05:00Z\", \"Questions\": [{\"QuestionText\": \"Are all walkways clear?\", \"Answer\": \"1\", \"Verification\": \"\", \"FileAttachments\": []}, {\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"A1: Broken handrail on loading dock\", \"FileAttachments\": []}]}}, \"EHS-INSP-A2\": {\"Entity\": {\"RowUID\": \"EHS-INSP-A2\", \"FormNumber\": \"FIC-1002\", \"BusinessEntity\": \"BE-10\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T15:00:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T15:05:00Z\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"A2: Fire extinguisher expired\", \"FileAttachments\": []}]}}, \"EHS-INSP-B\": {\"Entity\": {\"RowUID\": \"EHS-INSP-B\", \"FormNumber\": \"FIC-1200\", \"BusinessEntity\": \"BE-12\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T11:00:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T11:10:00Z\", \"Questions\": [{\"QuestionText\": \"Spill kit present?\", \"Answer\": \"0\", \"Verification\": \"B-Q1: Spill kit missing (EARLIER deficiency - must be IGNORED per OQ-035 last-only)\", \"FileAttachments\": []}, {\"QuestionText\": \"Eyewash station operational?\", \"Answer\": \"1\", \"Verification\": \"\", \"FileAttachments\": []}, {\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"B-Q3: Exit sign not illuminated\", \"FileAttachments\": [{\"AttachmentUID\": \"ATT-B-1\", \"FileName\": \"deficiency-photo.png\"}]}]}}, \"EHS-INSP-C\": {\"Entity\": {\"RowUID\": \"EHS-INSP-C\", \"FormNumber\": \"FIC-2300\", \"BusinessEntity\": \"BE-23\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T12:00:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T12:10:00Z\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"C: Guardrail corroded\", \"FileAttachments\": [{\"AttachmentUID\": \"ATT-C-1\", \"FileName\": \"inspection-report.pdf\"}]}]}}, \"EHS-INSP-D\": {\"Entity\": {\"RowUID\": \"EHS-INSP-D\", \"FormNumber\": \"FIC-2400\", \"BusinessEntity\": \"BE-24\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T13:00:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T13:10:00Z\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"D: Broken ladder rung\", \"FileAttachments\": []}]}}, \"EHS-INSP-E\": {\"Entity\": {\"RowUID\": \"EHS-INSP-E\", \"FormNumber\": \"FIC-3000\", \"BusinessEntity\": \"BE-30\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T13:30:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T13:40:00Z\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"E: Blocked emergency exit\", \"FileAttachments\": []}]}}, \"EHS-INSP-F\": {\"Entity\": {\"RowUID\": \"EHS-INSP-F\", \"FormNumber\": \"FIC-9900\", \"BusinessEntity\": \"BE-99\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T14:00:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T14:10:00Z\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"F: Trip hazard in lobby\", \"FileAttachments\": []}]}}, \"EHS-INSP-G\": {\"Entity\": {\"RowUID\": \"EHS-INSP-G\", \"FormNumber\": \"FIC-4000\", \"BusinessEntity\": \"BE-40\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T14:30:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T14:40:00Z\", \"Questions\": [{\"QuestionText\": \"Fire door self-closing?\", \"Answer\": \"0\", \"Verification\": \"G-Q1: earlier deficiency - must be IGNORED (last-only)\", \"FileAttachments\": []}, {\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"1\", \"Verification\": \"\", \"FileAttachments\": []}]}}, \"EHS-INSP-H\": {\"Entity\": {\"RowUID\": \"EHS-INSP-H\", \"FormNumber\": \"VEH-5000\", \"BusinessEntity\": \"BE-50\", \"QuestionsSelector\": \"QS-VEH-002\", \"UpdatedDtm\": \"2026-07-08T14:45:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T14:50:00Z\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"H: wrong question set - must NEVER be processed\", \"FileAttachments\": []}]}}, \"EHS-INSP-UPD-1\": {\"Entity\": {\"RowUID\": \"EHS-INSP-UPD-1\", \"FormNumber\": \"FIC-1001\", \"BusinessEntity\": \"BE-10\", \"QuestionsSelector\": \"QS-FIC-001\", \"UpdatedDtm\": \"2026-07-08T09:05:00Z\", \"RecurringTaskCompleteDtm\": \"2026-07-08T09:05:00Z\", \"UDFLimbleWOCompletionNotes\": \"\", \"Questions\": [{\"QuestionText\": \"Deficiency Summary and Work Order Creation\", \"Answer\": \"0\", \"Verification\": \"A1: Broken handrail on loading dock\", \"FileAttachments\": []}]}}};\nconst HIER = {\"BE-10\": {\"Hierarchy\": {\"Title\": \"10 Fort Lauderdale\"}}, \"BE-12\": {\"Hierarchy\": {\"Title\": \"12 Naples\"}}, \"BE-23\": {\"Hierarchy\": {\"Title\": \"23 East Miami Hauling\"}}, \"BE-24\": {\"Hierarchy\": {\"Title\": \"24 Lake Worth Facility\"}}, \"BE-30\": {\"Hierarchy\": {\"Title\": \"30 Savannah\"}}, \"BE-40\": {\"Hierarchy\": {\"Title\": \"40 Orlando\"}}, \"BE-99\": {\"Hierarchy\": {\"Title\": \"Corporate Office\"}}};\nconst ATT = {\"ATT-B-1\": {\"data\": \"TU9DSy1CQVNFNjQtSU1BR0UtREFUQS1ub3QtYS1yZWFsLWltYWdl\"}};\nlet statusCode = 200;\nlet responseBody;\nif (ep === 'list_inspections') responseBody = LIST;\nelse if (ep === 'list_questionsets') responseBody = QSETS;\nelse if (ep === 'fetch_inspection') responseBody = INSP[key] || { Entity: {} };\nelse if (ep === 'fetch_hierarchy') responseBody = HIER[key] || { Hierarchy: {} };\nelse if (ep === 'fetch_attachment') responseBody = ATT[key] || { data: '' };\nelse if (ep === 'update_inspection') responseBody = { Success: true, Message: 'Inspection updated (MOCK)' };\nelse { statusCode = 404; responseBody = { error: 'unknown endpoint ' + ep }; }\nreturn [{ json: { endpoint: ep, key, statusCode, responseBody } }];"
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1240,
+        800
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.responseBody }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WH: list_inspections": {
+      "main": [
+        [
+          {
+            "node": "SET: list_inspections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: list_inspections": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: list_questionsets": {
+      "main": [
+        [
+          {
+            "node": "SET: list_questionsets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: list_questionsets": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-A1": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-A1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-A1": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-A2": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-A2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-A2": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-B": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-B": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-C": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-C": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-D": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-D",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-D": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-E": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-E",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-E": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-F": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-F",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-F": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-G": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-G",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-G": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-H": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-H",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-H": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: fetch EHS-INSP-UPD-1": {
+      "main": [
+        [
+          {
+            "node": "SET: fetch EHS-INSP-UPD-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: fetch EHS-INSP-UPD-1": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-10": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-10": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-12": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-12": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-23": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-23",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-23": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-24": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-24",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-24": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-30": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-30",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-30": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-40": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-40",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-40": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: hier BE-99": {
+      "main": [
+        [
+          {
+            "node": "SET: hier BE-99",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: hier BE-99": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: att ATT-B-1": {
+      "main": [
+        [
+          {
+            "node": "SET: att ATT-B-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: att ATT-B-1": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WH: update": {
+      "main": [
+        [
+          {
+            "node": "SET: update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET: update": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Capture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture": {
+      "main": [
+        [
+          {
+            "node": "Build",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

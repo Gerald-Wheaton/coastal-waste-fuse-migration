@@ -1,0 +1,185 @@
+{
+  "_readme": "Canned response bodies for the 'Coastal - Mock Coupa API (TEST)' n8n workflow. One entry per Coupa endpoint used across the 4 API-calling Coupa workflows (Token Regen, Step 1, Step 2, Step 3). Shapes reverse-engineered from the built n8n nodes' field reads (n8n_get_workflow mode=filtered, 2026-07-08) and from docs/functions.js; folds in OQ-028's proven corrections. NO real secrets — token is a placeholder. Deterministic IDs (requisition 424242, PO 555001) are baked in so the mock's mid-path routes can be registered as LITERAL webhook paths (n8n does not match mid-path route params — OQ-028 finding). The Limble sandbox meta fields MUST be seeded to match these IDs (Step 2 WO meta1=424242, Step 3 WO meta2=555001).",
+  "_field_read_notes": {
+    "fullResponse": "When the consuming HTTP node has options.response.fullResponse=true, n8n wraps the mock's JSON body as $json.body. The mock still emits only the raw body; the 'body' wrapper is added by n8n. Nodes WITHOUT fullResponse read the raw JSON directly ($json.x). Column tells you which.",
+    "array_fan_out": "For a node WITHOUT fullResponse whose response is a top-level JSON array, n8n fans the array out to one item per element (this is how Step 2's task-list and purchase_orders feed work). Nodes WITH fullResponse do NOT fan out; the array stays under $json.body."
+  },
+  "endpoints": {
+    "token": {
+      "method": "POST",
+      "mockPath": "mock-coupa/oauth2/token",
+      "coupaPath": "/oauth2/token",
+      "usedBy": ["Token Regeneration"],
+      "consumerFullResponse": false,
+      "consumerReads": "$json.access_token (Token Regen 'Refresh Coupa OAuth Token' -> upsert oauth_token)",
+      "normalResponse": {
+        "access_token": "MOCK-TOKEN-COUPA-REFRESHED",
+        "token_type": "bearer",
+        "expires_in": 3600,
+        "scope": "core.accounting.read core.purchase_order.read core.requisition.write core.supplier.read core.user.read"
+      },
+      "errorVariants": {
+        "token": { "httpStatus": 500, "body": { "errors": { "base": ["Mock /oauth2/token failure"] } } }
+      }
+    },
+    "users": {
+      "method": "GET",
+      "mockPath": "mock-coupa/api/users",
+      "coupaPath": "/api/users?login={siteManagerEmail}",
+      "usedBy": ["Step 1"],
+      "consumerFullResponse": true,
+      "consumerReads": "$json.body.length > 0 ('Site Manager Found?' gate). Content is otherwise NOT read — the requisition payload uses the Limble-side siteManager.userEmail, not this response.",
+      "normalResponse": [
+        { "id": 1001, "login": "gerald+sm99@fm360consulting.com", "email": "gerald+sm99@fm360consulting.com", "active": true }
+      ],
+      "errorVariants": {
+        "user": { "httpStatus": 200, "body": [] }
+      }
+    },
+    "addresses": {
+      "method": "GET",
+      "mockPath": "mock-coupa/api/addresses",
+      "coupaPath": "/api/addresses?name={coupaAddressName}",
+      "usedBy": ["Step 1"],
+      "consumerFullResponse": true,
+      "consumerReads": "$json.body.length > 0 ('Address Found?'); then body[0].id, body[0]['custom-fields'].entity['external-ref-code'], body[0]['custom-fields'].location['external-ref-code'] (Build Account Segments seg1/seg2 + Build Requisition Payload ship-to-address.id).",
+      "normalResponse": [
+        {
+          "id": 2001,
+          "name": "Coastal Ninety Nine",
+          "custom-fields": {
+            "entity": { "external-ref-code": "CWR" },
+            "location": { "external-ref-code": "099" }
+          }
+        }
+      ],
+      "errorVariants": {
+        "addr": { "httpStatus": 200, "body": [] }
+      }
+    },
+    "accounts": {
+      "method": "GET",
+      "mockPath": "mock-coupa/api/accounts",
+      "coupaPath": "/api/accounts?segment-1..segment-4,segment-6=...",
+      "usedBy": ["Step 1"],
+      "consumerFullResponse": true,
+      "consumerReads": "$json.body.length > 0 ('Account Found?'); then body[0].id AND body[0]['account-type'].name (Build Requisition Payload account.id + account.account-type.name).",
+      "_note": "OQ-028 correction: response MUST include account-type.name — the payload builder dereferences it and would throw otherwise.",
+      "normalResponse": [
+        {
+          "id": 3001,
+          "name": "CWR-099-999-160999-OtherOperating",
+          "account-type": { "name": "Coastal Waste COA" }
+        }
+      ],
+      "errorVariants": {
+        "acct": { "httpStatus": 200, "body": [] }
+      }
+    },
+    "suppliers": {
+      "method": "GET",
+      "mockPath": "mock-coupa/api/suppliers",
+      "coupaPath": "/api/suppliers?display-name={designatedContractor}",
+      "usedBy": ["Step 1"],
+      "consumerFullResponse": true,
+      "consumerReads": "$json.body.length > 0 ('Supplier Found?'); then body[0].id (Build Requisition Payload supplier.id).",
+      "_supplierFailure": "PAYLOAD-DRIVEN, no failMode: if the inbound query display-name contains 'FAIL-SUPPLIER', return []. The supplier-miss path posts contractor-missing comment(s) and writes NO error-log row (faithful asymmetry).",
+      "normalResponse": [
+        { "id": 4001, "display-name": "Sandbox Contractor LLC" }
+      ],
+      "failWhenDisplayNameContains": "FAIL-SUPPLIER",
+      "failResponse": { "httpStatus": 200, "body": [] }
+    },
+    "createRequisition": {
+      "method": "POST",
+      "mockPath": "mock-coupa/api/requisitions/new/submit_for_approval",
+      "coupaPath": "/api/requisitions/new/submit_for_approval",
+      "usedBy": ["Step 1"],
+      "consumerFullResponse": true,
+      "consumerReads": "$json.body.id ('Coupa: Create Requisition' -> Update Task meta1 = String(body.id); and the attach URL /api/requisitions/{body.id}/attachments).",
+      "_note": "id MUST be the deterministic 424242 so the attach route literal path resolves, so meta1 stamped on the task is 424242, and so Step 2's GET /api/requisitions/424242 literal path resolves.",
+      "normalResponse": {
+        "id": 424242,
+        "status": "pending_approval",
+        "requisition-lines": [{ "line-num": "1" }]
+      },
+      "errorVariants": {
+        "createreq": { "httpStatus": 500, "body": { "errors": { "base": ["Mock create-requisition failure"] } } }
+      }
+    },
+    "requisitionAttachment": {
+      "method": "POST",
+      "mockPath": "mock-coupa/api/requisitions/424242/attachments",
+      "coupaPath": "/api/requisitions/{reqId}/attachments",
+      "usedBy": ["Step 1"],
+      "consumerFullResponse": true,
+      "consumerReads": "Response body NOT read further — success/failure only ('Coupa: Attach Quote').",
+      "_note": "Registered as LITERAL path with the deterministic req id 424242 (OQ-028 finding: n8n does not match /requisitions/:reqId/attachments).",
+      "normalResponse": { "id": 500001, "type": "file", "file": "attached" },
+      "errorVariants": {
+        "attachq": { "httpStatus": 500, "body": { "errors": { "base": ["Mock requisition-attachment failure"] } } }
+      }
+    },
+    "getRequisition": {
+      "method": "GET",
+      "mockPath": "mock-coupa/api/requisitions/424242",
+      "coupaPath": "/api/requisitions/{meta1}",
+      "usedBy": ["Step 2"],
+      "consumerFullResponse": false,
+      "consumerReads": "$json.status ('Is Requisition Ordered?' == 'ordered') and $json.id ('Get PO Created From Req.' uses requisition-header[id]={id}). Single object, NOT an array.",
+      "_note": "Registered as LITERAL path with deterministic meta1=424242. Step 2's WO fixture meta1 MUST equal 424242.",
+      "normalResponse": { "id": 424242, "status": "ordered" },
+      "errorVariants": {
+        "reqpending": { "httpStatus": 200, "body": { "id": 424242, "status": "requisition_pending" } },
+        "getreq": { "httpStatus": 500, "body": { "errors": { "base": ["Mock get-requisition failure"] } } }
+      }
+    },
+    "purchaseOrders": {
+      "method": "GET",
+      "mockPath": "mock-coupa/api/purchase_orders",
+      "coupaPath": "/api/purchase_orders?requisition-header[id]={reqId}  (Step 2)  |  /api/purchase_orders?id={meta2}  (Step 3)",
+      "usedBy": ["Step 2", "Step 3"],
+      "consumerFullResponse": "Step 2: false (array fans out to items; Set task reads .item.json.id and .item.json['po-number']). Step 3: true (reads body[0].id and body[0]['created-by'].fullname).",
+      "consumerReads": "Step 2: [0].id (-> meta2) and [0]['po-number'] (-> description append). Step 3: body[0].id (-> attach/comment URL) and body[0]['created-by'].fullname (-> @mention).",
+      "_note": "One canned array serves both. id MUST be deterministic 555001 so Step 3's attach/comment literal paths resolve and so the Step-3 WO fixture meta2=555001 matches.",
+      "normalResponse": [
+        {
+          "id": 555001,
+          "po-number": "PO-555001",
+          "status": "issued",
+          "requisition-header": { "id": 424242 },
+          "created-by": { "fullname": "Jordan Buyer" }
+        }
+      ],
+      "errorVariants": {
+        "getpo": { "httpStatus": 500, "body": { "errors": { "base": ["Mock get-purchase_orders failure"] } } }
+      }
+    },
+    "poAttachment": {
+      "method": "POST",
+      "mockPath": "mock-coupa/api/purchase_orders/555001/attachments",
+      "coupaPath": "/api/purchase_orders/{poId}/attachments",
+      "usedBy": ["Step 3"],
+      "consumerFullResponse": true,
+      "consumerReads": "Response NOT read further ('Coupa: Attach Invoice'). Failure -> error output -> Insert Error Log Row.",
+      "_note": "LITERAL path with deterministic PO id 555001.",
+      "normalResponse": { "id": 500002, "type": "file" },
+      "errorVariants": {
+        "poattach": { "httpStatus": 500, "body": { "errors": { "base": ["Mock PO-attachment failure"] } } }
+      }
+    },
+    "poComment": {
+      "method": "POST",
+      "mockPath": "mock-coupa/api/purchase_orders/555001/comments",
+      "coupaPath": "/api/purchase_orders/{poId}/comments",
+      "usedBy": ["Step 3"],
+      "consumerFullResponse": true,
+      "consumerReads": "Response NOT read further ('Coupa: Post Comment (Invoice)' and '(No Invoice)'). Failure -> error output -> Insert Error Log Row.",
+      "_note": "LITERAL path with deterministic PO id 555001. Serves BOTH the invoice-present and no-invoice comment POSTs (same URL/body).",
+      "normalResponse": { "id": 600001, "comments": "posted" },
+      "errorVariants": {
+        "pocomment": { "httpStatus": 500, "body": { "errors": { "base": ["Mock PO-comment failure"] } } }
+      }
+    }
+  }
+}
