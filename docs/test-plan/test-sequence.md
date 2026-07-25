@@ -34,9 +34,12 @@ Continues handoff-6193 "Next steps" exactly.
 - ✅ **S2-err-getpo** `failMode=getpo` → +1 row + admin comment 7028 (exec 126652)
 - ✅ Reset `failMode=""` in config table `YkCIlyx7lUUNs7vG`
 - ✅ **S2-3 user-assigned** → "Post User Comment" 7038 to userID 398783 on WO 4101 (exec 126665)
-- ☐ **S2-2 team-assigned — BLOCKED (OQ-040):** routing correct, but `Get Team` (`/v2/teams?teams=`)
-  returns `[]` for sandbox team 107065 (a "View Only" role-team the endpoint won't list). Needs a
-  real maintenance team at loc 98472 (also unlocks Step 1 R1/R2, A4) or defer to Phase C.
+- ✅ **S2-2 team-assigned — PASS 2026-07-24 (exec 127081, OQ-040 resolved):** real maintenance team
+  **605550** created at loc 98472 via the seeder's new `coastal-seed-team` branch (`POST /v2/teams`),
+  fixture WO **4213** (PO Requested 8055, meta1=424242, `@CoupaWO;`) seeded assigned to it. Step 2
+  run: `Get Team` returned team 605550 (`automaticallyCreated:0`, real — was `[]` for role-team
+  107065), `Post Team Comment` posted **commentID 7107** on 4213. Team-comment path proven end to
+  end. (Same mechanism unblocks the Step 1 R1 team variant — team 605550 available if run.)
 
 ### A2. Token Regeneration suite (`oCAl4h0SZenEtbNs`) — small; do early, it's also the go-live canary
 
@@ -96,7 +99,9 @@ and `null`); instruction responses are UI-only (OQ-042).
   Requisition?", zero Coupa traffic
 - ◐ **R1/R2**: ✅ **user variant** (exec 126714): 4056 PATCHed to user 398783 via
   `assignmentType/assignment`, re-fired s5 → Get Assigned User → Contractor Comment (User) 7049.
-  ✅ **R2 admin-comment** covered by s6a/b/c. ☐ **team variant** still blocked on OQ-040.
+  ✅ **R2 admin-comment** covered by s6a/b/c. ☐ **team variant** — OQ-040 now RESOLVED (real team
+  605550 exists at 98472, `/v2/teams` resolves it — proven by S2-2 exec 127081); not separately
+  re-run for Step 1, but unblocked (assign a supplier-fail fixture to 605550 + re-fire if wanted).
   Error-log rows 16–19 left in table for inspection; delete before Step 3 error tests or filter id.
 
 ### A5. Step 3 suite (`NH1giNups8iICMZe`) — webhook-fired
@@ -152,22 +157,44 @@ deleted):
 
 ### A7. EHS Update Inspection suite (`8JvtesynrYtZbw7U`) — webhook-fired; run last, reuses A6 outputs or seeded parents
 
-Staging — PARTIAL 2026-07-21: EHS URLs (n11 fetch + n13 update) → mock-EHS host (revert at
+Staging — READY 2026-07-25: EHS URLs (n11 fetch + n13 update) → mock-EHS host (revert at
 cutover); mock's `fetch EHS-INSP-UPD-1` + `update` routes verified by curl (`{Entity:{...}}`
-shape matches n12); Limble/EHS credentials already attached. Fixture skeletons seeded (real IDs
-replace plan's 9001/9101/9102/9002/9003): **4198**=U1 parent (`@EHSWO;`+meta1), **4199/4200**=
-children, **4201**=U3 non-EHS, **4202**=U4 parent. **BLOCKED on owner UI steps** — completion
-notes, dateCompleted, and child-WO instruction links are NOT API-writable (probed 2026-07-21);
-see owner checklist in `sandbox-seed-record-a6.md`. Run risk: API-created instructions carry no
-`meta` key — `Has Child WO?` reads `$json.meta.associatedTask` and may error on meta-less
-instructions; U1/U4 will reveal.
+shape matches n12); Limble/EHS credentials attached. **Fixtures rebuilt** (old 4198-plan
+skeletons scrapped — full story + mechanism in `sandbox-seed-record-a6.md`): **U1 parent =
+4218** (`@EHSWO;`+meta1, completed, exact note) with children **4220 + 4222**, spawned via
+**type-14 "Work Order" instructions** — the only mechanism that stamps `meta.associatedTask`
+(confirmed against prod template 842; one type-14 instr per child, UI "Start another WO");
+**4201**=U3 non-EHS (as-is); U4 optional, needs a fresh zero-children parent. **Three port
+fixes approved + applied 2026-07-25** (permanent — no cutover revert): n05 `?limit=100`
+(page-size-2 clip dropped children 2+), n06 `meta?.associatedTask` (plain `.meta.` threw on
+the meta-less text instruction), n07 host-prepend (`meta.associatedTask` is a relative path
+`/v2/tasks/?tasks=NNNN`, not a full URL — OQ-009 assumption resolved). Residual: dangling
+type-14 instr **15056** on 4218 → deleted task 4221; delete it before U1, or accept as an
+adversarial deleted-child case (watch for `undefined` in notes).
 
-- ☐ **U1** parent completed w/ 2 children → capture row `inspectionID=EHS-INSP-UPD-1`,
-  `udfCompletionNotes` = exact §4.3 concat string (parent + both child notes, Denver-tz timestamp)
-- ☐ **U2** non-completion payload → drops at `Is Completed?`, zero calls
-- ☐ **U3** completed non-EHS WO 9002 → drops at `@EHSWO;`/meta1 gate
-- ☐ *(optional)* **U4** zero-children parent 9003 → Aggregate empty-input behavior
-- ☐ OQ-036 negative: dead comments-fetch/lastComment nodes confirmed absent
+- ✅ **U1** PASS (exec 127255, 2026-07-25): Get Instructions returned all 4 instrs (limit fix
+  proven), Has Child WO? passed 3 type-14s no-throw (optional-chain proven), write-back exact
+  §4.3 string — `(Completed 07/25/2026 12:17 PM)` from parent dateCompleted 1785003479 (epoch-secs
+  + Denver tz proven), both child notes concatenated w/ verbatim leading space, mock returned
+  `Success:true` for `EHS-INSP-UPD-1`, zero `undefined`
+- ✅ **U1 bonus — deleted-child resilience:** dangling type-14 instr 15056 → deleted task 4221 was
+  left in place; its fetch returned empty → contributed zero items, no `undefined`. Orphaned
+  child-links degrade gracefully
+- ✅ **U2** PASS (exec 127253, 14ms): 2 nodes only (Webhook → Is Completed?), zero Limble/EHS calls
+- ✅ **U3** PASS (exec 127254): 4 nodes; Get Task fetched 4201, `@EHSWO;`/meta1 gate dropped it, no
+  EHS fetch/update
+- ✅ **U4** PASS after sanctioned rewire (2026-07-25). First run (exec 127258, parent 4223)
+  **confirmed the silent-stop fidelity gap**: `Has Child WO?` kept 0 items → entire write-back
+  tail skipped (6/13 nodes), exec "success" but EHS never updated — source Make aggregator emits
+  an empty bundle on zero inputs and would have written back. **Owner-approved rewire applied**
+  (workflow now 15 nodes): `Has Child WO?` filter replaced by `Collect Child Links` (Code,
+  always 1 item w/ link list) → `Any Child Links?` (IF) → true: `Split Child Links` →
+  Get Child Task → Aggregate → Build; false: straight to Build (yields `childWOCompNotes:""`);
+  Get Child Task now reads `$json.childLinks`. Re-run PASS (exec 127259): false branch, write-back
+  reached mock EHS w/ parent-note-only string, no `undefined`. **U1 regression PASS**
+  (exec 127262): byte-identical write-back to 127255, dangling-4221 link still harmless
+- ✅ OQ-036 negative: 13-node structure pull 2026-07-25 — no comments-fetch node, no `lastComment`;
+  Is Completed? feeds Get Task directly
 
 ### A8. Wrap-up gates (before declaring Phase A done)
 

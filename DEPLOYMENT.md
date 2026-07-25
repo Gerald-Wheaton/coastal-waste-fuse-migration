@@ -9,12 +9,19 @@ this doc has one section per workflow instead of one flat list.
 that must be true right before you flip a workflow live, not part of the build spec itself. Build
 specs live in `docs/build-specs/`.
 
-Status as of 2026-07-09: build phase complete. OQ-007 resolved; all 7 target workflows exist and
-are **deployed inactive** on the n8n instance (verified live 2026-07-09). Now in the
-test / pre-cutover phase — the per-workflow gates below are what must be true before each is
-flipped live. Step 1 has been exercised end-to-end against a mock Coupa + Limble sandbox (8
-scenarios PASS, 2026-07-06); the EHS-side test rigs (Mock Coupa, Mock EHS Insight, Limble seeder)
-are live as of 2026-07-09. No workflow has been tested against the real Coupa/EHS APIs yet.
+Status as of 2026-07-23: build complete; Phase A (pre-go-live) testing nearly done. All 7 target
+workflows exist and are **deployed inactive** (5 confirmed inactive via live read 2026-07-23 —
+Token Regen, Step 3, Error Log Export, EHS-Create, EHS-Update; Step 1/Step 2 not re-listed this
+pass, last known inactive after suite-end deactivation). The live test scoreboard is
+`docs/test-plan/test-sequence.md`; this doc is only the pre-publish cutover gate.
+
+Phase A suite status: **A1 Step 2 ✅** (except team-comment S2-2, blocked OQ-040) · **A2 Token
+Regen ✅** · **A3 Error Log Export ✅** · **A4 Step 1 ✅** (except team variant, OQ-040) · **A5
+Step 3 ✅** · **A6 EHS Create WO ✅** (exec 126934, 2026-07-21) · **A7 EHS Update ☐ staged, blocked
+on owner UI checklist** (`docs/test-plan/sandbox-seed-record-a6.md`) · **A8 wrap-up ☐**. All Phase
+A runs against mock Coupa + mock EHS + live Limble sandbox (loc 98472) — **no workflow has been
+tested against the real Coupa/EHS APIs yet** (that is Phase C, post-cutover). Test rigs live:
+Mock Coupa (`F05TiUurpc2kqxe0`), Mock EHS (`EBIzCJ0XJaJ5jUpp`), Limble seeder (`qyMChP0DKfI04r4a`).
 
 ---
 
@@ -46,8 +53,8 @@ before go-live regardless of what else changes.
 Record both table IDs here once created — later build specs and the workflows themselves need
 to agree on the same ID:
 
-- Coastal Coupa OAuth Token: `___________`
-- Coastal Coupa Error Log: `___________`
+- Coastal Coupa OAuth Token: `QAj62weJaWmRBJ76` (Token Regen writes; Step 1/2/3 read)
+- Coastal Coupa Error Log: `6GbR5Rxezl7hqk9i` (Step 1 + Step 3 write; Error Log Export drains)
 
 ### Workflow IDs (OQ-007 — resolved)
 
@@ -90,11 +97,24 @@ time:
    new n8n URL.
 3. Confirm old Fuse subscriptions are removed/disabled so Limble doesn't fire both.
 
-### Schedule timezone (OQ-011 — open)
+### Schedule timezone — UNRESOLVED CONTRADICTION (OQ-011 vs OQ-014), confirm before setting crons
 
-Fixed MST offset vs. DST-aware Mountain Time is still unresolved for the 3 scheduled workflows
-(Token Regeneration, Check For New PRs Ordered, Create WO From EHS Inspection). Confirm resolution
-before setting final cron expressions.
+Two conflicting answers are on the record; reconcile with Coastal before final cron expressions are
+set on the 3 scheduled workflows (Token Regeneration @ 12:00AM, Check For New PRs Ordered @ every
+5 min, Create WO From EHS Inspection @ 4:00PM):
+
+- **OQ-011 (resolved 2026-07-01):** DST-aware **America/Denver** (Mountain). The built workflows
+  currently use this — verified 2026-07-23 (e.g. `8JvtesynrYtZbw7U` `settings.timezone =
+  America/Denver`; Token Regen built the same way).
+- **OQ-014 (open):** Limble recon (2026-07-03) found **all ~49 Coastal locations set to
+  `America/New_York`** (Eastern; FL/GA/SC sites), and the source blueprints hardcode "EST" in
+  error-timestamp formatting. This says the Denver assumption is likely **wrong** and the schedules
+  + error-report display should be **America/New_York**.
+
+**Action:** get Coastal to confirm the business timezone. If Eastern (likely), flip the 3 schedule
+triggers and the Error Log Export report display from `America/Denver` → `America/New_York` before
+cutover — a one-line change per workflow, **not yet made** (builds still say Denver). Blocks final
+cron-setting for the scheduled workflows.
 
 ---
 
@@ -151,7 +171,10 @@ before setting final cron expressions.
       ping a real user — **revert to 317887** on deploy (OQ-019).
 - [ ] **Mock token row** purged from Coupa OAuth Token table `QAj62weJaWmRBJ76` (row
       `client=coastal_waste` / `oauth_token=MOCK-TOKEN-COUPA`).
-- [ ] Sandbox test fixtures/dud tasks removed from loc 98472 (4080–4083 etc.).
+- [ ] Sandbox test fixtures/dud tasks removed from loc 98472 (4080–4083 etc.; S2-2 fixtures added
+      2026-07-24: task **4213** `DELETE /v2/tasks/4213` + team **605550** `DELETE /v2/teams/605550`).
+- [ ] Remove the `coastal-seed-team` branch (3 nodes) added to seeder `qyMChP0DKfI04r4a` 2026-07-24
+      (or drop it with the whole seeder at cutover teardown).
 
 **Permanent (do NOT revert) — sanctioned fixes under OQ-024:** the write node
 `Set 'PO Approved' Status and Save PO ID` now writes **top-level `meta2`** (not `metadata.meta2`)
@@ -178,7 +201,11 @@ and wraps it as **`String(...)`** (Limble rejects the `metadata` object and reje
 
 Built 2026-07-08, deployed inactive to `isLUx7cUjkmKggD2` (**30 nodes** after the 2026-07-20
 fixes below, re-validated clean — 0 errors/warnings). See
-`docs/build-specs/ehs-create-wo-build-spec.md` (§12 for the as-deployed corrections).
+`docs/build-specs/ehs-create-wo-build-spec.md` (section 12 for the as-deployed corrections).
+
+**Test status: A6 suite PASSED 2026-07-21** (exec 126934) — 5 deficiency tasks created at correct
+locations/teams, `meta1`=RowUID (top-level string), epoch `due`, `@EHSWO;` tag, verbiage PATCH on
+all 5, image PUT on the image scenario; negative scenarios all held. Detail in test-sequence.md A6.
 
 **Permanent (do NOT revert) — fixes applied to the live workflow 2026-07-20:**
 - `Create Deficiency Task`: `due` → epoch seconds (`Math.round(...toSeconds())`; API 400s on
@@ -231,6 +258,22 @@ fixes below, re-validated clean — 0 errors/warnings). See
 
 Built 2026-07-08, deployed inactive to `8JvtesynrYtZbw7U` (13 nodes; confirmed live 2026-07-09).
 See `docs/build-specs/ehs-update-inspection-build-spec.md`.
+
+**Test status: A7 suite ☐ NOT RUN — staged, blocked on owner UI checklist.** Fixtures seeded at
+sandbox loc 98472 (parent 4198, children 4199/4200, non-EHS control 4201, optional 4202). Blocked
+because Limble's public API cannot write `completionNotes` / `dateCompleted` / child-WO links —
+completion state and child linking are UI-only (owner checklist in
+`docs/test-plan/sandbox-seed-record-a6.md`).
+**Run risk (verified from node config 2026-07-23):** `Has Child WO?` (n06, Filter) and `Get Child
+Task` (n07) both read `{{ $json.meta.associatedTask }}` with no optional chaining; API-created
+instructions carry no `meta` key at all, so the Filter will *throw* (not drop) on any meta-less
+instruction. Likely fix: optional chaining (`$json.meta?.associatedTask`) — restores Make's
+drop-don't-crash semantics; propose before applying.
+
+**Test-only staging applied 2026-07-21 — MUST be reverted before cutover:**
+- [ ] **EHS URLs:** 2 nodes (`EHS: Fetch Inspection`, `EHS: Update Inspection`) point at mock host
+      `https://fm360.n8n.fm360consulting.com/webhook/mock-ehs` — revert host to
+      `https://coastalwasteinc.ehsinsight.com` (paths unchanged). Verified applied 2026-07-23.
 
 - [ ] EHS Insight API key rotated and moved into an n8n credential (same rotated key as #5)
 - [ ] Limble credential swapped sandbox → Coastal prod

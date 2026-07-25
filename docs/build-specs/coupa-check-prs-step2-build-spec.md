@@ -71,7 +71,10 @@ Linear, single router at the tail:
    see §4.1.**
 7. `updateATask` (15) — `taskID={{13.taskID}}`, `metadata.meta2={{21.body[1].id}}`,
    `description="{{13.description}} || Coupa PO# {{21.body[1].`po-number`}}"`, `work_request={}`.
-   Connection 2106. **Does NOT set `statusID`** (the bug — §4.1).
+   Connection 2106. **Does NOT set `statusID`** (the bug — section 4.1). **Port note (OQ-024):**
+   the above is the *source* Make shape; the n8n build writes **top-level `meta2` wrapped as
+   `String(...)`**, NOT `metadata.meta2` — the raw Limble `/v2/tasks` API rejects the `metadata`
+   object and a numeric `meta2`. See section 4.7.
 8. `BasicRouter` (22) — two routes, evaluated for the same task:
    - **Route 0 — team-assigned:** `listTeams` (25) `teams={{13.teamID}}, limit=1` (**filter:**
      `13.teamID` exists AND `!= 0`) → `universalModule` (19) `POST /v2/tasks/{{13.taskID}}/
@@ -197,7 +200,10 @@ Loop Over Items node, keep the Coupa filters (§3.4/§3.5) as IF gates inside th
 
 - Description becomes `"{original} || Coupa PO# {po-number}"` — note the ` || ` separator and
   Coupa's hyphenated field name `po-number` (bracket/quote access in n8n).
-- `meta2 = purchase_orders[0].id`; PO number for the description = `purchase_orders[0]["po-number"]`.
+- `meta2 = String(purchase_orders[0].id)` — written **top-level** on the task (NOT `metadata.meta2`)
+  and wrapped as a string; the raw Limble `/v2/tasks` API rejects the `metadata` object and a numeric
+  `meta2` (OQ-024 sanctioned fix; matches the as-built node "Set 'PO Approved' Status and Save PO ID").
+  PO number for the description = `purchase_orders[0]["po-number"]`.
 - `work_request: {}` in the source updateATask is an empty object — carry as a no-op or omit if
   the Limble PATCH tolerates its absence (verify at build).
 - The merged task update (§4.1) sets `meta2` + `description` + `statusID` in one PATCH (Step 1
@@ -215,7 +221,7 @@ Loop Over Items node, keep the Coupa filters (§3.4/§3.5) as IF gates inside th
        → [HTTP C: GET api/requisitions/{meta1}]  ──err──▶ (shared error subgraph)   (14)
        → [IF: requisition.status == "ordered"]   (21 filter; false → skip, retry next poll)
        → [HTTP C: GET api/purchase_orders?requisition-header[id]={reqId}] ──err──▶ (err)  (21)
-       → [HTTP L: PATCH task {meta2: PO.id, description: "{desc} || Coupa PO# {po-number}",
+       → [HTTP L: PATCH task {meta2: String(PO.id) top-level per OQ-024, description: "{desc} || Coupa PO# {po-number}",
                              statusID: {PO-Approved id}}]  ──err──▶ (err)            (15 + §4.1)
        → [Switch/IF: assignee]                                                        (22)
             team (teamID exists & !=0)  → [HTTP L: listTeams {teamID}] → [HTTP L: POST comment @team] ──err──▶(err)

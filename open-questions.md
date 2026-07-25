@@ -53,9 +53,12 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-037](#oq-037) | `CoastalEHSFormFilter` dedupe never replaces (UpdateDtm/UpdatedDtm typo) — flag | OPEN QUESTION | Open | 2026-07-08 |
 | [OQ-038](#oq-038) | EHS tag mismatch: Create stamps `@EHS;`, Update filters `@EHSWO;` — sanctioned fix to `@EHSWO;` | PENDING DECISION | Resolved | 2026-07-08 |
 | [OQ-039](#oq-039) | Coupa TEST instance (`coastalwasteinc-test.coupahost.com`) exists w/ standing creds — authorize Phase-A live testing against it? | PENDING DECISION | Open | 2026-07-13 |
-| [OQ-040](#oq-040) | Step 2 team-comment path unprovable in sandbox — team 107065 is "View Only" role-team, not returned by `/v2/teams` | OPEN QUESTION | Open | 2026-07-13 |
+| [OQ-040](#oq-040) | Step 2 team-comment path unprovable in sandbox — team 107065 is "View Only" role-team, not returned by `/v2/teams` | OPEN QUESTION | Resolved | 2026-07-13 |
 | [OQ-041](#oq-041) | Token Regen ↔ Fuse collision at cutover — same Coupa client creds; concurrent tokens or rotate-and-invalidate? | OPEN QUESTION | Open | 2026-07-13 |
 | [OQ-042](#oq-042) | Limble instruction-answer write API — support confirmed NO public route to write a `response`/answer; EHS Create WO writes verbiage (`instruction`), not answer, so NOT blocked | BLOCKER | Resolved | 2026-07-13 |
+| [OQ-043](#oq-043) | EHS Create WO: filter-inside-loop batch-kill — `Team At Location`/`Deficiency Instruction` at 0 items never return to `Loop Each Form`, silently dropping the rest of the day's forms | PENDING DECISION | Resolved | 2026-07-25 |
+| [OQ-044](#oq-044) | Step 1: Coupa lookup returning bare `[]` skips the `Found?` IF **including its error branch** — no error row, no admin comment, silent stop (OQ-028-adjacent) | OPEN QUESTION | Open | 2026-07-25 |
+| [OQ-045](#oq-045) | Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes → silent stop where source continued (low reachability) — document or fix? | PENDING DECISION | Open | 2026-07-25 |
 
 ---
 
@@ -1576,11 +1579,36 @@ team-comment path is *likely* correct in prod but **cannot be validated in the s
 real (non-View-Only) team at loc 98472**. Limble MCP is read-only (and points at Coastal-PROD, so
 it returns nothing for sandbox tasks); no create-team API path was found.
 
+**Progress (2026-07-23) — premise corrected; direct API unblock exists.** The "no create-team API
+path was found" line above is stale. A6 seeding (2026-07-20) proved **`POST /v2/teams` works** —
+body `{name, locationID}` → `{"teamID"}` — and created 5 real maintenance teams at other sandbox
+locations (602733–602737, verified returned by `GET /v2/teams?name=...`, i.e. real teams, not
+View-Only role-teams). So S2-2 can be unblocked **without owner UI and without MCP**: `POST
+/v2/teams {name, locationID: 98472}` with the sandbox Basic key, assign the S2-2 fixture WO to that
+team, re-fire. Needs the sandbox key (not in the current session) + the loc-98472 write
+authorization already granted (OQ-003 addendum 2026-07-09). Re: "can the Limble MCP check this?" —
+no: MCP is read-only (the unblock is a write) and points at Coastal-PROD, so it cannot see sandbox
+loc 98472 / team 107065; its only use is corroborating that a normal PROD team is listed by
+`/v2/teams`, not proving S2-2 end-to-end.
+
 **Resolution criteria:**
-Owner either (a) provisions a real maintenance team at sandbox loc 98472 so S2-2 can be run to
+Owner either (a) provisions a real maintenance team at sandbox loc 98472 (now doable directly via
+`POST /v2/teams`, see 2026-07-23 progress — no UI needed) so S2-2 can be run to
 completion, or (b) accepts deferring the team-comment assertion to Phase C go-live validation
 (user-assigned variant already proves the assignment-comment machinery; team differs only in the
 `/v2/teams` lookup + mention name).
+
+**Resolved:** 2026-07-24
+**Resolution:** Path (a). A real maintenance team **605550** ("Coastal TEST Maint Team (S2-2
+DELETE)", `automaticallyCreated:0`) was created at sandbox loc 98472 via `POST /v2/teams`, driven
+through the seeder's new `coastal-seed-team` branch so the sandbox credential never left the n8n
+store. Fixture WO **4213** (PO Requested 8055, meta1=424242, `@CoupaWO;`) was seeded assigned to it,
+and Step 2 executed (exec 127081, 2026-07-24). **S2-2 PASSES:** `Get Team` returned team 605550
+(the exact prior blocker — it returned `[]` for role-team 107065), and `Post Team Comment` posted
+commentID **7107** on WO 4213. Confirms the diagnosis: `automaticallyCreated:0` teams are returned
+by `/v2/teams`; auto-created View-Only role-teams (107065) are not. The Step 1 R1 team-comment
+variant is unblocked by the same mechanism (team 605550 available; not separately re-run). Teardown
+(DEPLOYMENT section 3): delete team 605550 + task 4213 + the `coastal-seed-team` seeder branch.
 
 ## OQ-041 — Token Regen ↔ Fuse collision at cutover (shared Coupa client)
 
@@ -1740,3 +1768,100 @@ instruction-update assertions.
 A6 EHS Create WO suite is no longer OQ-042-blocked; it needs these two node fixes plus the
 `Create Deficiency Task` (n21) fixes (due→epoch, `metadata`→top-level `String(meta1)` per OQ-024,
 `@EHS;`→`@EHSWO;` per OQ-038).
+
+## OQ-043 — [resolved] EHS Create WO: filter-inside-loop batch-kill (zero-input skip anti-pattern)
+
+**Type:** PENDING DECISION
+**Status:** Resolved
+**Added:** 2026-07-25
+
+**Question / Description:**
+Found by the 2026-07-25 zero-input-skip audit (triggered by the U4/A7 finding: n8n skips
+zero-input nodes where Make aggregators emit an empty bundle — same root cause as the fixed
+EHS-Update silent stop, exec 127258). In EHS Create WO (`isLUx7cUjkmKggD2`), inside the
+`Loop Each Form` (splitInBatches) loop, two Filter→limit chains have no empty-path reconnection
+back to the loop node:
+
+- `Team At Location` (n19): a location with no "EHS Approver Assignee" team → 0 items →
+  `First Matching Team` → `Create Deficiency Task` skipped **and control never returns to
+  `Loop Each Form`** → the day's REMAINING inspection forms are silently never processed.
+  Blast radius = the whole run, not one form. Source Make iterates per-bundle independently
+  (aggregators #91/#95/#99 emit empty bundles; one bad form doesn't stop the next).
+  Reachability realistic: any new/unmapped location missing the team. A6 fixtures all had
+  seeded teams, so this never fired.
+- Same dead-loop shape at `Deficiency Instruction` (n23) — low reachability (template
+  guarantees the instruction), identical batch-kill if it fires.
+
+The builder handled the IF gates correctly (`Question Unacceptable?`, `Region In Allowlist?`
+both reconnect false→Loop) — Filter nodes have no false output, which is exactly where it broke.
+
+**Resolution criteria:**
+Owner decision: sanction an empty-path guard reconnecting to `Loop Each Form` (Collect-style
+Code+IF, same pattern as the approved EHS-Update `Collect Child Links` fix) before C6 go-live,
+or defer with documented risk. If sanctioned: apply, then re-run an A6-style multi-form test
+where one form's location lacks the team, asserting the remaining forms still process.
+
+**Update 2026-07-25:** owner sanctioned fix-now; applied same session (workflow now 34 nodes,
+verified by structure read-back). Shape: parallel watchdog per filter — `List EHS Approver
+Teams` fans out to `Any Team At Location?` (Code, always 1 boolean item) → `Team Missing?` (IF)
+→ true→`Loop Each Form`, false→dead end; same at `Get Task Instructions` → `Any Deficiency
+Instruction?` → `Instruction Missing?`. `alwaysOutputData` set on both HTTP nodes so a bare-`[]`
+response still reaches the guards. Happy path untouched. **Remaining to close: the
+missing-team batch test** (delete one fixture team, execute, assert remaining forms process).
+
+**Resolved:** 2026-07-25
+**Resolution:** Missing-team batch test PASSED (exec 127265): team 602733 (98872, scenario A1's
+location) deleted via `DELETE /v2/teams/{id}` (route thereby verified for teardown), manual
+execute over the 5 A6 fixture forms → `Any Team At Location?` ran 5x, A1 iteration
+`teamFound:false` → `Team Missing?` true → `Loop Each Form`; `Create Deficiency Task` ran 4x
+(new tasks 4224/4225/4226/4227 = B/C/D/E at their locations), **no task at 98872**, guards
+silent on happy-path iterations. Batch survives a team-less location, matching source behavior.
+Side observation for C6 watch: no cross-run dedupe — B/C/D/E duplicated against 4193–4196
+(static-mock caveat: prod re-serve depends on EHS-side date filtering). Team recreate at 98872
+pending (new teamID to be recorded in sandbox-seed-record-a6.md).
+
+## OQ-044 — Step 1: bare-`[]` Coupa lookup skips the error branch itself (silent stop)
+
+**Type:** OPEN QUESTION
+**Status:** Open
+**Added:** 2026-07-25
+
+**Question / Description:**
+Same audit. In Step 1 (`WJSs6apAdVH5yKkq`), the four Coupa lookups (`Get User`, `Get Address`,
+`Get Account`, `Get Supplier`) each feed a `Found?` IF whose **false branch is the error path**
+(error-log row + admin comment). If real Coupa returns a bare JSON `[]` on no-match, the HTTP
+node emits 0 items and the IF — **including its error branch** — is skipped entirely: no error
+row, no admin comment, silent stop. The A4 suite's error paths passed because the mocks returned
+item-producing payloads (e.g. an object or empty-object item), not a bare `[]`. Whether real
+Coupa returns `[]`, `{}`, or an items-wrapper on no-match is exactly the OQ-028 guessed-shape
+unknown.
+
+**Resolution criteria:**
+Fold into the OQ-028/C4 first-shepherd watch: on the first real Step 1 runs, deliberately
+observe a no-match lookup (or test against the OQ-039 test instance if authorized). If real
+Coupa returns bare `[]`, sanction a guard (alwaysOutputData on the lookup nodes, or
+Collect-style empty check) so the error path fires as designed. Until confirmed, the error
+handling for missing users/addresses/accounts/suppliers cannot be trusted live.
+
+## OQ-045 — Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes
+
+**Type:** PENDING DECISION
+**Status:** Open
+**Added:** 2026-07-25
+
+**Question / Description:**
+Same audit, low-reachability pair:
+- Step 1: a Coupa WO with zero instructions → `Parse Instruction Responses` (collapses source
+  aggregators #6/#44) skipped → silent stop; source continued with empty fields and would
+  surface an error downstream.
+- Step 3 (`NH1giNups8iICMZe`): zero-instruction WO → `Extract Invoice Response` (collapses
+  source aggregator #9) skipped → no PO fetch, no "@Jordan Buyer" comment; source would
+  continue and post the no-invoice comment.
+
+Both require a template-created WO to have lost all instructions — not seen in practice
+(templates guarantee instructions). Audit also verified instruction-fetch limits are present
+in Step 1 (100) and Step 3 (50): the page-size-2 clip was unique to EHS Update.
+
+**Resolution criteria:**
+Owner decision: document as known-remote as-is behavior (recommended given reachability), or
+sanction Collect-style guards in both workflows. Either way, note in DEPLOYMENT.md watch list.
