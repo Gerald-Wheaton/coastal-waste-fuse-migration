@@ -27,7 +27,7 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-011](#oq-011) | Schedule trigger timezone: fixed MST offset vs. DST-aware Mountain Time | OPEN QUESTION | Resolved | 2026-07-01 |
 | [OQ-012](#oq-012) | Error log `timestamp`: native Date column + Mountain-time display | PENDING DECISION | Resolved | 2026-07-01 |
 | [OQ-013](#oq-013) | "Coupa Integration Error Log Export" has no self-error-handling  | OPEN QUESTION | Open     | 2026-07-01 |
-| [OQ-014](#oq-014) | Confirm timezone(s) w/ Coastal — MST vs EST vs mixed             | OPEN QUESTION | Open     | 2026-07-01 |
+| [OQ-014](#oq-014) | Confirm timezone(s) w/ Coastal — MST vs EST vs mixed             | OPEN QUESTION | Resolved | 2026-07-01 |
 | [OQ-015](#oq-015) | API credentials needed: Limble (received), Coupa, EHS Insight, Ionos SMTP | BLOCKER | Resolved | 2026-07-02 |
 | [OQ-016](#oq-016) | Step 1: auth inside Make connection 1766 (3 unauthenticated Coupa lookups) | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-017](#oq-017) | Step 1: "Add Quote" onerror logs wrong module's error — fix?              | PENDING DECISION | Resolved | 2026-07-02 |
@@ -54,11 +54,11 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-038](#oq-038) | EHS tag mismatch: Create stamps `@EHS;`, Update filters `@EHSWO;` — sanctioned fix to `@EHSWO;` | PENDING DECISION | Resolved | 2026-07-08 |
 | [OQ-039](#oq-039) | Coupa TEST instance (`coastalwasteinc-test.coupahost.com`) exists w/ standing creds — authorize Phase-A live testing against it? | PENDING DECISION | Open | 2026-07-13 |
 | [OQ-040](#oq-040) | Step 2 team-comment path unprovable in sandbox — team 107065 is "View Only" role-team, not returned by `/v2/teams` | OPEN QUESTION | Resolved | 2026-07-13 |
-| [OQ-041](#oq-041) | Token Regen ↔ Fuse collision at cutover — same Coupa client creds; concurrent tokens or rotate-and-invalidate? | OPEN QUESTION | Open | 2026-07-13 |
+| [OQ-041](#oq-041) | Token Regen ↔ Fuse collision at cutover — same Coupa client creds; concurrent tokens or rotate-and-invalidate? | OPEN QUESTION | Resolved | 2026-07-13 |
 | [OQ-042](#oq-042) | Limble instruction-answer write API — support confirmed NO public route to write a `response`/answer; EHS Create WO writes verbiage (`instruction`), not answer, so NOT blocked | BLOCKER | Resolved | 2026-07-13 |
 | [OQ-043](#oq-043) | EHS Create WO: filter-inside-loop batch-kill — `Team At Location`/`Deficiency Instruction` at 0 items never return to `Loop Each Form`, silently dropping the rest of the day's forms | PENDING DECISION | Resolved | 2026-07-25 |
 | [OQ-044](#oq-044) | Step 1: Coupa lookup returning bare `[]` skips the `Found?` IF **including its error branch** — no error row, no admin comment, silent stop (OQ-028-adjacent) | OPEN QUESTION | Open | 2026-07-25 |
-| [OQ-045](#oq-045) | Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes → silent stop where source continued (low reachability) — document or fix? | PENDING DECISION | Open | 2026-07-25 |
+| [OQ-045](#oq-045) | Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes → silent stop where source continued (low reachability) — document or fix? | PENDING DECISION | Resolved | 2026-07-25 |
 
 ---
 
@@ -383,6 +383,9 @@ schedule triggers (Token Regeneration, Create WO From EHS Inspection).
 **Resolution:** DST-aware Mountain Time — set n8n Schedule Trigger nodes to `America/Denver`.
 Applies to both daily-schedule workflows (Token Regeneration, Create WO From EHS Inspection).
 
+**Superseded 2026-07-25 by OQ-014:** owner decided **America/New_York**; both schedule
+workflows' `settings.timezone` flipped to Eastern same day. See OQ-014 resolution.
+
 ---
 
 ## OQ-012 — [resolved] Error log `timestamp`: native Date column + Mountain-time display
@@ -414,6 +417,10 @@ build spec — two parts:
 
 Full detail: `docs/build-specs/coupa-error-log-export-build-spec.md` §4.
 
+**Superseded 2026-07-25 by OQ-014 (display half only):** report display flipped to
+**America/New_York** — the source's hardcoded EST was intentional after all (Coastal is
+entirely Eastern). Point 1 (native Date column) stands unchanged. See OQ-014 resolution.
+
 ---
 
 ## OQ-013 — "Coupa Integration Error Log Export" has no self-error-handling
@@ -436,7 +443,7 @@ what Token Regeneration got under its own sanctioned fix). Record the decision a
 
 ---
 
-## OQ-014 — Confirm timezone(s) w/ Coastal — MST vs EST vs mixed
+## OQ-014 — [resolved] Confirm timezone(s) w/ Coastal — MST vs EST vs mixed
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-01
@@ -464,6 +471,17 @@ need a one-line schedule change if confirmed.
 Coastal (or FM360's point of contact) states explicitly which timezone(s) apply to which
 workflows — confirming or overriding OQ-011/OQ-012's assumptions. Update those two entries
 with the confirmed answer once received.
+
+**Resolved:** 2026-07-25
+**Resolution:** Owner decision: **America/New_York** (Eastern), NOT Denver — supersedes
+OQ-011's schedule assumption and OQ-012's Mountain report display. All flips applied to the
+live workflows same day: Token Regen + EHS Create + EHS Update `settings.timezone` →
+America/New_York (Token Regen verified by read-back); EHS Update `Prepare Update Payload`
+`.setZone('America/Denver')` → `'America/New_York'`; Error Log Export `Build Report`
+`timeZone` → America/New_York. Step 1/2/3 carry no timezone settings or tz-formatting —
+nothing to flip (verified via full reads). Residual re-check: Eastern rendering of the EHS
+completion note and the error-report email not yet re-executed — covered by each workflow's
+cutover manual-test row (DEPLOYMENT.md sections 6/7).
 
 ---
 
@@ -1610,10 +1628,10 @@ by `/v2/teams`; auto-created View-Only role-teams (107065) are not. The Step 1 R
 variant is unblocked by the same mechanism (team 605550 available; not separately re-run). Teardown
 (DEPLOYMENT section 3): delete team 605550 + task 4213 + the `coastal-seed-team` seeder branch.
 
-## OQ-041 — Token Regen ↔ Fuse collision at cutover (shared Coupa client)
+## OQ-041 — [resolved] Token Regen ↔ Fuse collision at cutover (shared Coupa client)
 
 **Type:** OPEN QUESTION
-**Status:** Open
+**Status:** Resolved
 **Added:** 2026-07-13
 
 **Question / Description:**
@@ -1634,6 +1652,27 @@ Confirm Coupa's `client_credentials` token semantics (concurrent vs. rotate-and-
 ideally against the OQ-039 test instance. If rotate-and-invalidate: do NOT activate n8n Token Regen
 until Fuse's Coupa scenarios are disabled at cutover (sequence it with the OQ-020 webhook cutover);
 if concurrent: safe to run in parallel through the rollback window.
+
+**Resolved:** 2026-07-25
+**Resolution:** Mooted by cutover design, per owner (2026-07-25): the migration will be a
+**hot-swap**, not a parallel run — at no point will the Fuse and n8n Coupa workflows be active
+simultaneously. With zero overlap, cross-invalidation cannot occur regardless of which
+`client_credentials` semantics Coupa uses (concurrent vs. rotate-and-invalidate), so the semantics
+question no longer needs answering. A stale Fuse-issued token at swap time is harmless either way
+(Fuse is off; nobody uses it).
+
+Two caveats fold into the cutover runbook as conditions of this resolution:
+1. **Never-simultaneous rule (both directions).** Fuse's Coupa scenarios and n8n "Coupa - Token
+   Refresh" must never be active at the same time. In particular, on **rollback**, deactivate n8n
+   Token Regen *before* re-enabling Fuse's Coupa scenarios — otherwise the collision returns with
+   still-unknown semantics. Sequence with the OQ-020 webhook cutover.
+2. **In-flight drain at swap.** Disable Fuse's Coupa scenarios, let any in-flight executions
+   finish, *then* activate n8n Token Regen — closes the small window where a mid-run Fuse
+   execution's token could be invalidated (if semantics are rotate-and-invalidate).
+
+Note: the token-refresh-vs-mid-execution race *within* a single system (a workflow reads the
+stored token, refresh fires mid-run) existed in Fuse (datastore 324) and carries over 1:1 in the
+n8n port — that is pre-existing behavior, not part of this OQ.
 
 ## OQ-042 — [resolved] Limble instruction-answer write API not found (does NOT block EHS Create WO)
 
@@ -1843,7 +1882,13 @@ Coupa returns bare `[]`, sanction a guard (alwaysOutputData on the lookup nodes,
 Collect-style empty check) so the error path fires as designed. Until confirmed, the error
 handling for missing users/addresses/accounts/suppliers cannot be trusted live.
 
-## OQ-045 — Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes
+**Update 2026-07-25:** OQ-045's zero-instruction guards were applied and tested independently
+later the same day (`alwaysOutputData` on both `Get Instructions` nodes — see OQ-045), so the
+earlier bundle obligation is moot. This OQ remains open purely on the Coupa-lookup bare-`[]`
+question. Note the same `alwaysOutputData` mechanism is the proven candidate guard here too,
+now demonstrated in-workflow by exec 127289.
+
+## OQ-045 — [resolved] Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes
 
 **Type:** PENDING DECISION
 **Status:** Open
@@ -1865,3 +1910,43 @@ in Step 1 (100) and Step 3 (50): the page-size-2 clip was unique to EHS Update.
 **Resolution criteria:**
 Owner decision: document as known-remote as-is behavior (recommended given reachability), or
 sanction Collect-style guards in both workflows. Either way, note in DEPLOYMENT.md watch list.
+
+**Update 2026-07-25:** owner asked whether guards were already built in an earlier session —
+live n8n check (structure + filtered reads of both drafts) confirms NOT fixed: Step 1
+`Get Instructions` (n13) → `Parse Instruction Responses` (n14) and Step 3 `Get Instructions`
+(n05) → `Extract Invoice Response` (n06) are bare chains — no watchdog Code+IF anywhere, no
+`alwaysOutputData` (`options: {}` on both HTTP nodes). Recollection likely conflated with the
+same-pattern fixes in EHS Update (`Collect Child Links`) and EHS Create WO (OQ-043) — different
+workflows.
+
+**Resolved:** 2026-07-25
+**Resolution:** Owner decision: document as known-remote as-is behavior now (DEPLOYMENT.md
+watch entries added under sections 2 and 4), with a bundle trigger — if the OQ-044 shepherd
+watch ends in sanctioned bare-`[]` guards for Step 1, the same change/re-test cycle must also
+add zero-instruction guards at Step 1 `Parse Instruction Responses` and Step 3
+`Extract Invoice Response`. No standalone fix; no workflow touched today.
+
+**Superseded same day — fix applied and tested (2026-07-25):** examining how the OQ-043 fix
+was built in EHS Create WO showed the Step 1/Step 3 application collapses to component 1 only
+(`alwaysOutputData` on each `Get Instructions`) — no watchdog Code+IF needed because there is
+no loop to reconnect and both parser Code nodes already emit source-faithful defaults on a
+no-match input. Owner re-decided: fix now. Applied `alwaysOutputData: true` to Step 1 n13 and
+Step 3 n05 (verified by read-back). Tested via temp-activate + webhook fire (owner-approved),
+zero-instruction fixtures created bare (no template) at 98472:
+- **Z1 = task 4228** (Step 1): exec **127289** — `Get Instructions` 0→1 empty item, parser ran
+  emitting exact defaults (`description:""`, `dollarAmount:0`, `capex:true`, `glCode:160999`,
+  `attachmentInfo:[]`), flow continued through the full Coupa chain (mock accepted the
+  empty-field requisition; real Coupa would 400 into the error path — the no-silent-stop
+  assertion is what matters). Side effect: Z1 flipped to PO Requested + meta1=424242.
+- **Z3 = task 4229** (Step 3): exec **127286** — 0→1 empty item, `Extract Invoice Response`
+  emitted `{fileName:"",link:""}`, `Has Invoice?` false, no-invoice comment posted to mock
+  PO 555001. Exactly source behavior.
+- **Regressions:** Step 1 exec **127295** (task 4056, fresh trigger comment): 6 real
+  instruction items parsed to real values, s5 supplier-missing path unchanged. Step 3 exec
+  **127296** (task 4053): 7 items, real invoice extracted, attach+comment path unchanged.
+- Error-log table unchanged (7 stale rows, ids 16–22). Workflows deactivated after test.
+  Sandbox statusIDs confirmed differ from prod: PO Create=8054, PO Requested=8055,
+  PO Approved=8074 (prod: 5784/5782/5783). Mock Config table ID is now `YkCIlyx7lUUNs7vG`
+  (test-plan's `bZ78rLHH8sJfDbtN` is stale).
+The OQ-044 bundle trigger is moot for OQ-045 scope; OQ-044 itself remains open on its own
+merits (Coupa lookup bare-`[]` shape unknown). Fixtures 4228/4229 added to cutover teardown.
