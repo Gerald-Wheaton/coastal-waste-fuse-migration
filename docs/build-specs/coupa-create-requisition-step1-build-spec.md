@@ -201,6 +201,8 @@ formatted EST string (3 inconsistent formats — superseded by OQ-012's native-D
    unconfirmed, OQ-019.
 10. **`listUsers limit=500` kept faithful** — single page, no pagination, silently misses the
     site manager past 500 users (OQ-018 tracks whether to sanction a paginate fix).
+    **Superseded 2026-07-26 — OQ-018 resolved:** owner sanctioned the paginate fix
+    (future-proofing). Cursor-based change set in section 9; applied to n8n 2026-07-26.
 11. **No email in this workflow** — error visibility is the shared error-log table (drained by
     the already-built Error Log Export) plus Limble comments. Ionos/OQ-010 not applicable here.
 12. **Idempotency guard (sanctioned fix — OQ-022 item 1, approved 2026-07-03).** After the task
@@ -408,3 +410,57 @@ Limble API quirks for the build (apply to the n8n HTTP nodes):
 - Instruction option field names differ by endpoint: inline options use `itemOptionID`/
   `itemOptionText`; the options sub-endpoint uses `instructionOptionID`/`instruction`.
   `CoastalCoupaWOInstResponses` consumes the inline shape — keep it that way.
+
+## 9. OQ-018 sanctioned fix (2026-07-26) — APPLIED to n8n same day
+
+Owner approved paginating the main `GET users` fetch (future-proofing). Applied 2026-07-26
+to workflow `WJSs6apAdVH5yKkq`, node **`Get Limble Users`** (`n10`, httpRequest v4.4 — the
+spec graph's `[HTTP L: GET users limit=500]` placeholder). Round-trip read confirmed the
+pagination options landed exactly as designed; `limit=500`, URL, auth, headers untouched;
+node `notes` updated. **`Extract Site Manager` (`n11`) needed NO patch** — item 2's predicted
+flatMap tweak proved unnecessary: n8n's HTTP Request node splits the bare-array response into
+one item per user, and the Code node already iterates `$input.all()` per-user, so pagination
+just appends items. Post-apply validation: 5 errors, all pre-existing validator-heuristic
+complaints about the intentional `Err: *` error-branch wiring (present before this change,
+none touch `n10`/`n11`); 0 new issues, 79 expressions validated. Workflow still **inactive**.
+
+**Activation gate CLEARED (2026-07-26, same day):** raw-REST probe via curl against
+`api.limblecmms.com` (sandbox credential from local `.env`): `GET /v2/users/?limit=2` →
+userIDs `[220593, 224202]`; `GET /v2/users/?limit=2&cursor=224202` → `[224203, 231029]`.
+Confirms on the raw API (not just the MCP wrapper): param name is `cursor`, exclusive-after,
+ascending — exactly the contract the node's pagination expression assumes. The node's n8n
+`notes` field was updated 2026-07-26 (same day) to record the verification — no stale
+caveat remains.
+
+**Probe findings this design rests on (2026-07-26, read-only via Limble CLIENT MCP, prod):**
+- Coastal prod still has **79 users** (matches 2026-07-03 recon) — `limit=500` returns all in
+  one call today. No live truncation; this fix changes nothing at runtime until users > 500.
+- **Limble user pagination is cursor-based, not page-based**: `cursor` = a userID, results
+  resume strictly AFTER it (exclusive), ordered ascending by userID. Response is a bare JSON
+  array — no `nextCursor`/`hasMore`/envelope; the client must carry the last userID forward.
+- The Fuse wrapper (`fuse-limble-app:listUsers`) exposes **no pagination parameter at all**
+  (param surface: limit/name/users/teams/roles) — the original could never have paginated.
+  This fix is additive, with no source behavior to imitate.
+- Caveat: the probe ran through the Limble MCP wrapper. The raw `/v2/users` REST param is
+  presumably also `cursor` (pass-through), but **confirm with one live call at apply time**
+  before wiring the expression below.
+
+**Change set (workflow node `[HTTP L: GET users limit=500]`, section 5 graph — confirm the
+live node's exact name at apply time):**
+
+1. HTTP Request node → Options → **Pagination**:
+   - Mode: **Update a Parameter in Each Request**
+   - Parameter: type Query, name `cursor`,
+     value `{{ $response.body.last().userID }}`
+   - Complete When: **Other** — expression `{{ $response.body.length < 500 }}`
+     (a short page is the last page; empty page also terminates)
+   - Keep `limit=500` unchanged. First request carries no cursor; n8n adds it from page 2 on.
+2. **Downstream `CoastalSiteManagerExtract` Code node**: with pagination on, the HTTP node
+   emits one item per page (each body an array). The user array must be built across ALL
+   items — `$input.all().flatMap(i => i.json)` or equivalent — not from a single item's body.
+   Confirm the built node's current input handling at apply time; worst case a 2-line tweak.
+3. **No change** to the other 7 `listUsers` calls (limit=1 targeted lookups — error-path
+   admin fetch and @mention lookups are unaffected by any cap).
+
+**Out of scope, flagged:** EHS Create WO has the same pattern (`listTeams limit=500`,
+ehs-create-wo-build-spec.md) — same class of fix, needs its own OQ + sanction if wanted.

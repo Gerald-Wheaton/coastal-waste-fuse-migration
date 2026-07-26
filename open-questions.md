@@ -26,12 +26,12 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-010](#oq-010) | Email delivery: Ionos integration, dev-mode recipient override    | PENDING DECISION | Resolved | 2026-07-01 |
 | [OQ-011](#oq-011) | Schedule trigger timezone: fixed MST offset vs. DST-aware Mountain Time | OPEN QUESTION | Resolved | 2026-07-01 |
 | [OQ-012](#oq-012) | Error log `timestamp`: native Date column + Mountain-time display | PENDING DECISION | Resolved | 2026-07-01 |
-| [OQ-013](#oq-013) | "Coupa Integration Error Log Export" has no self-error-handling  | OPEN QUESTION | Open     | 2026-07-01 |
+| [OQ-013](#oq-013) | "Coupa Integration Error Log Export" has no self-error-handling  | OPEN QUESTION | Resolved | 2026-07-01 |
 | [OQ-014](#oq-014) | Confirm timezone(s) w/ Coastal — MST vs EST vs mixed             | OPEN QUESTION | Resolved | 2026-07-01 |
 | [OQ-015](#oq-015) | API credentials needed: Limble (received), Coupa, EHS Insight, Ionos SMTP | BLOCKER | Resolved | 2026-07-02 |
 | [OQ-016](#oq-016) | Step 1: auth inside Make connection 1766 (3 unauthenticated Coupa lookups) | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-017](#oq-017) | Step 1: "Add Quote" onerror logs wrong module's error — fix?              | PENDING DECISION | Resolved | 2026-07-02 |
-| [OQ-018](#oq-018) | Step 1: listUsers limit=500, no pagination — silent miss past 500 users    | OPEN QUESTION | Open | 2026-07-02 |
+| [OQ-018](#oq-018) | Step 1: listUsers limit=500, no pagination — silent miss past 500 users    | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-019](#oq-019) | Hardcoded Limble admin user 317887 in all Step 1 error paths — who is it?  | OPEN QUESTION | Open | 2026-07-02 |
 | [OQ-020](#oq-020) | Limble webhook re-registration at cutover (hooks 775/776/777 → n8n URLs)   | OPEN QUESTION | Open | 2026-07-02 |
 | [OQ-021](#oq-021) | Step 1 spec: sign-off on proposed consolidations (§4)                      | PENDING DECISION | Resolved | 2026-07-02 |
@@ -52,12 +52,12 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-036](#oq-036) | EHS Update Inspection: drop dead comments-fetch (63) / lastComment (64) | PENDING DECISION | Resolved | 2026-07-08 |
 | [OQ-037](#oq-037) | `CoastalEHSFormFilter` dedupe never replaces (UpdateDtm/UpdatedDtm typo) — flag | OPEN QUESTION | Open | 2026-07-08 |
 | [OQ-038](#oq-038) | EHS tag mismatch: Create stamps `@EHS;`, Update filters `@EHSWO;` — sanctioned fix to `@EHSWO;` | PENDING DECISION | Resolved | 2026-07-08 |
-| [OQ-039](#oq-039) | Coupa TEST instance (`coastalwasteinc-test.coupahost.com`) exists w/ standing creds — authorize Phase-A live testing against it? | PENDING DECISION | Open | 2026-07-13 |
+| [OQ-039](#oq-039) | Coupa TEST instance (`coastalwasteinc-test.coupahost.com`) exists w/ standing creds — authorize Phase-A live testing against it? | PENDING DECISION | Resolved | 2026-07-13 |
 | [OQ-040](#oq-040) | Step 2 team-comment path unprovable in sandbox — team 107065 is "View Only" role-team, not returned by `/v2/teams` | OPEN QUESTION | Resolved | 2026-07-13 |
 | [OQ-041](#oq-041) | Token Regen ↔ Fuse collision at cutover — same Coupa client creds; concurrent tokens or rotate-and-invalidate? | OPEN QUESTION | Resolved | 2026-07-13 |
 | [OQ-042](#oq-042) | Limble instruction-answer write API — support confirmed NO public route to write a `response`/answer; EHS Create WO writes verbiage (`instruction`), not answer, so NOT blocked | BLOCKER | Resolved | 2026-07-13 |
 | [OQ-043](#oq-043) | EHS Create WO: filter-inside-loop batch-kill — `Team At Location`/`Deficiency Instruction` at 0 items never return to `Loop Each Form`, silently dropping the rest of the day's forms | PENDING DECISION | Resolved | 2026-07-25 |
-| [OQ-044](#oq-044) | Step 1: Coupa lookup returning bare `[]` skips the `Found?` IF **including its error branch** — no error row, no admin comment, silent stop (OQ-028-adjacent) | OPEN QUESTION | Open | 2026-07-25 |
+| [OQ-044](#oq-044) | Step 1: Coupa lookup returning bare `[]` skips the `Found?` IF **including its error branch** — no error row, no admin comment, silent stop (OQ-028-adjacent) | OPEN QUESTION | Resolved | 2026-07-25 |
 | [OQ-045](#oq-045) | Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes → silent stop where source continued (low reachability) — document or fix? | PENDING DECISION | Resolved | 2026-07-25 |
 
 ---
@@ -423,7 +423,7 @@ entirely Eastern). Point 1 (native Date column) stands unchanged. See OQ-014 res
 
 ---
 
-## OQ-013 — "Coupa Integration Error Log Export" has no self-error-handling
+## OQ-013 — [resolved] "Coupa Integration Error Log Export" has no self-error-handling
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-01
@@ -440,6 +440,20 @@ to the EHS workflows only. Surfaced while writing this workflow's build spec.
 Owner decides: faithful port (this workflow stays silent on its own failures, consistent with
 current production behavior), or sanctioned fix (e.g. a direct failure-alert email, similar to
 what Token Regeneration got under its own sanctioned fix). Record the decision and date here.
+
+**Resolved:** 2026-07-26
+**Resolution:** Sanctioned fix, basic variant (owner-approved 2026-07-26): replicate the Token
+Regeneration alert pattern on workflow `hR5YnDixecDz9HzJ` — On Error = "Continue (using error
+output)" + Retry On Fail (3 tries) on the three failure-capable nodes (Get Error Log Rows,
+Send Error Report Email, Delete Reported Rows), all three error outputs wired to one new
+"Alert: Error Log Export Failed" email node (Ionos credential, integrations@ → gerald@ until
+go-live per OQ-010). Accepted blind spot: alert channel is the same Ionos SMTP as the report —
+a hard SMTP outage stays silent either way; the "second channel" variant was offered and
+declined. No data-loss change: deletes remain on the success path. **Applied to n8n
+2026-07-26** (after a brief multi-instance-MCP hold): 7 operations atomic on
+`hR5YnDixecDz9HzJ`, post-apply validation clean (0 errors, 0 warnings — the 3 pre-fix
+"no error handling" warnings cleared), 8 nodes, still inactive. Change set + validation
+detail in `docs/build-specs/coupa-error-log-export-build-spec.md` section 8.
 
 ---
 
@@ -606,7 +620,7 @@ OQ-005/OQ-006/OQ-012/OQ-021 on the sanctioned-fixes list. Spec §4.6 stands as w
 
 ---
 
-## OQ-018 — Step 1: listUsers limit=500, no pagination — silent miss past 500 users
+## OQ-018 — [resolved] Step 1: listUsers limit=500, no pagination — silent miss past 500 users
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-02
@@ -629,6 +643,25 @@ port; as-is behavior, not a migration regression.
 **Resolution criteria:**
 Owner decides faithful (single page, current spec default, §4.10) vs. sanctioned paginate
 fix. Knowing Coastal's current Limble user count would inform this.
+
+**Resolved:** 2026-07-26
+**Resolution:** Sanctioned paginate fix, owner-approved 2026-07-26 as future-proofing (79
+users today — recount confirmed 2026-07-26 — so zero runtime change until Coastal crosses
+500). Probe established the contract: Limble user pagination is **cursor-based** (`cursor` =
+last userID, exclusive-after, ascending; bare-array response, no metadata), and the Fuse
+wrapper exposed no pagination param at all — nothing in the source to imitate, purely
+additive. Design: n8n HTTP Request built-in pagination ("Update a Parameter in Each Request",
+query `cursor` = `{{ $response.body.last().userID }}`, complete when page length < 500) on
+the main GET-users node only; `CoastalSiteManagerExtract` must aggregate across page-items;
+the 7 targeted limit=1 lookups unchanged. **Applied to n8n 2026-07-26** (node `Get Limble
+Users` on `WJSs6apAdVH5yKkq`; round-trip verified; `Extract Site Manager` needed no patch —
+already per-item; validation shows only the 5 pre-existing error-branch heuristic complaints,
+0 new; still inactive). Full detail in
+`docs/build-specs/coupa-create-requisition-step1-build-spec.md` section 9. **Activation gate
+cleared same day:** raw-REST curl probe confirmed `cursor` (exclusive-after, ascending) on
+`api.limblecmms.com` directly — see spec section 9 for the probe transcript.
+EHS Create WO's `listTeams limit=500` is the same pattern — deliberately NOT covered here,
+needs its own OQ if the owner wants it swept in.
 
 ---
 
@@ -1553,7 +1586,7 @@ workaround).
 
 ---
 
-## OQ-039 — Coupa TEST instance exists with standing creds — authorize Phase-A live testing?
+## OQ-039 — [resolved] Coupa TEST instance exists with standing creds — authorize Phase-A live testing?
 
 **Type:** PENDING DECISION
 **Status:** Open
@@ -1578,6 +1611,19 @@ Owner confirms (a) the test instance is safe to call (non-prod data, won't distu
 attachments, PO comments — are higher-touch), and (c) current valid client_id/secret for the test
 instance are installed in the isolated n8n credential (OQ-005). Then re-run A2/A-Step-2 read paths
 against the real test endpoint before cutover.
+
+**Resolved:** 2026-07-25
+**Resolution:** Owner decision: **no test-instance pass — examine Coupa shapes at go-live**
+(C4 first-shepherd watch, per cutover sequence step 4: watch the first live cycle of each
+workflow with Fuse disabled-not-deleted for rollback). Decision was conditioned on plugging
+the one silent failure mode first (the OQ-044 lookup-skip) — investigation then showed that
+hole doesn't exist: all four Step 1 Coupa lookups use `fullResponse: true` (one output item
+per request regardless of body shape) and every `Found?` IF tests `$json.body.length > 0`, so
+bare-`[]`, `{}`, and wrapper no-match shapes all route to the error branch (OQ-044 resolved
+no-defect, zero changes). Remaining shape risk (successful-response field shapes vs the OQ-028
+mock guesses) fails loudly at first live runs — acceptable under the shepherd watch. OQ-028
+stays open as the C4 watch tracking item. The stale `Coastal_Waste (TEST)` token row (id 1 in
+`QAj62weJaWmRBJ76`, expired JWT) should be deleted at cutover table cleanup.
 
 ## OQ-040 — Step 2 team-comment path unprovable in sandbox (View Only role-team)
 
@@ -1859,10 +1905,10 @@ Side observation for C6 watch: no cross-run dedupe — B/C/D/E duplicated agains
 (static-mock caveat: prod re-serve depends on EHS-side date filtering). Team recreate at 98872
 pending (new teamID to be recorded in sandbox-seed-record-a6.md).
 
-## OQ-044 — Step 1: bare-`[]` Coupa lookup skips the error branch itself (silent stop)
+## OQ-044 — [resolved] Step 1: bare-`[]` Coupa lookup skips the error branch itself (silent stop)
 
 **Type:** OPEN QUESTION
-**Status:** Open
+**Status:** Resolved
 **Added:** 2026-07-25
 
 **Question / Description:**
@@ -1887,6 +1933,21 @@ later the same day (`alwaysOutputData` on both `Get Instructions` nodes — see 
 earlier bundle obligation is moot. This OQ remains open purely on the Coupa-lookup bare-`[]`
 question. Note the same `alwaysOutputData` mechanism is the proven candidate guard here too,
 now demonstrated in-workflow by exec 127289.
+
+**Resolved:** 2026-07-25
+**Resolution:** **Premise disproven — no defect, zero changes.** Config read-back of all four
+Step 1 lookups (`Coupa: Get User` n17, `Get Address` n19, `Get Account` n22, `Get Supplier`
+n24) shows every one has `fullResponse: true` — the HTTP node then emits exactly **one item
+per request** regardless of response body, so the zero-item skip this OQ posited cannot occur.
+Each `Found?` IF tests `$json.body.length > 0` (loose validation): bare `[]` → length 0 →
+false → error branch; `{}` or wrapper object → length undefined → false → error branch; 404 →
+3 retries → loud exec failure. n17's own node note confirms this was deliberate build-time
+engineering ("fullResponse so an empty match still emits an item for the miss gate"). Live
+proof: exec 127295 (2026-07-25) — mock served a literal bare-`[]` body and `Supplier Found?`
+routed false into the contractor-missing path. The A4 "mocks returned item-producing payloads"
+premise in this OQ's description was wrong: the item is produced by the node's fullResponse
+wrapping, not by the mock's payload shape, so real Coupa behaves identically. Residual
+successful-shape risk is OQ-028's (loud-failure class, C4 shepherd watch).
 
 ## OQ-045 — [resolved] Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes
 

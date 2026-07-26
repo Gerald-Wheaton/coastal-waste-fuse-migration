@@ -92,6 +92,8 @@ a **pre-formatted display string**, inconsistently: `"MM/DD/YYYY hh:mm A"` in so
    zero `onerror` chains. This is a **third** instance of the asymmetric-error-handling pattern
    (alongside the two EHS workflows, OQ-004, and Step 2, OQ-008) — flagged as **OQ-013**, not
    fixed here, since it hasn't been individually sanctioned like OQ-004/008 covered the others.
+   **Superseded 2026-07-26 — OQ-013 resolved:** owner sanctioned the basic fix (Token Regen
+   alert pattern). Change set in section 8; applied to n8n 2026-07-26, validated clean.
 
 ## 5. Target n8n node graph
 
@@ -185,9 +187,61 @@ built yet — must, when their specs are written:
 - Table is empty until Step 1/3 are built — nothing to test end-to-end yet. A manual test row
   can be inserted via `n8n_manage_datatable` to dry-run this workflow before then.
 - Step 1 / Step 3 specs (not written) inherit the OQ-012 timestamp obligation from this spec.
-- **OQ-013** (open): this workflow has no self-error-handling — third instance of the
-  asymmetric pattern. Not fixed here; owner needs to decide same as OQ-004/OQ-008.
+- **OQ-013** (resolved 2026-07-26): sanctioned fix approved — self-error-handling via the
+  Token Regen alert pattern. **Applied to n8n 2026-07-26** (see section 8 for the change set
+  and validation results).
 - **Activation** — built but left inactive, matching Token Regen's precedent; turning it on is
   a separate decision.
 - Real recipient swap (`ethan@fm360consulting.com`) — held back until owner confirms go-live
   (OQ-010).
+
+## 8. OQ-013 sanctioned fix (2026-07-26) — APPLIED to n8n same day
+
+Owner approved the **basic** sanctioned fix (Token Regen alert pattern; the "second alert
+channel" variant was explicitly not chosen). The write was briefly deferred behind a
+multi-instance-MCP hold, then applied later on 2026-07-26: all 7 operations below landed in
+one atomic partial-update on workflow `hR5YnDixecDz9HzJ`. Post-apply validation (runtime
+profile): valid, 0 errors, 0 warnings — the 3 pre-fix "no error handling" warnings are gone.
+Final graph: 8 nodes, alert node fed by exactly the three error outputs, success path
+unchanged, workflow still **inactive** (activation remains a separate owner decision).
+
+Note: the live workflow now has **7 nodes**, not the 6 listed in section 7's build note — a
+"Reattach Row IDs" Code node sits between Send Email and Split Out (added in a later build
+session; versionCounter was 8 on 2026-07-26).
+
+Change set (mirrors `oCAl4h0SZenEtbNs` "Coupa - Token Refresh" node 4 exactly):
+
+1. **Add node** `Alert: Error Log Export Failed` — `n8n-nodes-base.emailSend` v2.1,
+   position ~`[1120, 260]`, credential **Integrations Ionos** (`vPXcXvRpktLu49Vr`):
+   - From: `integrations@fm360consulting.com`
+   - To: `gerald@fm360consulting.com` (dev override, OQ-010 — real go-live recipient TBD
+     same as the report email)
+   - Subject: `Coastal Coupa Error Log Export failed`
+   - Format: plain text. Body:
+     ```
+     The Coupa Integration Error Log Export workflow failed for Coastal Waste.
+
+     Failed node: {{ $prevNode.name }}
+     Error: {{ $json.error && $json.error.message ? $json.error.message : ($json.error || 'unknown') }}
+
+     Error-log rows are not lost: rows are only deleted after a successful report send, so
+     unexported rows remain in the "Coastal - Coupa Integration Error Log" Data Table and
+     will be retried on the next 15-minute run. If the failed node is "Delete Reported Rows",
+     already-emailed rows may be re-reported next run.
+     ```
+2. **Update 3 nodes** — `Get Error Log Rows`, `Send Error Report Email`,
+   `Delete Reported Rows`: set `onError: continueErrorOutput`, `retryOnFail: true`,
+   `maxTries: 3` (exact Token Regen settings).
+3. **Add 3 connections** — each of those nodes' error output (main, index 1) →
+   `Alert: Error Log Export Failed`.
+
+Decisions locked in with the fix:
+
+- **Accepted blind spot:** the alert uses the same Ionos SMTP as the report itself — a hard
+  SMTP outage stays silent either way. Retry (3x) + alert covers transient failures only.
+  The "second channel" (global Error Workflow / Slack) option was offered and declined.
+- **No data-loss change:** deletes stay on the success path. Failed report send = rows remain
+  and re-export next run (same as pre-fix). Failed delete = duplicate report next run, now
+  alerted instead of silent.
+- Section 4 decision 7's "no `continueOnFail` on the Send Email node" and decision 9's
+  faithful-port stance are both superseded by this section.

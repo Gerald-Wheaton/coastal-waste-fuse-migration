@@ -11,9 +11,10 @@ It is a **migration analysis & design project**: porting **Coastal Waste** (refe
 throughout workflow names and docs)'s **Limble (CMMS) ⇄ Coupa (procurement)** and **Limble ⇄ EHS
 Insight (safety inspections)** integrations off **Fuse** (Coastal's white-labeled **Make.com /
 Integromat** platform, using private/custom Make apps — see "Working with the blueprint exports"
-below) onto **n8n**. There are two related integrations, seven scenarios total. The work here is
-reverse-engineering the existing Make.com scenarios and producing a build-ready design before
-touching n8n.
+below) onto **n8n**. There are two related integrations, seven scenarios total. The work started
+as reverse-engineering the existing Make.com scenarios into build-ready designs; as of 2026-07-26
+**all 7 n8n workflows are built** (inactive, test phase) — the workflow-ID table lives in OQ-007's
+entry in `open-questions.md`.
 
 Two kinds of artifact live here:
 
@@ -36,9 +37,9 @@ Two kinds of artifact live here:
   `EHSLimbleLocationMapping`). Read this before porting any `function:CoastalX` call to an n8n Code
   node — this is the one place their real logic lives, not the blueprint export.
 
-No `docs/workflows/` vs. `docs/build-specs/` split exists yet. When flow-analysis docs and
-build-ready n8n specs start getting written, keep them separate on purpose — do not co-mingle
-reverse-engineering notes with build specs. Naming convention: `<workflow>-build-spec.md`.
+`docs/build-specs/` holds the build-ready n8n specs — one per workflow,
+`<workflow>-build-spec.md`, all 7 written. Keep reverse-engineering notes and build specs
+separate on purpose — do not co-mingle them.
 
 ## Key facts that override surface impressions
 
@@ -196,16 +197,18 @@ independently verified against an API spec.
 
 - **Migration posture:** 1:1 + a sanctioned list of fixes (see `open-questions.md` OQ-001). Fixes
   must be individually proposed and approved — no unilateral improvements beyond the sanctioned
-  list. Sanctioned so far: OQ-005 (isolated n8n credential instead of shared datastore), OQ-006
-  (fix the Error Log Export delete-all race). Do not "improve" beyond the sanctioned list without
-  asking — this is the single most common scope-creep failure mode in these engagements.
+  list. The list has grown far past the initial OQ-005/OQ-006 — the authoritative record is the
+  resolved entries in `open-questions.md`; check there, not this file. Do not "improve" beyond
+  the sanctioned list without asking — this is the single most common scope-creep failure mode
+  in these engagements.
 - **Decomposition:** 7 Make scenarios → 7 n8n workflows, 1:1, same trigger boundaries
   (webhook/schedule) preserved exactly (OQ-002).
-- **API access boundaries:** this phase is **design/spec only** — no live API calls against
-  Limble, Coupa, or EHS Insight (OQ-003).
-- **Target n8n workflow IDs:** none assigned yet — **blocked**, tracked as **OQ-007**. Get one per
-  workflow from the owner as each is built; write only to the named ID. Track superseded/old IDs
-  explicitly so they don't get reused by accident.
+- **API access boundaries (OQ-003, relaxed in stages — its addenda in `open-questions.md` are
+  the current line):** read-only Limble calls are sanctioned, and live writes against the Limble
+  **sandbox** (test location 98472) are sanctioned for test-phase work. No live calls to Coupa
+  or EHS Insight (mock rigs only), and no writes to Coastal's Limble **prod**.
+- **Target n8n workflow IDs (OQ-007 resolved):** all 7 assigned and built — the ID table lives
+  in OQ-007's entry in `open-questions.md`. Write only to those IDs.
 - **Secrets:** Limble/Coupa credentials are datastore-referenced, not inlined — but the EHS Insight
   API key IS hardcoded in plaintext in both EHS blueprint exports (see "Key facts" above). Treat it
   as exposed; get it rotated before go-live. Re-verify (actually grep, don't assume) as new files
@@ -214,12 +217,21 @@ independently verified against an API spec.
 
 ## Tooling
 
-- An **n8n MCP server** is connected. **Current authorization (OQ-003):** read-only use only —
-  `search_nodes`, `get_node`, `validate_workflow` etc. to ground specs in real node schemas. Do
-  **not** use `n8n_create_workflow` / write tools yet — the target n8n workspace is still being
-  built out by the owner. Do not proactively look into the n8n instance until asked.
-- No Limble, Coupa, or EHS Insight MCP server is connected. All source-system facts must currently
-  come from the blueprint exports, `docs/functions.js`, and the two docx review docs.
+- An **n8n MCP server** is connected and **writes are authorized** — the original read-only rule
+  belonged to OQ-003's design phase and is superseded; all 7 workflows are built, and
+  owner-approved sanctioned fixes get applied directly via the write tools. Standing limits:
+  **never activate a workflow without asking the owner**; ~100 MCP calls/day quota; and the
+  server is **multi-instance with a binding shared across parallel sessions** — run
+  `n8n_instances mode=list` and confirm the current instance is `FM360_Account` before any call,
+  and never switch instances without checking whether another session is mid-use.
+- Two **Limble MCP servers** are connected, both read-only: `limble-mcp-CLIENT` → Coastal prod,
+  `limble-mcp-SANDBOX` → the FM 360 sandbox (test location 98472). Confirm which instance a
+  server actually points at (`get_current_customer_info`) before trusting or recording recon
+  facts. Known blind spot: the MCP `get_statuses` tool returns only a subset — verify statuses
+  via direct API or the UI, never the MCP tool.
+- No Coupa or EHS Insight MCP server is connected — facts for those systems come from the
+  blueprint exports, `docs/functions.js`, the two docx review docs, and the mock-Coupa test rig
+  (OQ-028).
 
 ## Open Questions
 

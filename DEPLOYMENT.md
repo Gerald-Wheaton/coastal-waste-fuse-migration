@@ -80,7 +80,7 @@ Every email-sending node currently routes to `gerald@fm360consulting.com` only, 
 
 | Node / Workflow | Real recipient(s) | Status |
 | --- | --- | --- |
-| "Token Refresh Failed" — Coupa Token Regeneration | FM360 internal — TBD, not yet decided | ☐ not decided |
+| "Token Refresh Failed" — Coupa Token Regeneration | `integrations@fm360consulting.com` (owner decision 2026-07-25; also the from-address — self-addressed on purpose) | ☐ pending restore |
 | Coupa Integration Error Log Export report | `ethan@fm360consulting.com` (confirmed — matches source Make blueprint) | ☐ pending restore |
 
 If any additional error/failure-alert emails get added while building Step 1/2/3 or the EHS
@@ -129,7 +129,8 @@ re-verify at each workflow's cutover manual-test row.
 
 - [ ] Coastal Coupa OAuth Client Credentials populated with real client_id/secret
 - [ ] Coastal Coupa OAuth Token Data Table ID confirmed correct
-- [ ] "Token Refresh Failed" email recipient decided and set (currently gerald@ dev-only)
+- [ ] "Token Refresh Failed" email recipient restored to `integrations@fm360consulting.com`
+      (decided 2026-07-25; node currently gerald@ dev-only per OQ-010 — swap at cutover)
 - [x] Schedule timezone resolved (OQ-014, 2026-07-25) — cron daily @ 12:00AM **America/New_York**,
       `settings.timezone` flipped + verified by read-back
 - [ ] Manual test run — confirm token written to Data Table
@@ -141,6 +142,9 @@ re-verify at each workflow's cutover manual-test row.
       `https://coastalwasteinc.coupahost.com/oauth2/token`.
 - [ ] Mock token value (`MOCK-TOKEN-COUPA-REFRESHED`) purged from Coupa OAuth Token table
       `QAj62weJaWmRBJ76` (shared with Step 2 §3 mock-row cleanup).
+- [ ] Stale `Coastal_Waste (TEST)` row (id 1, expired test-instance JWT) deleted from the same
+      table (OQ-039 resolved 2026-07-25: no test-instance pass; Coupa shapes examined at
+      go-live under the C4 first-shepherd watch — OQ-028 is the tracking item).
 
 ## 2. Create Requisition in Coupa (Step 1)
 
