@@ -39,7 +39,21 @@ Two kinds of artifact live here:
 
 `docs/build-specs/` holds the build-ready n8n specs — one per workflow,
 `<workflow>-build-spec.md`, all 7 written. Keep reverse-engineering notes and build specs
-separate on purpose — do not co-mingle them.
+separate on purpose — do not co-mingle them. Post-build sanctioned-fix change sets are appended
+as sections 8/9 of the affected spec.
+
+Other artifacts to know about:
+
+- `docs/test-plan/` — mock-rig test strategy, fixtures, and **`test-sequence.md`, the live test
+  scoreboard**. For test status, trust `test-sequence.md` + actual n8n execution history — never
+  `DEPLOYMENT.md` status lines alone; parallel sessions outdate those within hours.
+- `DEPLOYMENT.md` — the pre-publish gate checklist (one section per workflow). Not a build doc.
+  `DEPLOYMENT-REFERENCE-DOC.md` is the deer-valley equivalent, copied in as a model only.
+- `oq-resolution-plan.md` — 2026-07-17 plan for closing the remaining open questions, grouped by
+  who can answer.
+- `tools/sandbox-seed/` — scripts that seed the Limble sandbox (location 98472) for tests.
+- `handoffs/` — session handoff docs (`handoff-*.md`), written/consumed by the handoff/hand-in
+  skills.
 
 ## Key facts that override surface impressions
 
@@ -66,7 +80,7 @@ separate on purpose — do not co-mingle them.
   2026-07-01 note said 8). Found 2026-07-01 via `grep` across all `*.json` for header/value fields
   matching key/token/secret/password patterns. Because the value is already in-hand, testing does
   not wait on it — but treat this key as already exposed: it must be rotated by
-  Coastal before go-live, tracked in `DEPLOYMENT.md` §0 (Credentials). Do not re-run the
+  Coastal before go-live, tracked in `DEPLOYMENT.md` section 0 (Credentials). Do not re-run the
   "no secrets found" spot-check claim for new blueprints without actually grepping — this file
   slipped through the original check.
 - **Custom IML/JS functions** referenced in mappers (`function:CoastalX`) have their real bodies in
@@ -118,20 +132,19 @@ For large blueprints, parse structurally instead of reading top to bottom, e.g.:
 python3 -c "import json; d=json.load(open('docs/OG-workflows/[file].json')); print([m['module'] for m in d['flow']])"
 ```
 
-A confirmed reliable full-graph walk (flow → routes[].flow → onerror, recursively) has already been
-run once across all 7 files this session — see `open-questions.md` for what it found. Re-run it
-whenever blueprints are updated rather than trusting this snapshot.
+A confirmed reliable full-graph walk (flow → routes[].flow → onerror, recursively) was run once
+across all 7 files during the initial analysis (2026-07-01) — its findings are recorded in
+`open-questions.md`. Re-run it whenever blueprints are updated rather than trusting that snapshot.
 
 The cross-module data model: Make passes _bundles_ down a linear flow with
 Aggregator/Feeder/Repeater + roundtrip variables. n8n passes _arrays of items_. These do **not**
-map node-for-node — document the translation rules as you discover them (e.g. a
-`docs/01-module-translation.md`), don't assume a 1:1 node swap.
+map node-for-node — don't assume a 1:1 node swap.
 
-A shared, cross-engagement translation-patterns reference is planned at
-`../fuse-migrations/_template/module-translation-reference.md` (currently a placeholder, not yet
-populated), covering common Fuse→n8n patterns pulled from past *completed* migrations. Once
-populated, consult it as a starting point — it's advisory, not authoritative. Where it conflicts
-with what Coastal's actual blueprints do, trust the blueprint.
+The cross-engagement translation-patterns reference is populated and lives at
+`docs/module-translation-reference.md` (an identical copy sits in `../_template/`), covering
+common Fuse→n8n patterns confirmed across past migrations (deer-valley, drink-pak). Consult it
+as a starting point — it's advisory, not authoritative. Where it conflicts with what Coastal's
+actual blueprints do, trust the blueprint.
 
 Common Make → n8n node mappings to start from (verify each against the actual blueprint, don't
 assume):
@@ -177,21 +190,18 @@ treat `datastore:*` as one uniform node-swap rule:
 
 ## Reference material
 
-No authoritative API reference material (Swagger/OpenAPI, Postman collection, or equivalent) has
-been located in this repo for Limble, Coupa, or EHS Insight — tracked as **OQ-009** in
-`open-questions.md`. The only material found so far:
+No authoritative API reference (Swagger/OpenAPI, Postman collection, or equivalent) exists in this
+repo for Limble, Coupa, or EHS Insight — tracked as **OQ-009** (still open). What exists instead,
+and how far to trust each system's facts:
 
-- `docs/Coastal - Limble Integration Review - Coupa Integration (v1.2.0).docx` — narrative design
-  doc (not an API reference), describes intended Coupa PR/PO field mapping (Account segments:
-  entity/location/line-of-business/GLAccount/department/commodity).
-- `docs/Coastal - Limble Integration Review - EHS Integration (v1.3.2).docx` — narrative design doc
-  for the EHS side.
-- The blueprint JSONs themselves are the closest thing to a live API reference right now — actual
-  request shapes are visible in each `http:ActionSendData` / `coupa:makeApiCall` module's `mapper`.
-
-Until OQ-009 resolves, treat field-level facts (e.g. exact Coupa Account segment codes, Limble
-instruction schema) as reverse-engineered from the blueprint mappers and docx docs only — not
-independently verified against an API spec.
+- **Limble** — field-level facts are now **live-verified**: extensive sandbox/prod recon and raw
+  API probes during the test phase (create-task contract, cursor pagination, status IDs,
+  instruction writes — see the resolved OQ entries and build-spec sections 8/9). Vendor doc sites
+  are JS-rendered shells (unfetchable); raw-contract questions need a live probe, not WebFetch.
+- **Coupa / EHS Insight** — still reverse-engineered only, from the blueprint mappers (request
+  shapes in each `http:ActionSendData` / `coupa:makeApiCall` module) and the two narrative docx
+  review docs in `docs/`. Test-phase calls hit **mock rigs** whose response shapes are guessed
+  from the blueprints (OQ-028) — no live verification against either API yet.
 
 ## Constraints for this work (from the project owner)
 
