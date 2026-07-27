@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "limble-mcp-CLIENT": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.limblecmms.com/mcp",
+        "--header",
+        "Limble-Client-ID: CLIENT-ID",
+        "--header",
+        "Limble-Client-Secret: CLIENT-SECRET"
+      ]
+    },
+    "limble-mcp-SANDBOX": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.limblecmms.com/mcp",
+        "--header",
+        "Limble-Client-ID: FM360-ID",
+        "--header",
+        "Limble-Client-Secret: FM360-SECRET"
+      ]
+    }
+  }
+}
