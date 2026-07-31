@@ -1,6 +1,9 @@
 {
   "__note": "Keyed map for GET /api/v4/entity/AuditInspection/fetch/{RowUID}. The mock looks up the trailing RowUID path param and returns the matching value (which has the shape { Entity: {...} }). Used by BOTH workflows: Create WO source module 64 ('EHS: Fetch Inspection Detail' -> reads $json.Entity), and Update source module 4 ('EHS: Fetch Inspection' -> reads $json.Entity, then mutates UDFLimbleWOCompletionNotes and POSTs it back). Question fields consumed: Answer ('0'==unacceptable), Verification (deficiency text), FileAttachments[0].{AttachmentUID,FileName}. Entity fields consumed: RowUID, FormNumber, BusinessEntity, QuestionsSelector, UpdatedDtm, RecurringTaskCompleteDtm, Questions.",
 
+  "__updateddtm_format_note": "KEEP THIS FILE SINGLE-FORMAT. Every UpdatedDtm here is ISO with T/Z ('2026-07-08T15:00:00Z'); live EHS emits '2026-07-24 05:12:01' instead. n07 compares UpdatedDtm as STRINGS (deliberate — see build-spec section 13), which is chronologically correct for either format on its own since both are fixed-width and zero-padded, but WRONG for a set that MIXES them: 'T' (0x54) sorts above ' ' (0x20), so any ISO value beats any space-separated value on the same date regardless of actual time. Adding a live-shaped row to this fixture set would silently corrupt the A1/A2 and J comparisons.",
+
+
   "EHS-INSP-A1": {
     "Entity": {
       "RowUID": "EHS-INSP-A1",
@@ -127,6 +130,36 @@
       "RecurringTaskCompleteDtm": "2026-07-08T14:50:00Z",
       "Questions": [
         { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "H: wrong question set - must NEVER be processed", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-I": {
+    "__note": "Case I (OQ-037 draft guard, added 2026-07-26). BE-60's ONLY in-window inspection, and it is an unsubmitted draft: RecurringTaskCompleteDtm is \"\". The pre-dedupe guard in 'Filter To Latest Completed' (n07) must drop it, so BE-60 yields zero tasks. Its last question is deliberately deficient (Answer == '0') so a regressed guard would visibly try to create a WO instead of failing silently. Primary assertion is at n07's OUTPUT (EHS-INSP-I absent) — a drop further downstream would prove nothing about the guard. No hierarchy fixture and no Limble sandbox seeding: nothing downstream of n07 runs for BE-60.",
+    "Entity": {
+      "RowUID": "EHS-INSP-I",
+      "FormNumber": "FIC-6000",
+      "BusinessEntity": "BE-60",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T16:00:00Z",
+      "RecurringTaskCompleteDtm": "",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "I: draft-only site - must NEVER produce a WO (OQ-037 draft guard)", "FileAttachments": [] }
+      ]
+    }
+  },
+
+  "EHS-INSP-J": {
+    "__note": "Case J (OQ-037 guard-runs-before-comparison, added 2026-07-26). Draft at BE-30 (same site as E) whose UpdatedDtm 18:00 is LATER than E's 13:30, and it is listed BEFORE E in ehs-auditinspection-list.json. Correct behavior: the guard drops J pre-dedupe, so E survives untouched (instruction text '...E: Blocked emergency exit', meta1 = EHS-INSP-E). A 'drop drafts after picking the max' implementation would keep J and cut a WO from a draft — this case fails it while case I still passes, which is why J is the sharper of the two. Assert EHS-INSP-J absent from n07's output and no task name containing FIC-3001. Reuses E's already-seeded Limble location/region/team — no new sandbox seeding.",
+    "Entity": {
+      "RowUID": "EHS-INSP-J",
+      "FormNumber": "FIC-3001",
+      "BusinessEntity": "BE-30",
+      "QuestionsSelector": "QS-FIC-001",
+      "UpdatedDtm": "2026-07-08T18:00:00Z",
+      "RecurringTaskCompleteDtm": "",
+      "Questions": [
+        { "QuestionText": "Deficiency Summary and Work Order Creation", "Answer": "0", "Verification": "J: newer draft at BE-30 - must NEVER win over E (OQ-037 guard-before-compare)", "FileAttachments": [] }
       ]
     }
   },

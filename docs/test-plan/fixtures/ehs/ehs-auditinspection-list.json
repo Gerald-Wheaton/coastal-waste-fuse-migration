@@ -1,14 +1,17 @@
 {
-  "__note": "Canned response for GET /api/v4/entity/AuditInspection/list?CreatedAfter=<now-24h> (Create WO source module 24). Built node 'EHS: List Inspections' reads $json.List; 'Prepare Inspections' emits one item per element and 'EHS: Fetch Inspection Detail' fetches by RowUID. Only RowUID is consumed from these summary rows; BusinessEntity/FormNumber are included for readability. The full inspection bodies live in ehs-inspection-fetch.json keyed by RowUID. All 9 rows are treated as created in the last 24h (the mock ignores the CreatedAfter query filter).",
+  "__note": "Canned response for GET /api/v4/entity/AuditInspection/list?CreatedAfter=<now-24h> (Create WO source module 24). Built node 'EHS: List Inspections' reads $json.List; 'Prepare Inspections' emits one item per element and 'EHS: Fetch Inspection Detail' fetches by RowUID. Only RowUID is consumed from these summary rows; BusinessEntity/FormNumber are included for readability. The full inspection bodies live in ehs-inspection-fetch.json keyed by RowUID. All 11 rows are treated as created in the last 24h (the mock ignores the CreatedAfter query filter).",
+  "__order_note": "ROW ORDER IS PART OF THE TEST (OQ-037, cases I and J, added 2026-07-26). EHS-INSP-J must stay immediately BEFORE EHS-INSP-E: J is a draft whose UpdatedDtm is later than E's, so a 'drop drafts after picking the max' implementation would keep J and cut a WO from a draft, while the correct pre-dedupe guard drops J and lets E survive. Reordering these two silently weakens case J to nothing.",
   "List": [
     { "RowUID": "EHS-INSP-A1", "BusinessEntity": "BE-10", "FormNumber": "FIC-1001" },
     { "RowUID": "EHS-INSP-A2", "BusinessEntity": "BE-10", "FormNumber": "FIC-1002" },
     { "RowUID": "EHS-INSP-B",  "BusinessEntity": "BE-12", "FormNumber": "FIC-1200" },
     { "RowUID": "EHS-INSP-C",  "BusinessEntity": "BE-23", "FormNumber": "FIC-2300" },
     { "RowUID": "EHS-INSP-D",  "BusinessEntity": "BE-24", "FormNumber": "FIC-2400" },
+    { "RowUID": "EHS-INSP-J",  "BusinessEntity": "BE-30", "FormNumber": "FIC-3001" },
     { "RowUID": "EHS-INSP-E",  "BusinessEntity": "BE-30", "FormNumber": "FIC-3000" },
     { "RowUID": "EHS-INSP-F",  "BusinessEntity": "BE-99", "FormNumber": "FIC-9900" },
     { "RowUID": "EHS-INSP-G",  "BusinessEntity": "BE-40", "FormNumber": "FIC-4000" },
-    { "RowUID": "EHS-INSP-H",  "BusinessEntity": "BE-50", "FormNumber": "VEH-5000" }
+    { "RowUID": "EHS-INSP-H",  "BusinessEntity": "BE-50", "FormNumber": "VEH-5000" },
+    { "RowUID": "EHS-INSP-I",  "BusinessEntity": "BE-60", "FormNumber": "FIC-6000" }
   ]
 }

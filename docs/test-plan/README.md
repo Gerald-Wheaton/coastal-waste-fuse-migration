@@ -56,14 +56,17 @@ in `DEPLOYMENT.md`'s revert ledger.
 
 ## Cross-cutting findings the agents surfaced (all since addressed — historical record)
 
-1. **EHS loop tag mismatch — RESOLVED + APPLIED (OQ-038).** "Create WO From EHS Inspection" stamped
-   the WO description with **`@EHS;`** while "Update EHS Inspection From Limble WO" filters on
-   **`@EHSWO;`** — disjoint literals, so Create's output could never trigger Update. It is a
-   **pre-existing defect in the source Make blueprints** (`@EHS;` ×3 vs `@EHSWO;` ×1), faithfully
-   ported. The EHS review docx specifies `@EHSWO;` on both sides, so the sanctioned fix
-   (owner-approved 2026-07-08) corrects **Create → `@EHSWO;`**. Live edit applied to
-   `isLUx7cUjkmKggD2` 2026-07-20 (A6 pre-test fixes); verified by A6 (tag present on created tasks)
-   and A7 scenario U3 (gate filters correctly).
+1. **EHS loop tag mismatch — RESOLVED, then REVERSED; both sides now `@EHS;` (OQ-038).** "Create WO
+   From EHS Inspection" stamped the WO description with **`@EHS;`** while "Update EHS Inspection
+   From Limble WO" filtered on **`@EHSWO;`** — disjoint literals, so Create's output could never
+   trigger Update. A **pre-existing defect in the source Make blueprints** (`@EHS;` ×3 vs
+   `@EHSWO;` ×1), faithfully ported. The first fix (owner-approved 2026-07-08, applied live
+   2026-07-20) corrected **Create → `@EHSWO;`** per the review docx. **Ethan reversed that on
+   2026-07-27:** Create keeps `@EHS;` and **Update's gate moved to `@EHS;`**, because prod holds
+   10 EHS WOs all tagged `@EHS;` with **5 still open** that a `@EHSWO;` gate would orphan at
+   cutover. Both live nodes changed (`isLUx7cUjkmKggD2` n21, `8JvtesynrYtZbw7U` n04) and read
+   back. A7 U1 re-validated post-flip (exec 127376); **A6's description assertion is still owed a
+   run.** The A6/A7 passes that predate 2026-07-27 assert the old literal.
 2. **Step 2 pointed at the PROD Limble credential — swapped to sandbox for test.** Step 2
    (`WYJyHdQGcdeD8wEr`) used "Coastal Waste Limble" (`qn6u8jEK085DoHT8`) on both Limble nodes, unlike
    Step 1/3 which use the sandbox credential. Running it as-built would have **read and PATCHed real

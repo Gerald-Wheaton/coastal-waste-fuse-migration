@@ -463,4 +463,102 @@ live node's exact name at apply time):**
    admin fetch and @mention lookups are unaffected by any cap).
 
 **Out of scope, flagged:** EHS Create WO has the same pattern (`listTeams limit=500`,
-ehs-create-wo-build-spec.md) — same class of fix, needs its own OQ + sanction if wanted.
+ehs-create-wo-build-spec.md) — filed and resolved as **OQ-046 (2026-07-26): no change**,
+faithful single call stands (45 of 500 teams today, name-filtered server-side).
+
+### 9.1 Runtime failure of the as-applied expression — corrected 2026-07-26 (same day)
+
+The fix above was verified two ways that both looked convincing and neither of which ran the
+node: a **config round-trip read** (proves what n8n stored) and a **raw-REST cursor probe**
+(proves what Limble accepts). Its first actual execution — 2026-07-26, exec **127324**, fired
+during the R1-team run — failed:
+
+```
+NodeApiError: last can't be used on undefined value
+node: Get Limble Users (n10)
+```
+
+**Root cause:** n8n evaluates the pagination parameter expression on the **first** request as
+well as subsequent ones. On request 1 there is no `$response` body yet, so
+`{{ $response.body.last().userID }}` throws before any HTTP call is made. Step 1 died at n10
+on every run, ahead of all Coupa traffic — the design note above ("First request carries no
+cursor; n8n adds it from page 2 on") was wrong about n8n's evaluation order.
+
+**Probes establishing the corrected value** (sandbox credential, read-only):
+- `GET /v2/users?limit=2&cursor=` → **HTTP 400**, `` `cursor` must be a number `` — an
+  empty-string guard is not viable.
+- `GET /v2/users?limit=2&cursor=0` → **200**, `[220593, 224202]` — identical to omitting the
+  param. `0` is a safe "start from the beginning" sentinel.
+
+**Applied (2026-07-26):** cursor value changed to
+
+```
+={{ $response?.body?.last()?.userID ?? 0 }}
+```
+
+`completeExpression` left unchanged at `{{ $response.body.length < 500 }}` (it only evaluates
+after a real response). The whole `parameters.options` object was replaced in one update — dot
+paths do not index array elements — and the node was read back to confirm no sibling-key
+corruption. Re-fired as exec **127325: PASS**, `Get Limble Users` → **54 items** from the
+sandbox in a single page, run completed through to the team-comment tail.
+
+**Residual:** only the single-page path has executed. The multi-page branch (>500 users, where
+the cursor actually advances) is still unproven at runtime — sandbox has 54 users, prod 79.
+The cursor contract itself is probe-verified; what is untested is n8n's page-2 request
+assembly. Watch at go-live, or prove it by temporarily setting `limit` low on a sandbox run.
+
+**Lesson for the rest of this build:** a config round-trip plus an API-contract probe is not
+execution proof. Any node change lands unverified until the node has actually run once.
+
+## 10. OQ-019 sanctioned fix (2026-07-26) — APPLIED to n8n same day
+
+Owner approved hoisting the error-path escalation admin userID out of the workflow. Applied
+2026-07-26 to `WJSs6apAdVH5yKkq` (49 → **50 nodes**), and to Step 2 `WYJyHdQGcdeD8wEr` the same
+day (26 → 27 nodes) — the two are deliberately kept in lockstep on this.
+
+**What was wrong (and what wasn't).** The Make source hardcodes `317887` **6 times** across
+Step 1's error paths. This spec's port had already collapsed that to **one** literal, because
+all five `Err: *` Set nodes funnel into a single
+`Insert Error Log Row → Get Admin User → Merge Error Context → Post Admin Comment` chain — so
+the "6 hardcodes" framing in OQ-019 never described the n8n build. What remained was still one
+literal per workflow, two across the build, and the escalation contact is a person who can
+leave the company.
+
+**Change set:**
+
+1. New Data Table **`Coastal - Integration Config`** (`L0npQPPEXQI9JRzX`), columns
+   `key` / `value` / `notes`. Seeded with one row:
+   `escalation_admin_user_id = 398783` (test value; sandbox Site Manager) with a note naming
+   `317887` as the cutover value. Deliberately Coastal-scoped rather than reusing the instance's
+   cross-client `Project Settings` table — same isolation reasoning as OQ-005.
+2. New node **`Get Escalation Admin ID`** (`n8n-nodes-base.dataTable` v1.1, operation `get`,
+   `returnAll: true`, filter `key = escalation_admin_user_id`), inserted between
+   `Insert Error Log Row` and `Get Admin User`.
+3. **`Get Admin User`** (`n40`) query param `users`: literal `398783` → `={{ $json.value }}`.
+   URL, `limit=1`, auth, headers unchanged. Moved to `[4784, 248]` to make room.
+4. Nothing else in the error subgraph moved. `Merge Error Context` still combines by position,
+   `Get Admin User` on input 0 and the originating `Err: *` Set node on input 1, one item each.
+   `Post Admin Comment` still reads `firstName`/`lastName` off the user lookup and
+   `adminMsgBody` off the merge, and still targets `$('Get Task').first().json.taskID`.
+
+**Apply-time gotcha worth recording.** The first patch attempt used the n8n-MCP `updateNode`
+dot path `parameters.queryParameters.parameters[0].value`. That path does **not** index into
+the array — it created a literal sibling key `"parameters[0]"` next to the real `parameters`
+array and left `398783` live in the request. Caught by reading the node back. Fix: replace the
+whole `parameters.queryParameters` object in one update. **Always read the node back after an
+array-element patch.**
+
+**Deliberately not done:** no `|| '317887'` fallback in the expression. A fallback is a second
+place the value can drift, which defeats the fix. Trade-off accepted: if the config row is
+missing or renamed, `Get Escalation Admin ID` returns 0 items and the admin comment is skipped.
+The error row is written to the error log *before* this node, so the failure is not silent —
+but it is a new (small) failure point inside the error path, gated by a DEPLOYMENT.md check
+rather than by code.
+
+**Re-test: DONE — PASS 2026-07-26, exec `127330`.** Fired `{status:"ADDED COMMENT TO TASK",
+taskID:4059}` at `failMode=acct` after the owner posted a fresh `Status was changed from Open to
+PO Create` comment on 4059 (required — the prior latest comment was A4's admin comment, which
+would have bounced the n08 gate). Result: `Err: Account Missing` → error-log row **23** with a
+message byte-identical to A4's row 18 → `Get Escalation Admin ID` returned `value="398783"` →
+`Get Admin User` resolved userID 398783 → `Post Admin Comment` posted **commentID 7140**. Fixture
+unmutated (4059 still statusID 8054, meta1 null). Workflow deactivated, `failMode` reset to `""`.

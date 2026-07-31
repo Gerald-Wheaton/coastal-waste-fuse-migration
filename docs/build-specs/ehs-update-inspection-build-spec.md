@@ -13,7 +13,7 @@ consistent with OQ-004). Custom functions used: `CoastalGetChildWONotes`,
 
 ## 1. Purpose
 
-When a Limble WO tagged `@EHSWO;` (carrying `meta1` = the source EHS inspection's `RowUID`,
+When a Limble WO tagged `@EHS;` (carrying `meta1` = the source EHS inspection's `RowUID`,
 written by "Create WO From EHS Inspection") is **completed**, write the WO's completion notes
 — plus the completion notes of any child WOs spawned from it — back into that EHS Insight
 inspection's `UDFLimbleWOCompletionNotes` field. This is the return leg of the EHS↔Limble loop:
@@ -30,7 +30,7 @@ Payload fields consumed: `status` (event name), `taskID`. Nothing else from the 
 is referenced.
 
 **Effective trigger semantics:** fires on any task event; proceeds only when the event is a
-**completion** (`status == "COMPLETE"`) of a task whose description contains `@EHSWO;` and
+**completion** (`status == "COMPLETE"`) of a task whose description contains `@EHS;` and
 which already carries `meta1`. A completion of any non-EHS or not-yet-tagged WO exits at the
 gate. Same two-gate shape as Step 3 (§3 of that spec) — completion check first, integration-tag
 check second, after the task detail fetch. Preserve exactly.
@@ -47,6 +47,8 @@ Linear chain, no branching, no error handling:
    `description`, `dateCompleted`, `completionNotes`. Connection 2106.
 5. `listInstructions` (68) — `taskID={{59.taskID}}`. **Filter "WO is an EHS WO":**
    `{{59.description}}` contains `"@EHSWO;"` AND `{{59.meta1}}` exists. Connection 2106.
+   **Built gate changed 2026-07-27 to `"@EHS;"`** (OQ-038 reversal) — the source literal above is
+   preserved for provenance; the live n8n node `n04` now tests `@EHS;`.
 6. Aggregator→Feeder→Aggregator (70/69/71), the latter gated by filter **"Grab Child WOs"**:
    `{{69.meta.associatedTask}} exists` — filters the instruction list down to instructions that
    carry a linked child-task reference (the "generate child WO" button instruction from the
@@ -132,7 +134,7 @@ patch). Direct port to a Code node; no external calls.
 [Webhook: POST hook-775]
   → [IF: status == "COMPLETE"]                                    (63's filter, moved; false → end)
   → [HTTP L: GET /v2/tasks/?tasks={taskID}&limit=1]               (59)
-  → [IF: description contains "@EHSWO;" AND meta1 exists]         (68 filter; false → end)
+  → [IF: description contains "@EHS;" AND meta1 exists]           (68 filter; false → end)
   → [HTTP L: GET /v2/tasks/{taskID}/instructions]                 (68)
   → [Filter: instruction.meta.associatedTask exists]              (70/69/71 collapsed, §7)
   → [Loop each matching instruction]
@@ -200,7 +202,7 @@ side of this integration (lines 87-94):
   = {{28.RowUID}}`, that spec §3 step 13). If EHS1's meta1 write changes, this workflow's
   inspection lookup breaks with it — keep in lockstep, same pattern as Step 2/Step 3's
   `meta1`/`meta2` coupling (Step 3 spec §6).
-- **Reads `@EHSWO;` tag** — written into the WO's `description` by EHS1's `createATask`
+- **Reads `@EHS;` tag** (changed from `@EHSWO;` 2026-07-27, OQ-038 reversal) — written into the WO's `description` by EHS1's `createATask`
   (verify the literal tag string against EHS1's `description` field at build; EHS1's spec §3
   step 13 shows the description template but doesn't show the `@EHSWO;` tag literal itself —
   cross-check both specs' descriptions against each other at build time, flag if they diverge).
@@ -219,7 +221,7 @@ side of this integration (lines 87-94):
 - **OQ-020** — this workflow is one of the 3 webhook re-registrations at cutover (hook 775).
 - **EHS API key rotation** — must happen before go-live (DEPLOYMENT §0); shares the credential
   entry with EHS1, not a separate one.
-- **`@EHSWO;` tag literal** — confirm exact string against EHS1's `description` template at
+- **`@EHS;` tag literal** (was `@EHSWO;` until the 2026-07-27 OQ-038 reversal) — confirm exact string against EHS1's `description` template at
   build (§9).
 - **Child-task fetch shape** — confirm `meta.associatedTask` resolves to a fetchable URL/ID and
   that the response shape matches `body[0].completionNotes` at build (§7).

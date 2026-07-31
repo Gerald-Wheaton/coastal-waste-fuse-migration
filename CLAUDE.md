@@ -201,7 +201,10 @@ and how far to trust each system's facts:
 - **Coupa / EHS Insight** — still reverse-engineered only, from the blueprint mappers (request
   shapes in each `http:ActionSendData` / `coupa:makeApiCall` module) and the two narrative docx
   review docs in `docs/`. Test-phase calls hit **mock rigs** whose response shapes are guessed
-  from the blueprints (OQ-028) — no live verification against either API yet.
+  from the blueprints — no live verification against either API yet, and none is coming before
+  cutover: OQ-039/OQ-028 (both resolved) settled that real shapes get examined at go-live under
+  the C4 first-shepherd watch (`docs/test-plan/test-sequence.md` Phase C), with Fuse
+  disabled-not-deleted as the rollback lever.
 
 ## Constraints for this work (from the project owner)
 
@@ -232,16 +235,34 @@ and how far to trust each system's facts:
   owner-approved sanctioned fixes get applied directly via the write tools. Standing limits:
   **never activate a workflow without asking the owner**; ~100 MCP calls/day quota; and the
   server is **multi-instance with a binding shared across parallel sessions** — run
-  `n8n_instances mode=list` and confirm the current instance is `FM360_Account` before any call,
-  and never switch instances without checking whether another session is mid-use.
+  `n8n_instances mode=list` before any call and confirm you are pointed at the right account,
+  then never switch instances without checking whether another session is mid-use.
+  **Match on the URL, not the name.** As of the **2026-07-30 owner ruling (OQ-048)** there are
+  TWO Coastal-relevant hosts, with different roles:
+  - **`https://fm360.n8n.fm360consulting.com`** — where all 7 workflows were built and tested
+    (Phase A). After the OQ-048 port it remains the build/test sandbox + mock rigs. Display
+    name unstable: has appeared as `FM360_Account` and `FM360` (renamed, new instance ID, by an
+    MCP reconnect 2026-07-27) — same host either way.
+  - **`https://coastal.n8n.fm360consulting.com`** (display name `Coastal-Waste`) — the **go-live
+    target**. All 7 workflows must be ported here before cutover; we create placeholder
+    credentials/data tables, the owner populates credential values. Port not yet executed —
+    see OQ-048 for the sub-decisions and the new-ID bookkeeping.
+
+  Other accounts are separate clients with their own names and URLs (e.g. `DrinkPak` →
+  `https://drinkpak.n8n.fm360consulting.com`), so a name check alone can pass while you are on
+  the wrong client, or fail on a rename that changed nothing. Verify the host.
 - Two **Limble MCP servers** are connected, both read-only: `limble-mcp-CLIENT` → Coastal prod,
   `limble-mcp-SANDBOX` → the FM 360 sandbox (test location 98472). Confirm which instance a
   server actually points at (`get_current_customer_info`) before trusting or recording recon
   facts. Known blind spot: the MCP `get_statuses` tool returns only a subset — verify statuses
   via direct API or the UI, never the MCP tool.
 - No Coupa or EHS Insight MCP server is connected — facts for those systems come from the
-  blueprint exports, `docs/functions.js`, the two docx review docs, and the mock-Coupa test rig
-  (OQ-028).
+  blueprint exports, `docs/functions.js`, the two docx review docs, and the mock Coupa/EHS test
+  rigs (Mock Coupa `F05TiUurpc2kqxe0`, Mock EHS `EBIzCJ0XJaJ5jUpp`, seeder `qyMChP0DKfI04r4a`).
+- **A config round-trip read is not execution proof.** Reading a node back after an MCP write
+  confirms what n8n stored, and an API-contract probe confirms what the vendor accepts — neither
+  proves the node runs. The OQ-018 pagination fix passed both checks and still threw on its
+  first execution (2026-07-26). Run the node once before calling any change verified.
 
 ## Open Questions
 

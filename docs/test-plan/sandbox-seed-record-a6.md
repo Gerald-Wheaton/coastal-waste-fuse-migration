@@ -8,6 +8,14 @@ teardown), except where marked.
 Companion staging (n8n side, tracked in DEPLOYMENT.md section 5, not here): 5 EHS node URLs →
 mock host, `templateID: "842"` → `"4189"` on `Create Deficiency Task` — both revert at cutover.
 
+> ⚠️ **Tag literals below are stale where they say `@EHSWO;` (OQ-038 reversed 2026-07-27).** The
+> EHS gate now matches **`@EHS;`**; `"@EHSWO;"` does not contain `"@EHS;"`, so any parent still
+> carrying the old literal drops at `WO is an EHS WO?`. Re-seeded since this ledger was written:
+> **4218** and **4202** → `@EHS;` (`customTags` `['@EHS']`). **NOT re-seeded: 4223**, the fixture
+> that actually produced the U4 pass — it still carries `@EHSWO;` and needs a PATCH before U4 is
+> re-fired. Treat the rows below as the historical seed record, not current fixture state; the
+> live state is in `test-sequence.md`'s A7 block.
+
 ## Created via API (this session)
 
 ### Regions — `DELETE /v2/regions/{id}`

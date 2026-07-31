@@ -16,8 +16,9 @@ Covers the two EHS-side workflows:
 Both were confirmed **built and inactive** by a read-only `n8n_get_workflow` on 2026-07-08 (the
 build-spec headers still say "empty shell" — stale; the OQ-007 table and this plan reflect Built).
 
-**Goal:** exercise every branch, both sanctioned fixes (OQ-034 region consolidation, OQ-036 dead-node
-drop), and the two open-question behaviors (OQ-035 last-question-only, OQ-037 dedupe typo) **without
+**Goal:** exercise every branch, the sanctioned fixes (OQ-034 region consolidation, OQ-036 dead-node
+drop, and **OQ-037's full dedupe fix — latest-submitted-wins plus draft exclusion, applied to `n07`
+2026-07-26**), and the by-design last-question-only rule (OQ-035, resolved as intended), **without
 touching real EHS Insight**. The EHS Insight API is replaced by a mock n8n workflow; the Limble side
 of "Create WO" runs against the Limble sandbox (a separate agent owns Limble seeding — this plan only
 **enumerates** the Limble inputs needed).
@@ -150,7 +151,8 @@ needed). The workflow then calls the mock for E1/E2, loops, and writes to the Li
 
 ### 3.2 One fixture set drives every branch
 
-The single `ehs-auditinspection-list.json` (9 inspections across 8 sites) + `ehs-inspection-fetch.json`
+The single `ehs-auditinspection-list.json` (**11 inspections across 9 sites** — the two OQ-037 draft
+rows I and J were added 2026-07-27; **row order matters: J sits immediately before E**, see section 3.3) + `ehs-inspection-fetch.json`
 + `ehs-hierarchy-fetch.json` + `ehs-attachment-fetch.json` cover the whole matrix in one run. Site →
 Limble location → region mapping is produced by `EHSLimbleLocationMapping` (site name) then the Limble
 sandbox (location's regionID → region name).
@@ -159,25 +161,30 @@ sandbox (location's regionID → region name).
 
 | Inspection(s) | EHS site Title → Limble location → Region | Branch(es) exercised | Expected result |
 | --- | --- | --- | --- |
-| **A1 + A2** (both `BE-10`) | `10 Fort Lauderdale` → `Coastal 10` → **Central Florida** (allow) | `CoastalEHSFormFilter` dedupe, **OQ-037** typo | Exactly **one** task for Coastal 10. Its name must contain **`FIC-1001`** (A1, first-seen), **not** `FIC-1002` (A2). A2 is discarded even though it has a newer `UpdatedDtm` + completed — proving the `UpdateDtm`/`UpdatedDtm` typo makes the replace branch never fire. `meta1 = EHS-INSP-A1`. No image → verbiage-only PATCH, image PUT not reached. |
-| **B** (`BE-12`) | `12 Naples` → `Coastal 12` → **Southwest Florida** (allow) | **OQ-035** last-question-only + **image** attachment path | One task. Instruction text = `Deficiencies from Inspection:  B-Q3: Exit sign not illuminated` (last question only; `B-Q1: Spill kit missing` must be **absent**). `EHS: Fetch Attachment` **called** for `ATT-B-1` (capture row via mock's `Att Capture`); `Attach Instruction Image` PUT fires — instruction's `instructionFiles[]` gains `<serverPrefix>-deficiency-photo.png` (upload response `{"filename": ...}`). |
+| **A1 + A2** (both `BE-10`) | `10 Fort Lauderdale` → `Coastal 10` → **Central Florida** (allow) | `CoastalEHSFormFilter` dedupe — **latest-wins, post-OQ-037 fix** | **EXPECTATION INVERTED 2026-07-26 (OQ-037 full fix applied to `n07`).** Exactly **one** task for Coastal 10, and its name must now contain **`FIC-1002`** (A2 — newer `UpdatedDtm` 15:00 vs A1's 09:00, and submitted), **not** `FIC-1001`. `meta1 = EHS-INSP-A2`. No image → verbiage-only PATCH, image PUT not reached. *Under the pre-fix code A1 won (first-seen); execution 126934 recorded exactly that, which is why that assertion is now invalid rather than a regression.* **CONFIRMED LIVE 2026-07-27 (exec 127388): task 4234 = `FIC-1002`, `meta1: EHS-INSP-A2` — the inverted expectation holds against the fixed node.** Both A1 and A2 carry a non-empty `RecurringTaskCompleteDtm`, so this case tests **only** latest-wins — the draft guard is covered by I and J below. |
+| **B** (`BE-12`) | `12 Naples` → `Coastal 12` → **Southwest Florida** (allow) summary-question-only rule (**OQ-035**, by design) + **image** attachment path | One task. Instruction text = `Deficiencies from Inspection:  B-Q3: Exit sign not illuminated` — sourced from the "Deficiency Summary and Work Order Creation" roll-up question. `B-Q1: Spill kit missing` must be **absent**: an earlier checklist item is an input to the inspector's summary, not an independent WO source (correct per the EHS review docx, not a tolerated quirk). `EHS: Fetch Attachment` **called** for `ATT-B-1` (capture row via mock's `Att Capture`); `Attach Instruction Image` PUT fires — instruction's `instructionFiles[]` gains `<serverPrefix>-deficiency-photo.png` (upload response `{"filename": ...}`). |
 | **C** (`BE-23`) | `23 East Miami Hauling` → `Coastal 23 - Miami Hauling East` → **South Florida** (allow) | `EHSLimbleLocationMapping` **Coastal 23 special case** + attachment-present-but-**not-image** | One task. `EHS: Fetch Attachment` **not** called (`.pdf` fails the `.jpeg/.png/.jpg/.gif` filter). Verbiage-only PATCH, no image PUT. Text `…C: Guardrail corroded`. |
 | **D** (`BE-24`) | `24 Lake Worth Facility` → `Coastal 24 - Lake Worth Hauling` → **Coastal Materials Management** (allow) | `EHSLimbleLocationMapping` **Coastal 24 special case** + no attachment | One task. Verbiage-only PATCH, no image PUT. Text `…D: Broken ladder rung`. |
 | **E** (`BE-30`) | `30 Savannah` → `Coastal 30` → **South Atlantic** (allow) | 5th allowlisted region | One task. Verbiage-only PATCH, no image PUT. Text `…E: Blocked emergency exit`. |
 | **F** (`BE-99`) | `Corporate Office` → `Corporate Office` → **Corporate Services** (NOT in allowlist) | `EHSLimbleLocationMapping` **no-digit passthrough** + **OQ-034** region-drop (negative) | **No task.** Passes the Answer gate (last Q deficient), resolves location + region, then **drops at `Region In Allowlist?`**. `List EHS Approver Teams` / `Create Deficiency Task` do **not** run. |
-| **G** (`BE-40`) | `40 Orlando` (hierarchy fetched; Limble never queried) | acceptable last answer (`Answer != "0"`) + OQ-035 reinforcement | **No task.** Drops at `Question Unacceptable?`. The earlier deficient question (`G-Q1`) is **ignored** (last-only). No Limble location lookup. |
+| **G** (`BE-40`) | `40 Orlando` (hierarchy fetched; Limble never queried) | acceptable summary answer (`Answer != "0"`) + OQ-035 reinforcement | **No task.** Drops at `Question Unacceptable?`. The earlier deficient question (`G-Q1`) is **correctly ignored** — the inspector marked the summary question acceptable, i.e. judged that no deficiency warranted a WO. No Limble location lookup. |
 | **H** (`BE-50`) | n/a | wrong `QuestionsSelector` + question-set Title filter | **Dropped** inside `Filter To Latest Completed` (`QuestionsSelector = QS-VEH-002 ≠ QS-FIC-001`). Never enters the per-form loop; hierarchy never fetched. |
+| **I** (`BE-60`, draft-only site) | `60 Fort Pierce` → `Coastal 60` — hierarchy never fetched, Limble never queried | **OQ-037 draft guard** (docx v1.3.2 line 69) — new case 2026-07-26 | **No task.** BE-60's only in-window inspection has an empty `RecurringTaskCompleteDtm`, so the pre-dedupe guard drops it **inside `Filter To Latest Completed`**. Primary assertion (unambiguous): `EHS-INSP-I` is **absent from that node's output items** — a drop anywhere downstream (missing location/team/region) would prove nothing about the guard. Secondary: no task named `…- FIC-6000` exists. Its last question is deliberately deficient (`Answer == "0"`), so a regressed guard would visibly attempt a WO. **Fixtures BUILT 2026-07-27** — `ehs-auditinspection-list.json` row (last, `BE-60`/`FIC-6000`) + `ehs-inspection-fetch.json` entry `EHS-INSP-I` (`UpdatedDtm: 2026-07-08T16:00:00Z`, `RecurringTaskCompleteDtm: ""`) + mock `Build` node `LIST`/`INSP` + a new `WH`/`SET` pair for `fetch/EHS-INSP-I` (curl-probed, HTTP 200, empty `RecurringTaskCompleteDtm` preserved on the wire). No hierarchy fixture and **no Limble sandbox seeding** — nothing downstream of `n07` runs for this site. |
+| **J** (`BE-30`, draft **newer** than a submitted inspection at the same site) | shares E's `30 Savannah` → `Coastal 30` → **South Atlantic** (allow) | **OQ-037: guard runs BEFORE the comparison** — new case 2026-07-26 | **No extra task; E's single task must be unchanged.** J is a draft (`RecurringTaskCompleteDtm: ""`) whose `UpdatedDtm` is **later** than E's, and it must be listed **before** E in the list fixture. Pre-fix, first-seen would have kept J and cut the WO from a draft; post-fix J is dropped before dedupe, so the survivor is E — instruction text stays `…E: Blocked emergency exit`, `meta1 = EHS-INSP-E`. Assert: `EHS-INSP-J` absent from `Filter To Latest Completed` output, and **no** task name contains `FIC-3001`. This is the sharpest single case for the fix — a "drop drafts *after* picking the max" implementation would fail it while passing I. **Fixtures BUILT 2026-07-27** — list row inserted **immediately before E** + fetch entry `EHS-INSP-J` (`BE-30`, `FIC-3001`, `QS-FIC-001`, `UpdatedDtm: 2026-07-08T18:00:00Z` vs E's `13:30:00Z`, `RecurringTaskCompleteDtm: ""`, deficient last question) + mock `Build` node `LIST`/`INSP` + a new `WH`/`SET` pair for `fetch/EHS-INSP-J` (curl-probed, HTTP 200). A dry-run of the deployed `n07` `jsCode` over the 11-row set confirms the case discriminates: correct guard → E survives (5 tasks); guard *after* dedupe → E lost (**4** tasks, no `FIC-3000`); no guard → J and I both survive. **Reuses E's existing Limble location/region/team — no new sandbox seeding.** |
 
-**Net:** exactly **5** tasks created (A1, B, C, D, E); F/G/H create nothing. Region allowlist coverage:
-all 5 names appear as *proceeding* cases (A1/B/C/D/E) + one *dropping* case (F) — full OQ-034 coverage.
+**Net:** exactly **5** tasks created (**A2**, B, C, D, E); F/G/H/I/J create nothing. (Pre-OQ-037-fix
+this read "A1, B, C, D, E" — the count is unchanged, the A-site winner is not.) Region allowlist
+coverage: all 5 names appear as *proceeding* cases (A2/B/C/D/E) + one *dropping* case (F) — full
+OQ-034 coverage.
 
 ### 3.4 Per-created-task assertions (Limble side, from the `Create Deficiency Task` node body)
 
-For each of A1/B/C/D/E, the outgoing `POST /v2/tasks` JSON body must have:
+For each of A2/B/C/D/E (A2, not A1, since the OQ-037 fix — section 3.3), the outgoing
+`POST /v2/tasks` JSON body must have:
 `name = "EHS Facility Inspection Checklist Deficiencies - {FormNumber}"`, `type: 2`, `priority: 2`,
 `metadata.meta1 = {inspection RowUID}`, `assignmentType: "team"`, `assignment = {teamID matched to the
 location}`, `locationID = {matched location}`, `templateID: "842"`,
-`description = "Deficiencies were found in the latest Facility Inspection Checklist for {site Title} @EHSWO;"` (**OQ-038:** tag corrected from source's `@EHS;` to `@EHSWO;` so the created WO matches "Update EHS Inspection"'s gate),
+`description = "Deficiencies were found in the latest Facility Inspection Checklist for {site Title} @EHS;"` (**OQ-038 REVERSED 2026-07-27, Ethan's call:** the tag stays at the source's `@EHS;` and *Update's gate* moved to `@EHS;` instead — 10 prod EHS WOs already carry `@EHS;` and 5 are still open, so gating on `@EHS;` adopts them at cutover rather than orphaning them. The 2026-07-20 `@EHSWO;` edit to `isLUx7cUjkmKggD2` n21 was reverted; do **not** re-apply it without changing both sides),
 `due = now+7d`. Then `Get Task Instructions` → `Deficiency Instruction` filter selects the instruction
 containing `Work that Needs to be Done (from the EHS Inspection)`, and one `updateAnInstruction` PATCH
 fires (image or no-image branch per the table). Note the **double space** in
@@ -211,9 +218,9 @@ Payloads for all three scenarios are in `update-inspection-webhook.json` (post t
 
 | Scenario | Payload | Exercises | Expected |
 | --- | --- | --- | --- |
-| **U1 — parent completed w/ 2 children** | `{status:"COMPLETE", taskID:9001}` | Main path: `@EHSWO;` gate passes, child WO collection, `CoastalGetChildWONotes` concat, `CoastalEHSInspectFormUpdate`, write-back | Capture-table row: `inspectionID = EHS-INSP-UPD-1`; `udfCompletionNotes` = parent notes **and** both child notes concatenated (per spec §7): see §4.3 for the exact expected string. |
+| **U1 — parent completed w/ 2 children** | `{status:"COMPLETE", taskID:9001}` | Main path: `@EHS;` gate passes, child WO collection, `CoastalGetChildWONotes` concat, `CoastalEHSInspectFormUpdate`, write-back | Capture-table row: `inspectionID = EHS-INSP-UPD-1`; `udfCompletionNotes` = parent notes **and** both child notes concatenated (per spec §7): see §4.3 for the exact expected string. |
 | **U2 — not a completion** | `{status:"ADDED COMMENT TO TASK", taskID:9001}` | `Is Completed?` gate | Drops immediately. No Limble/EHS calls, **no** capture row. |
-| **U3 — completed, not an EHS WO** | `{status:"COMPLETE", taskID:9002}` | `WO is an EHS WO?` gate (`@EHSWO;` + `meta1 exists`) | `Get Task` runs; gate fails (task 9002 has no `@EHSWO;` / no `meta1`); drops. **No** EHS fetch/update, no capture row. |
+| **U3 — completed, not an EHS WO** | `{status:"COMPLETE", taskID:9002}` | `WO is an EHS WO?` gate (`@EHS;` + `meta1 exists` — literal changed 2026-07-27, OQ-038 reversal) | `Get Task` runs; gate fails (task 9002 has no EHS tag / no `meta1`); drops. **No** EHS fetch/update, no capture row. |
 
 ### 4.3 U1 expected write-back string (exact)
 
@@ -263,7 +270,7 @@ read-only structure pull; re-confirm after any rebuild.)
   Limble parent fixture (§5) must keep child-link instructions within the returned page, or the test
   must confirm the full instruction list returns.
 - **`Aggregate Child Tasks` with 0 children.** The build assumes it still emits one item (empty array)
-  when no child WOs pass the filter. Add a fourth optional scenario **U4** (an `@EHSWO;` parent with
+  when no child WOs pass the filter. Add a fourth optional scenario **U4** (an `@EHS;` parent with
   **no** child-linked instructions) to confirm the write-back still runs with `childWOCompNotes = ""`;
   if Aggregate emits nothing, the workflow would silently stop before updating EHS — an important
   negative check. (Requires one more Limble parent fixture; listed optional in §5.)
@@ -286,7 +293,7 @@ match with trailing `%`):
 
 | Limble location name (starts-with) | regionID → region name (via `GET /v2/regions?regions={id}` → `regionName`) | Needed because |
 | --- | --- | --- |
-| `Coastal 10` | → **Central Florida** (allowlisted) | A1 proceeds |
+| `Coastal 10` | → **Central Florida** (allowlisted) | A2 proceeds (A1 loses the dedupe post-OQ-037 fix) |
 | `Coastal 12` | → **Southwest Florida** (allowlisted) | B proceeds |
 | `Coastal 23 - Miami Hauling East` | → **South Florida** (allowlisted) | C proceeds |
 | `Coastal 24 - Lake Worth Hauling` | → **Coastal Materials Management** (allowlisted) | D proceeds |
@@ -326,18 +333,26 @@ child fetches by the instructions' `meta.associatedTask` URL.
 
 | Fixture | Requirement |
 | --- | --- |
-| **Parent WO `9001`** | `description` contains `@EHSWO;`; `meta1 = "EHS-INSP-UPD-1"` (matches the mock's E3 key); `dateCompleted` set (epoch seconds — see §4.3 flag); `completionNotes = "Parent WO: replaced handrail bolts."`; status Complete. |
+| **Parent WO `9001`** | `description` contains `@EHS;` (**not** `@EHSWO;` — see the cross-check note below); `meta1 = "EHS-INSP-UPD-1"` (matches the mock's E3 key); `dateCompleted` set (epoch seconds — see §4.3 flag); `completionNotes = "Parent WO: replaced handrail bolts."`; status Complete. |
 | **Parent 9001 instructions** | At least two instructions carrying `meta.associatedTask` = a fetchable URL to a child task (e.g. `https://api.limblecmms.com/v2/tasks/9101` and `…/9102`), plus optionally a plain (no-`associatedTask`) label instruction. **Keep child-link instructions within the first returned page** given the no-`limit` page-size-2 risk (§4.5). |
 | **Child WO `9101`** | Completed, `completionNotes = "Child 1: guardrail welded."` |
 | **Child WO `9102`** | Completed, `completionNotes = "Child 2: lighting fixed."` |
-| **Non-EHS WO `9002`** | Completed but `description` without `@EHSWO;` and/or `meta1` empty — drives U3's gate drop. |
-| *(optional)* **Parent WO `9003`** | `@EHSWO;` + `meta1 = "EHS-INSP-UPD-1"` but **no** child-linked instructions — drives optional U4 (§4.5, zero-children Aggregate check). |
+| **Non-EHS WO `9002`** | Completed but `description` without any EHS tag and/or `meta1` empty — drives U3's gate drop. (The live negative fixture, sandbox 4201, reads `"ordinary WO, no EHS tag"` with `meta1: null`, so it drops under either literal.) |
+| *(optional)* **Parent WO `9003`** | `@EHS;` + `meta1 = "EHS-INSP-UPD-1"` but **no** child-linked instructions — drives optional U4 (§4.5, zero-children Aggregate check). |
 
-**Cross-check at seed time:** the `@EHSWO;` tag literal and `meta1` must match what "Create WO"
-writes. Per **OQ-038** both sides are now `@EHSWO;` (Create corrected from `@EHS;`, aligned to the
-docx + Update's gate). Confirm the queued live edit to `isLUx7cUjkmKggD2` has been applied before
-running a real Create→Update closed-loop test; until then the parent fixture supplies `@EHSWO;`
-directly.
+**Cross-check at seed time:** the EHS tag literal and `meta1` must match what "Create WO" writes.
+**The literal is `@EHS;` on both sides as of 2026-07-27 (OQ-038 REVERSED, Ethan's call).** The
+2026-07-08 resolution had gone the other way — correct Create to `@EHSWO;` — and that was applied
+live on 2026-07-20; it was reverted on 2026-07-27 and **EHS-Update's gate moved to `@EHS;`**
+instead, because Coastal's prod Limble holds 10 EHS WOs all tagged `@EHS;`, **5 of them still
+open**, which a `@EHSWO;` gate would orphan at cutover. Applied to both live nodes
+(`isLUx7cUjkmKggD2` n21 description, `8JvtesynrYtZbw7U` n04 gate `rightValue`); both workflows
+remain inactive.
+
+⚠️ **Seeding trap:** `"@EHSWO;"` does **not** contain `"@EHS;"` (after `@EHS` it continues `WO;`,
+not `;`), so any parent fixture still carrying the old literal now **drops at the gate**. Sandbox
+parents **4218** and **4202** were re-PATCHed to `@EHS;` on 2026-07-27; **4223** (the fixture that
+actually produced the U4 pass) was **not** — see the A7 block in `test-sequence.md`.
 
 ---
 
@@ -385,15 +400,42 @@ After the test window:
 - **OQ-009 (mock shapes are guesses)** — E1–E6 response shapes, the attachment `data` encoding, and
   especially the **child-task fetch shape** (§4.5) are reverse-engineered, not spec-confirmed. First
   live/sandbox run is the real confirmation.
-- **OQ-035 / OQ-037** — deliberately made observable (B/G for last-only; A1/A2 for the dedupe typo) so
-  the owner can see the shipped behavior in test before deciding whether to sanction a fix.
+- **OQ-035** — **resolved 2026-07-26 as intended behavior** (EHS review docx: the last question *is*
+  the "Deficiency Summary and Work Order Creation" roll-up). B/G remain as **regression** coverage
+  for the correct rule, not as a quirk under review. Residual accepted, not fixed: the port matches
+  the summary question **positionally**, so an EHS form reorder would silently select the wrong one.
+- **OQ-037** — **resolved 2026-07-26; full fix (option (c)) applied to `isLUx7cUjkmKggD2` node
+  `n07` "Filter To Latest Completed"** (workflow still inactive). The old circularity caveat here
+  is **moot**: live prod EHS settled the field name non-circularly — `UpdatedDtm` on 5
+  `AuditInspection/fetch` payloads **and** 86/86 `AuditInspection/list` records, `UpdateDtm` zero
+  occurrences — so our fixtures were accidentally right and **no fixture or mock regeneration is
+  needed**. The docx line 72 `UpdateDtm` spelling is doc drift. Two defects were fixed, neither of
+  which had ever worked in production: latest-wins dedupe (`NaN` compare → first-seen kept), and
+  the docx line 69 **draft exclusion** (`RecurringTaskCompleteDtm` existed only inside the dead
+  replace branch, with no completion gate anywhere else in the graph). **Consequences for this
+  plan:** A1/A2's expectation inverts (A2 wins — section 3.3) and two new cases, **I** and **J**,
+  cover the draft guard; **their fixture rows were built 2026-07-27** (repo fixtures + mock `Build`
+  node + two new mock webhook/SET pairs, all curl-probed) — see their section 3.3 entries.
+  **A6 must be re-run — nothing has been executed against the fixed node.** One fixture nuance to
+  watch, not a blocker: our fixtures spell `UpdatedDtm` values as ISO
+  (`2026-07-08T15:00:00Z`) while live EHS emits `YYYY-MM-DD HH:mm:ss`; both are fixed-width and
+  zero-padded, so the deployed **string** comparison orders either correctly, but a fixture set
+  must not mix the two formats in one run.
 - **`dateCompleted` epoch-vs-ISO** (§4.3) and **`Get Instructions` pagination** (§4.5) are build-note
   flags that testing can now settle.
 - **Create WO EHS credential placeholder** (§1.4) — a build gap independent of testing.
 - **Region names are Limble-side config**, not in the EHS mock — full OQ-034 allowlist coverage depends
   on the six sandbox locations resolving to the six intended region names (§5.1).
-- **`@EHSWO;` tag literal — RESOLVED (OQ-038, 2026-07-08):** owner sanctioned correcting "Create
-  WO" to stamp `@EHSWO;` (was `@EHS;`), matching the docx and "Update"'s gate. Design applied; the
-  live `isLUx7cUjkmKggD2` edit is queued for the write phase. Fixtures stamp `@EHSWO;` as the
-  *correct* Create output (no longer a workaround).
+- **EHS tag literal — RESOLVED, then REVERSED (OQ-038).** The 2026-07-08 resolution corrected
+  "Create WO" to stamp `@EHSWO;` (matching the docx and "Update"'s gate) and was applied live
+  2026-07-20. **On 2026-07-27 Ethan reversed the direction:** the created WO keeps the
+  source-faithful **`@EHS;`**, and **"Update"'s gate moved to `@EHS;`** instead. Rationale — prod
+  holds 10 EHS WOs all tagged `@EHS;` with **5 still open**; those five complete *after* cutover,
+  and a `@EHSWO;` gate would silently skip them with nobody hand-editing live WO descriptions.
+  No collision risk (Coupa uses `@CoupaWO;`; `@EHS;` and `@EHSWO;` are mutually exclusive as
+  substrings in both directions). Ethan is updating the review docx past v1.3.2 accordingly, so
+  the docx's two `@EHSWO;` references become `@EHS;` — **until that lands, the docx and this plan
+  disagree on this one literal, and this plan is correct.** Applied to both live nodes and read
+  back, but **not execution-verified for Create**: A6's description assertion still needs a run.
+  A7's U1 *was* re-run post-flip (exec 127376, gate matched `@EHS;`).
 ```

@@ -57,9 +57,12 @@ quote attached. That makes 4052 a ready-made **Step 2 input** if it is still in 
 other scenario tasks ended in their respective terminal states (error paths, supplier-miss, etc.).
 
 **Known baseline gaps (from OQ-028 residual surface R1/R2):**
-- Admin user **`317887`** (Brandon Ray Freckleton, the hardcoded error-escalation @-mention used
-  by Step 1 & Step 2) **does not exist in the sandbox** — "Get Admin User" returns 0 items and
+- Admin user **`317887`** (Brandon Ray Freckleton, the error-escalation @-mention used by
+  Step 1 & Step 2) **does not exist in the sandbox** — "Get Admin User" returns 0 items and
   admin error comments no-op in test (R2). Fine for prod (user exists there, OQ-019).
+  **Since 2026-07-26 the ID is no longer a node literal** — both workflows read it from row
+  `escalation_admin_user_id` in Data Table `Coastal - Integration Config` (`L0npQPPEXQI9JRzX`),
+  currently holding the sandbox stand-in `398783`. Change the stand-in there, not in the nodes.
 - No team, no EHS template, no EHS/CoupaWO-completed task states were ever seeded (Step-1 rig
   only).
 
@@ -81,8 +84,8 @@ listed to show what a passing run should produce.
 | 2 | Create Requisition (Step 1) | Webhook: new comment `status="ADDED COMMENT TO TASK"` | task (`meta1`,`statusID`,`description @CoupaWO;`,`locationID`,`teamID`/`userID`,`due`); instructions (17, load-bearing 6); users (scan for Site Manager); location (name→spelled); statuses `%PO Create%`/`%PO Requested%`; comments (latest-comment tiebreak); admin `317887` | `meta1`, status→PO Requested, comments | **Yes** (baseline covers it) |
 | 3 | Check For New PRs (Step 2) | Schedule (every 5 min) | statuses `%PO Requested%` → all tasks in it (`meta1`,`description @CoupaWO;`,`teamID`,`userID`,`taskID`); statuses `%PO Approved%`; team (`teamID`) / user (`userID`) for mention; admin `317887` (error path) | `meta2`, description append, status→**PO Approved**, comment @assignee | **Yes** (+ "PO Approved" status, assignments) |
 | 4 | WO Completed (Step 3) | Webhook: task completed `status="COMPLETE"` | task (`meta1`+`meta2`,`description @CoupaWO;`,`taskID`); instructions (find **"Upload Invoice Here"** → `response[0].link`) | — nothing (Coupa only) — | **Yes** (completed CoupaWO w/ meta1+meta2+invoice) |
-| 5 | Create WO From EHS Inspection | Schedule (daily) | `listLocations name="Coastal 99%"` → `locationID`,`regionID`; `GET /v2/regions?regions={regionID}` → `regionName` (must be in allowlist); `listTeams name="EHS Approver Assignee"` filtered by `locationID` → `teamID`; instructions on the created task (find "Work that Needs to be Done (from the EHS Inspection)") | **createATask** (template 842, `meta1`=EHS RowUID, `@EHSWO;` desc — OQ-038 fix), updateAnInstruction | **Yes** (region on location, team, EHS template) — EHS side mocked |
-| 6 | Update EHS Inspection From Limble WO | Webhook: task completed `status="COMPLETE"` | task (`meta1`=EHS RowUID, `description @EHSWO;`, `dateCompleted`, `completionNotes`); instructions (filter `meta.associatedTask` exists → child WOs); each child task (`completionNotes`) | — nothing (EHS only) — | **Yes** (completed @EHSWO; parent + optional child) — EHS side mocked |
+| 5 | Create WO From EHS Inspection | Schedule (daily) | `listLocations name="Coastal 99%"` → `locationID`,`regionID`; `GET /v2/regions?regions={regionID}` → `regionName` (must be in allowlist); `listTeams name="EHS Approver Assignee"` filtered by `locationID` → `teamID`; instructions on the created task (find "Work that Needs to be Done (from the EHS Inspection)") | **createATask** (template 842, `meta1`=EHS RowUID, `@EHS;` desc — OQ-038 fix REVERSED 2026-07-27, tag stays source-faithful), updateAnInstruction | **Yes** (region on location, team, EHS template) — EHS side mocked |
+| 6 | Update EHS Inspection From Limble WO | Webhook: task completed `status="COMPLETE"` | task (`meta1`=EHS RowUID, `description @EHS;` — gate literal changed 2026-07-27, `dateCompleted`, `completionNotes`); instructions (filter `meta.associatedTask` exists → child WOs); each child task (`completionNotes`) | — nothing (EHS only) — | **Yes** (completed @EHS; parent + optional child) — EHS side mocked |
 | 7 | Coupa Integration Error Log Export | Schedule (every 15 min) | — nothing — | — nothing — | **No** (Data Table + email only; R3 = insert a synthetic error row) |
 
 **Trigger note:** only **3** workflows are webhook-triggered (Step 1, Step 3, EHS-Update) and are
@@ -90,19 +93,30 @@ fired via the trigger helper (§7 deliverable, `docs/test-plan/seed/fire.sh`). S
 Token Regen and Error Log Export are **schedule-triggered** — they are exercised by executing /
 activating the workflow in n8n; they self-discover their work (no payload).
 
-### 2a. Tag mismatch — RESOLVED as OQ-038 (2026-07-08)
+### 2a. Tag mismatch — RESOLVED as OQ-038 (2026-07-08), then **REVERSED 2026-07-27**
+
+> ⚠️ **Read this first — the direction below is superseded.** On **2026-07-27 Ethan reversed
+> OQ-038**: the created WO keeps the source-faithful **`@EHS;`** and **EHS-Update's gate moved to
+> `@EHS;`** instead. Reason: Coastal's prod Limble holds 10 EHS WOs all tagged `@EHS;` with **5
+> still open**, which a `@EHSWO;` gate would orphan when they complete after cutover. Applied to
+> both live nodes (`isLUx7cUjkmKggD2` n21, `8JvtesynrYtZbw7U` n04).
+> **Fixture consequence, inverted:** EHS-Update parent fixtures must carry **`@EHS;`**, not
+> `@EHSWO;`. Sandbox parents **4218** and **4202** were re-PATCHed 2026-07-27; **4223** was not
+> (see the A7 block in `test-sequence.md`). `"@EHSWO;"` does not contain `"@EHS;"`, so a
+> stale-literal parent now drops at the gate.
 
 EHS-Create's `createATask` stamped the description with **`@EHS;`** (3 occurrences in
 `Coastal - Create WO From EHS Inspection (PROD).json`, one per region route) while EHS-Update
 **filters on `description contains "@EHSWO;"`** (1 occurrence in the Update blueprint). `"@EHS;"`
 is not a substring of `"@EHSWO;"`, so an EHS-Create WO could never satisfy EHS-Update's gate — a
 **pre-existing defect in the shipped Make blueprints** (faithfully ported into n8n), meaning the
-EHS closed loop has never worked in production. **Owner decision (OQ-038):** sanctioned fix —
+EHS closed loop has never worked in production. ~~**Owner decision (OQ-038):** sanctioned fix —
 EHS-Create is corrected to stamp **`@EHSWO;`**, matching the EHS review docx (which specifies
 `@EHSWO;` on both the created WO and the Update gate). Design is applied in the specs/plan; the
 one-line live edit to `isLUx7cUjkmKggD2` is **queued for the write phase** (n8n writes on hold).
 **Fixture consequence:** the EHS-Update parent-task fixture is stamped **`@EHSWO;`** — now the
-*correct* Create output, not a workaround.
+*correct* Create output, not a workaround.~~ **(Struck 2026-07-27 — reversed; see the block above.
+Both sides are `@EHS;`.)**
 
 ---
 
@@ -124,7 +138,7 @@ one-line live edit to `isLUx7cUjkmKggD2` is **queued for the write phase** (n8n 
 | | region on the create-target location | `regionName` ∈ allowlist (e.g. **"South Florida"**) | **NEW / verify** | UI (region admin) |
 | | team **"EHS Approver Assignee"** @ that location | `locationID`==that location | **NEW** | API attempt → UI fallback |
 | | EHS deficiency template (prod 842 analog) | has instruction "Work that Needs to be Done (from the EHS Inspection)" + a "generate child WO" button instruction | **NEW** | UI (no template API) |
-| **EHS-Update** | completed **`@EHSWO;`** parent task | `meta1`=**`EHS-INSP-UPD-1`** (matches the mock), `completionNotes` set, `dateCompleted` set; taskID wired into the mock's `update-inspection-webhook.json` | **NEW** | create + stamp meta1 + complete (API + UI) |
+| **EHS-Update** | completed **`@EHS;`** parent task (was `@EHSWO;` before the 2026-07-27 reversal) | `meta1`=**`EHS-INSP-UPD-1`** (matches the mock), `completionNotes` set, `dateCompleted` set; taskID wired into the mock's `update-inspection-webhook.json` | **NEW** | create + stamp meta1 (API) + complete (API, via `status` — see below) + **UI for `completionNotes`, which the API cannot set at all**. Contract proven 2026-07-27 on 4237: `PATCH /v2/tasks` **rejects built-in statuses on `statusID`** (`2` and `0` both 400 `` `statusID` contains an invalid value ``; custom statuses like 8054 are fine). Completion works via `{"status":1,"assignmentType":"team","assignment":<teamID>}`, which sets `statusID:2` + `dateCompleted` as side effects. `completionNotes` and `dateCompleted` are both `is not allowed` on PATCH, and a completed task cannot be PATCHed back to Open. |
 | | 2 completed child WOs (mock scenario U1) | linked from parent instructions' `meta.associatedTask`, each with `completionNotes` | **NEW** | UI (button-spawned links) |
 
 Allowlist region names (EHS-Create §4.2 / OQ-034): **Central Florida, Southwest Florida, Coastal
@@ -166,7 +180,7 @@ Limble at create time and recorded back into `tools/sandbox-seed/` on the real r
   branch — reuse any other 405x task, no new fixture.)
 - **C:** reuse **4054** — completed CoupaWO with `meta1`+`meta2` but **no** invoice file → covers
   Step 3's *no-invoice* branch.
-- **D:** **NEW** `TEST EHSUpdate parent` — completed task, `@EHSWO;` in description,
+- **D:** **NEW** `TEST EHSUpdate parent` — completed task, `@EHS;` in description (post-2026-07-27 reversal),
   `meta1`=**`EHS-INSP-UPD-1`** (the RowUID the concurrent EHS mock defines for the update path),
   `completionNotes` typed → EHS-Update core. This parent's Limble taskID must be written back into
   the mock's `update-inspection-webhook.json` (scenario U1) so `fire.sh` replays the right id.
@@ -263,7 +277,7 @@ base `seed.py`; the n8n seeder must replicate them, do not re-invent):
 | Quote file (s1) / invoice file (Step 3) | **UI only** | File uploads onto an instruction response are UI actions (base README already lists the quote upload as UI). |
 | Instruction responses (capex/contractor/amount/desc) | **UI** (API where exposed) | Base README scenario table; unchanged. |
 | Child-WO link (`meta.associatedTask`) | **UI only** | The link is created by clicking the template's "generate child WO" button in the Limble UI; no direct seeding API assumed. Optional fixture E. |
-| EHS-Update parent `@EHSWO;` task | **API** (create + stamp meta1 + complete) **+ UI** (completion notes if PATCH won't set them) | Description must contain `@EHSWO;` literally (§2a). `meta1` = a fixed RowUID string the EHS mock recognizes. |
+| EHS-Update parent `@EHS;` task | **API** (create + stamp meta1 + complete) **+ UI** (completion notes if PATCH won't set them) | Description must contain `@EHS;` literally — **not** `@EHSWO;`, which no longer matches the gate (§2a, reversed 2026-07-27). `meta1` = a fixed RowUID string the EHS mock recognizes. |
 
 ### seed.py extensions required to go beyond Step 1
 Designed in `docs/test-plan/seed/seed_ext.py` (imports and reuses the base seeder). New functions:
@@ -355,9 +369,10 @@ is no local credential (this session's case).
   falls back — confirm at seed time.
 
 **Open questions to raise with the owner:**
-- **RESOLVED — EHS tag mismatch (§2a → OQ-038):** owner sanctioned correcting EHS-Create to write
-  `@EHSWO;` (was `@EHS;`), so the loop closes. Design applied; the live edit is queued for the
-  write phase. The parent fixture's `@EHSWO;` is now the correct Create output.
+- **RESOLVED, then REVERSED — EHS tag mismatch (§2a → OQ-038):** the 2026-07-08 fix corrected
+  EHS-Create to write `@EHSWO;` (applied live 2026-07-20). **Ethan reversed it 2026-07-27** — the
+  WO keeps `@EHS;` and **EHS-Update's gate** moved to `@EHS;`, which also adopts the 5 prod EHS WOs
+  still open. Both live nodes changed. Parent fixtures must carry **`@EHS;`**.
 - **NEW — EHS-Create site→location mismatch (§4a):** the concurrent EHS mock maps its sites to
   Coastal 10/12/23/24/30/"Corporate Office", none matching the sandbox's Coastal 99 (98472). Pick
   Option A (retarget one mock inspection to Coastal 99 + drop the rest before `listLocations`) or

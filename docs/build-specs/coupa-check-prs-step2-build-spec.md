@@ -293,3 +293,31 @@ Node notes beyond §3/§4:
   verify Limble's default page size for `/v2/tasks/` and add a limit if the PO-Requested set
   could exceed it (low risk given tiny Coupa volume, but note it; cf. the instructions-endpoint
   default-2 surprise).
+
+## 9. OQ-019 sanctioned fix (2026-07-26) — APPLIED to n8n same day
+
+Escalation admin userID hoisted out of the workflow into a Data Table. Applied 2026-07-26 to
+`WYJyHdQGcdeD8wEr` (26 → **27 nodes**), in lockstep with Step 1 `WJSs6apAdVH5yKkq` — both read
+the same row, so the cutover edit happens once.
+
+**Change set (identical in shape to Step 1 §10, which holds the full rationale):**
+
+1. New Data Table **`Coastal - Integration Config`** (`L0npQPPEXQI9JRzX`) — `key`/`value`/`notes`.
+   Row `escalation_admin_user_id = 398783` (test) → `317887` at cutover.
+2. New node **`Get Escalation Admin ID`** (`n8n-nodes-base.dataTable` v1.1, operation `get`,
+   filter `key = escalation_admin_user_id`) inserted between `Insert Error Log Row` and
+   `Get Admin User`.
+3. **`Get Admin User`** query param `users`: literal `398783` → `={{ $json.value }}`; moved to
+   `[2384, 96]`. URL/`limit=1`/auth/headers unchanged.
+4. `Merge Error Context` (combine-by-position) and `Post Admin Comment` untouched. The second
+   error path — `Err: Setup Lookup Failed → Insert Setup Error Row` — posts no admin comment and
+   is unaffected.
+
+This supersedes §8's line "Admin escalation user `317887` … reused here for the §4.2 error
+comments": the identity is unchanged, but the workflow no longer names it.
+
+**Re-test: DONE — PASS 2026-07-26, exec `127334`.** Owner-clicked Execute at `failMode=getreq`;
+the poll picked up **4228** (the only WO in statusID 8055) → `Err: Requisition Fetch Failed` →
+error-log row **24** → `Get Escalation Admin ID` returned `value="398783"` → `Get Admin User`
+resolved userID 398783 → `Post Admin Comment` posted **commentID 7141** on 4228. Status not
+flipped (4228 still 8055), fixture reusable. `failMode` reset to `""`.

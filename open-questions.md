@@ -32,7 +32,7 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-016](#oq-016) | Step 1: auth inside Make connection 1766 (3 unauthenticated Coupa lookups) | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-017](#oq-017) | Step 1: "Add Quote" onerror logs wrong module's error — fix?              | PENDING DECISION | Resolved | 2026-07-02 |
 | [OQ-018](#oq-018) | Step 1: listUsers limit=500, no pagination — silent miss past 500 users    | OPEN QUESTION | Resolved | 2026-07-02 |
-| [OQ-019](#oq-019) | Hardcoded Limble admin user 317887 in all Step 1 error paths — who is it?  | OPEN QUESTION | Open | 2026-07-02 |
+| [OQ-019](#oq-019) | Hardcoded Limble admin user 317887 in all Step 1 error paths — who is it?  | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-020](#oq-020) | Limble webhook re-registration at cutover (hooks 775/776/777 → n8n URLs)   | OPEN QUESTION | Open | 2026-07-02 |
 | [OQ-021](#oq-021) | Step 1 spec: sign-off on proposed consolidations (§4)                      | PENDING DECISION | Resolved | 2026-07-02 |
 | [OQ-022](#oq-022) | Step 1 improvement candidates awaiting sanction (idempotency, retries, etc.) | PENDING DECISION | Resolved | 2026-07-02 |
@@ -41,17 +41,17 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-025](#oq-025) | "PO Requested"/"PO Approved"/"PO Create" status names — confirmed via direct API | OPEN QUESTION | Resolved | 2026-07-03 |
 | [OQ-026](#oq-026) | Step 2: blueprint never flips WO to "PO Approved" (docx says it should) — fix | PENDING DECISION | Resolved | 2026-07-03 |
 | [OQ-027](#oq-027) | Step 2: Coupa auth on 2 calls — resolved Bearer-for-all (matches OQ-016) | OPEN QUESTION | Resolved | 2026-07-03 |
-| [OQ-028](#oq-028) | Mock-Coupa test rig: guessed response shapes; cutover teardown checklist | OPEN QUESTION | Open | 2026-07-05 |
+| [OQ-028](#oq-028) | Mock-Coupa test rig: guessed response shapes; cutover teardown checklist | OPEN QUESTION | Resolved | 2026-07-05 |
 | [OQ-029](#oq-029) | Step 2 built (`WYJyHdQGcdeD8wEr`) missing OQ-008 error-log subgraph | OPEN QUESTION | Resolved | 2026-07-09 |
 | [OQ-030](#oq-030) | Step 3: PO lookup by po-number but meta2 holds PO id — fix to query by id | PENDING DECISION | Resolved | 2026-07-07 |
 | [OQ-031](#oq-031) | Step 3: Coupa auth on 3 calls — Bearer-for-all (matches OQ-016/027) | OPEN QUESTION | Resolved | 2026-07-07 |
 | [OQ-032](#oq-032) | Step 3: error handling — faithful log-only, no admin comment | PENDING DECISION | Resolved | 2026-07-07 |
 | [OQ-033](#oq-033) | Step 3: drop dead comment Feeder/Aggregator (8/9) — consolidation | PENDING DECISION | Resolved | 2026-07-07 |
 | [OQ-034](#oq-034) | EHS Create WO: consolidate 3 identical region routes → 1 + allowlist guard | PENDING DECISION | Resolved | 2026-07-08 |
-| [OQ-035](#oq-035) | EHS Create WO: `last(Questions)` only inspects last question — flag | OPEN QUESTION | Open | 2026-07-08 |
+| [OQ-035](#oq-035) | EHS Create WO: `last(Questions)` only inspects last question — flag | OPEN QUESTION | Resolved | 2026-07-26 |
 | [OQ-036](#oq-036) | EHS Update Inspection: drop dead comments-fetch (63) / lastComment (64) | PENDING DECISION | Resolved | 2026-07-08 |
-| [OQ-037](#oq-037) | `CoastalEHSFormFilter` dedupe never replaces (UpdateDtm/UpdatedDtm typo) — flag | OPEN QUESTION | Open | 2026-07-08 |
-| [OQ-038](#oq-038) | EHS tag mismatch: Create stamps `@EHS;`, Update filters `@EHSWO;` — sanctioned fix to `@EHSWO;` | PENDING DECISION | Resolved | 2026-07-08 |
+| [OQ-037](#oq-037) | [resolved] `CoastalEHSFormFilter` dedupe never replaced + drafts never excluded — full fix applied to `isLUx7cUjkmKggD2` | OPEN QUESTION | Resolved | 2026-07-08 |
+| [OQ-038](#oq-038) | EHS tag mismatch: Create stamps `@EHS;`, Update filters `@EHSWO;` — fix **REVERSED 2026-07-27**: both sides now `@EHS;` (Ethan), applied to both live workflows | PENDING DECISION | Resolved | 2026-07-27 |
 | [OQ-039](#oq-039) | Coupa TEST instance (`coastalwasteinc-test.coupahost.com`) exists w/ standing creds — authorize Phase-A live testing against it? | PENDING DECISION | Resolved | 2026-07-13 |
 | [OQ-040](#oq-040) | Step 2 team-comment path unprovable in sandbox — team 107065 is "View Only" role-team, not returned by `/v2/teams` | OPEN QUESTION | Resolved | 2026-07-13 |
 | [OQ-041](#oq-041) | Token Regen ↔ Fuse collision at cutover — same Coupa client creds; concurrent tokens or rotate-and-invalidate? | OPEN QUESTION | Resolved | 2026-07-13 |
@@ -59,6 +59,9 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-043](#oq-043) | EHS Create WO: filter-inside-loop batch-kill — `Team At Location`/`Deficiency Instruction` at 0 items never return to `Loop Each Form`, silently dropping the rest of the day's forms | PENDING DECISION | Resolved | 2026-07-25 |
 | [OQ-044](#oq-044) | Step 1: Coupa lookup returning bare `[]` skips the `Found?` IF **including its error branch** — no error row, no admin comment, silent stop (OQ-028-adjacent) | OPEN QUESTION | Resolved | 2026-07-25 |
 | [OQ-045](#oq-045) | Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes → silent stop where source continued (low reachability) — document or fix? | PENDING DECISION | Resolved | 2026-07-25 |
+| [OQ-046](#oq-046) | EHS Create WO: `listTeams limit=500` unpaginated — OQ-018's dangling follow-up; sweep in the paginate fix or leave faithful? | PENDING DECISION | Resolved | 2026-07-26 |
+| [OQ-047](#oq-047) | EHS Create WO: four docx-vs-blueprint drifts — team name, priority 2 vs 3, due +7d vs same-day **[all 3 closed 2026-07-26, no change]**; only `CreatedAfter` vs `DatePerformed` remains **[EHS-blocked, deferred to C4 cutover watch]** | OPEN QUESTION | Open (1 of 4) | 2026-07-26 |
+| [OQ-048](#oq-048) | Cutover target moved: port all 7 workflows fm360 → dedicated `coastal.n8n.fm360consulting.com` instance; we create placeholder credentials/data tables, owner populates values | ACTION ITEM | Open | 2026-07-30 |
 
 ---
 
@@ -84,7 +87,9 @@ OQ-006 for the first two sanctioned fixes agreed under this posture.
 race), OQ-016/027/031 (Bearer-for-all Coupa auth), OQ-026 (Step 2 flip to "PO Approved"),
 OQ-030 (Step 3 PO lookup by id), OQ-034 (EHS region-route consolidation), and
 **OQ-024 (2026-07-09): write top-level `metaN`, not `metadata.metaN` — the raw Limble API
-rejects the `metadata` object; applies to Step 1/2/3 workflows + build specs.**
+rejects the `metadata` object; applies to Step 1/2/3 workflows + build specs**, and
+**OQ-019 (2026-07-26): escalation admin userID hoisted out of Step 1/Step 2 into the
+`Coastal - Integration Config` Data Table (`L0npQPPEXQI9JRzX`) — one row, one edit at cutover.**
 
 ---
 
@@ -153,6 +158,54 @@ the real Limble sandbox, so execution cannot proceed without this. Rollback: on 
 the boundary reverts to read-only Limble + no writes, per the pre-go-live posture. Owner will
 click "Execute Workflow" in the n8n editor for schedule-triggered workflows (Token Regen,
 Step 2, Error Log Export, EHS Create) since those cannot be fired headless via MCP.
+
+**Addendum 3 (2026-07-26) — narrow, one-off live EHS Insight READ exception (exercised, now
+closed).** Owner authorized live read-only calls to EHS Insight to settle OQ-038, correcting a
+misstatement on my part: I had described the EHS check as impossible ("no EHS access"), when in
+fact the API key is in hand and the only barrier was this rule. Capability was never the issue;
+the constraint was.
+
+Scope as authorized and as actually used — **5 calls, no more**:
+- `GET https://coastalwasteinc.ehsinsight.com/api/v4/entity/AuditInspection/fetch/{RowUID}`
+  x5, for the RowUIDs held in `meta1` on the 5 completed prod EHS WOs.
+- **Reads only. Zero writes, zero state change.** All returned HTTP 200.
+- Ran under the **already-exposed** key (`apikey-160448cf-…`, the one pending rotation per
+  DEPLOYMENT section 0). The key was read programmatically out of the blueprint at call time and
+  never printed, echoed, or written to any file. Rotation requirement is unchanged.
+- Responses saved to the session scratchpad only, **not** committed to the repo (they contain
+  live client inspection data).
+
+What it bought, in one pass: **OQ-038 proven** (write-back never fired — see its Addendum 2),
+**OQ-037 unblocked** (EHS emits `UpdatedDtm`; no `UpdateDtm` field exists), **OQ-047 #2 advanced**
+(`DatePerformed` exists, and is date-only), and the **E3 response shape verified** (real top
+level is `{"ResultCode":"OK","Entity":{…}}`; our mock omits `ResultCode`, harmless since the
+built nodes read `$json.Entity`).
+
+**This exception is spent.** The standing rule is unchanged: no further live Coupa or EHS calls,
+no EHS writes, mock rigs only. A list-endpoint probe for OQ-047 #2 was deliberately **not** run
+under this grant — it fell outside it and needed its own authorization.
+
+**Second grant — 6th call, list endpoint, 2026-07-26 (separately authorized).** The owner
+authorized a further read-only exception in a concurrent session, to settle OQ-037's field name:
+- `GET https://coastalwasteinc.ehsinsight.com/api/v4/entity/AuditInspection/list?CreatedAfter=2026-07-24T01:32:10`
+  x1. HTTP 200, `"ResultCode":"OK"`, 33KB, **86 records**. Read-only, no writes, same
+  already-exposed key. Response saved to session scratchpad only (`scratchpad/ehs-list.json`) —
+  real Coastal inspection data, **not committed**.
+- **Bought:** `UpdatedDtm` x86 / `UpdateDtm` x0 on the list payload (corroborating the 5 fetch
+  payloads above — OQ-037 now settled on both endpoints); the **86-inspections-across-31-sites**
+  frequency figure that made OQ-037 worth fixing rather than porting; and a live instance of
+  OQ-047 #2 (a record with `DatePerformed 2026-07-22` but `CreatedDtm 2026-07-24` — a 2-day gap,
+  i.e. an inspection the `CreatedAfter` window mis-times relative to when it was performed).
+- **Also attempted and blocked** by the permission classifier, so still unrun:
+  `AuditInspection/fetch/{RowUID}` (3 attempts) and `AuditInspectionQuestions/list`. The latter
+  is what would let the 31-of-86 collision figure be narrowed to the
+  "Facility Inspection Checklist" selector in a real 24h window.
+- The exposed key is now **confirmed working against prod**, not merely suspected. Rotation
+  before go-live (DEPLOYMENT section 0) unchanged in requirement, no longer hypothetical.
+
+**Both grants are now spent.** Standing rule stands: no further live Coupa or EHS calls, no EHS
+writes, mock rigs only. Any additional probe (incl. the `AuditInspectionQuestions/list` call
+above) needs its own authorization.
 
 ---
 
@@ -333,6 +386,16 @@ Owner confirms whether such reference material exists elsewhere (even if mis-nam
 per CLAUDE.md's guidance on mis-labeled Swagger/Postman files) and provides a pointer,
 or confirms none exists and field-level facts must be reverse-engineered from the
 blueprint mappers and docx review docs alone.
+
+**2026-07-26 status check:** Limble side effectively moot — extensive live sandbox/prod
+recon since 2026-07-01 has confirmed real API contracts directly (see resolved OQ entries
+citing direct API probes), independent of whether a formal spec ever turns up. Coupa/EHS
+side remains genuinely open — those facts are still reverse-engineered from blueprint
+mappers + docx review docs only, and the mock-Coupa test rig's response shapes are guessed
+from those same blueprints (OQ-028), with zero live verification yet. **Decision: leave
+open, revisit before first live Coupa/EHS call** (cutover), rather than chasing the owner
+for reference docs now or closing as accepted risk — not a build blocker today, but a
+required check immediately pre-cutover given the account-segment mapping complexity.
 
 ---
 
@@ -661,11 +724,30 @@ already per-item; validation shows only the 5 pre-existing error-branch heuristi
 cleared same day:** raw-REST curl probe confirmed `cursor` (exclusive-after, ascending) on
 `api.limblecmms.com` directly — see spec section 9 for the probe transcript.
 EHS Create WO's `listTeams limit=500` is the same pattern — deliberately NOT covered here,
-needs its own OQ if the owner wants it swept in.
+needs its own OQ if the owner wants it swept in. **Filed and resolved as OQ-046 (2026-07-26):
+no change — name-filtered server-side, 45 of 500 today, growth tied to location count.**
+
+**ADDENDUM 2026-07-26 — the as-applied expression threw on its first live execution; fixed
+same day.** The fix above was signed off on two checks that both looked sufficient and neither
+of which executed the node: a config round-trip read (proves what n8n stored) and a raw-REST
+cursor probe (proves what Limble accepts). Its first real run — exec **127324**, fired during
+the OQ-028 R1-team test — failed with `NodeApiError: last can't be used on undefined value` at
+`Get Limble Users` (n10). Cause: n8n evaluates the pagination parameter expression on the
+**first** request too, when `$response` has no body yet, so `{{ $response.body.last().userID }}`
+throws before any HTTP call. Step 1 died at n10 on **every** run, ahead of all Coupa traffic —
+a cutover blocker that config verification could not have caught. Probes: `cursor=` (empty) →
+HTTP 400 `` `cursor` must be a number ``; `cursor=0` → 200 and identical to omitting the param,
+so `0` is a safe start sentinel. Corrected value applied 2026-07-26:
+`={{ $response?.body?.last()?.userID ?? 0 }}` (whole `parameters.options` object replaced —
+dot paths do not index array elements — node read back clean). Re-fired: exec **127325 PASS**,
+54 users returned in one page, run completed to the team-comment tail. `completeExpression`
+left unchanged. **Residual:** only the single-page path has run; the multi-page branch (>500
+users, cursor actually advancing) is still unproven at runtime — watch at go-live or force it
+with a low `limit` on a sandbox run. Detail in build-spec section 9.1.
 
 ---
 
-## OQ-019 — Hardcoded Limble admin user 317887 in all Step 1 error paths — who is it?
+## OQ-019 — [resolved] Hardcoded Limble admin user 317887 in all Step 1 error paths — who is it?
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-02
@@ -685,6 +767,62 @@ escalation contact for go-live.
 **Resolution criteria:**
 Owner confirms the identity and that the ID stays valid for go-live (or supplies a
 replacement). Note: Step 3 likely has the same pattern — check when its spec is written.
+(Checked when the Step 3 spec was written: Step 3 does **not** use the admin @-mention at all —
+its error comments go to Coupa. Only Step 1 and Step 2 are affected.)
+
+**Resolved:** 2026-07-26
+
+**Resolution — two parts.**
+
+**1. Identity: settled, verification deferred to the cutover checklist.** User `317887` =
+Brandon Ray Freckleton, active Super User (confirmed 2026-07-03 via Limble MCP recon). Owner's
+call: close this OQ now rather than hold it open pending a Coastal reply. Confirming he is
+still the right escalation contact at go-live is a **cutover-checklist line item**, not an open
+question — `DEPLOYMENT.md` section 3.
+
+**2. Mechanism: sanctioned fix — hoist the ID out of the workflows (applied 2026-07-26).**
+The Make source hardcodes `317887` **6 times** in Step 1. The n8n port had already collapsed
+that to **one literal per workflow** (all five `Err: *` Set nodes funnel into a single
+`Insert Error Log Row → Get Admin User → Merge → Post Admin Comment` chain), i.e. 2 literals
+across the build. That is still two places to edit when the escalation contact changes — and
+the contact *will* change if Freckleton leaves Coastal.
+
+New n8n Data Table **`Coastal - Integration Config`** (`L0npQPPEXQI9JRzX`), columns
+`key` / `value` / `notes`, is now the single source of truth. Seeded row:
+
+| key | value | notes |
+| --- | --- | --- |
+| `escalation_admin_user_id` | `398783` (test) → `317887` at cutover | Limble userID @-mentioned by the Step 1 + Step 2 error-path admin comment |
+
+Applied to both workflows the same day:
+
+- New node **`Get Escalation Admin ID`** (`n8n-nodes-base.dataTable`, operation `get`, filter
+  `key = escalation_admin_user_id`) inserted between `Insert Error Log Row` and
+  `Get Admin User`. Step 1 `WJSs6apAdVH5yKkq` → 50 nodes; Step 2 `WYJyHdQGcdeD8wEr` → 27 nodes.
+- `Get Admin User` query param `users` changed from the literal to `={{ $json.value }}`.
+  Verified by node read after the patch — no literal remains in either workflow.
+- Error-path topology otherwise unchanged; `Merge Error Context` still combines by position
+  (`Get Admin User` on input 0, the `Err: *` Set node on input 1), one item per side.
+
+**Deliberately not done:** no fallback literal in the expression. A fallback would silently
+reintroduce a second place the value can diverge, which is the exact thing this fix removes.
+The cost is that a missing/renamed config row means `Get Escalation Admin ID` returns 0 items
+and the admin comment is skipped — the error row is still written to the error-log table first,
+so nothing is lost silently, but it is a new (small) failure point inside the error path.
+Guarded by a DEPLOYMENT.md gate check rather than by code.
+
+**Re-test: DONE, both PASS (2026-07-26).** Targeted error-path re-runs against mock Coupa +
+Limble sandbox, after the node was inserted:
+
+| Workflow | Exec | Path | Error-log row | `Get Escalation Admin ID` | Admin comment |
+| --- | --- | --- | --- | --- | --- |
+| Step 1 `WJSs6apAdVH5yKkq` | **127330** | `failMode=acct` on task 4059 → `Err: Account Missing` | 23 (byte-identical to A4's row 18) | `value="398783"` | **7140** on 4059 |
+| Step 2 `WYJyHdQGcdeD8wEr` | **127334** | `failMode=getreq`, poll picked up 4228 → `Err: Requisition Fetch Failed` | 24 | `value="398783"` | **7141** on 4228 |
+
+In both, `Get Admin User` resolved `{{ $json.value }}` → userID 398783 (Site Manager Sandbox
+NinetyNine) and the comment posted. Error-path behavior otherwise unchanged from the pre-fix
+suites; neither fixture was mutated (4059 still 8054/meta1 null, 4228 still 8055). `failMode`
+reset to `""`; Step 1 deactivated again. Details in `docs/test-plan/test-sequence.md` A1/A4.
 
 ---
 
@@ -1178,7 +1316,7 @@ owner go-ahead (declined for now, 2026-07-06).
 
 ---
 
-## OQ-028 — Mock-Coupa test rig: response shapes are guessed; cutover teardown checklist
+## OQ-028 — [resolved] Mock-Coupa test rig: response shapes are guessed; cutover teardown checklist
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-05
@@ -1207,7 +1345,13 @@ Two things keep this OQ open:
    spec). The rig proves Step 1 handles *expected* Coupa responses, not that expectations match
    Coupa reality. Real Coupa create-req acceptance (auth, payload, account segments) remains
    untested until first live call — OQ-016/OQ-024 confirmation points unchanged.
-2. **Cutover teardown checklist — n8n side EXECUTED 2026-07-06** (owner: "reset n8n for
+2. **Cutover teardown checklist — STALE, DO NOT READ AS CURRENT STATE (see resolution).** The
+   2026-07-06 teardown below covered only the original July-5 rig, which was torn down and then
+   **re-staged larger** across 2026-07-09/13/20/21 (mock Coupa on Step 1/2/3 + Token Regen, mock
+   EHS on both EHS workflows, sandbox admin user, sandbox Limble credential, sandbox EHS
+   template). That staging is **still applied**. `DEPLOYMENT.md` sections 1-7 is the single
+   authoritative revert list; this entry no longer tracks teardown at all.
+   Historical record follows — n8n side EXECUTED 2026-07-06 (owner: "reset n8n for
    deployment"): Step 1 deactivated; all 6 Coupa base URLs restored to
    `coastalwasteinc.coupahost.com` (verified by node read); dummy token row deleted (only the
    `Coastal_Waste (TEST)` row remains); 7 test rows purged from the error-log table (now
@@ -1285,6 +1429,43 @@ That's also exactly the OQ-016 lookup-auth probe, so R1 doubles as a partial R4.
 Closes when the test phase ends and every teardown item is verified done at cutover. Item 1
 folds into the first-live-call confirmation (OQ-016) — or into a Coupa-TEST-instance run if
 the owner sanctions that.
+
+**Resolved:** 2026-07-26
+**Resolution:** Closed — nothing actionable is left in this entry. Owner decision after review;
+each half of it now lives somewhere better:
+
+- **Item 1 (guessed mock shapes) — decided, not open.** OQ-039 (resolved 2026-07-25) settled it:
+  no Coupa test-instance pass, examine real Coupa/EHS shapes at go-live under the C4
+  first-shepherd watch, with Fuse disabled-not-deleted as the rollback lever. The watch itself is
+  itemized in `docs/test-plan/test-sequence.md` Phase C (C1/C2/C4/C6/C7 WATCH lines — C2 is
+  flagged the top cutover risk). Keeping a duplicate tracker here added nothing.
+- **Item 2 (teardown) — superseded.** `DEPLOYMENT.md` sections 1-7 owns the per-workflow revert
+  list and is current through 2026-07-21; `test-sequence.md` Phase B is the test-side summary.
+  The 2026-07-06 "EXECUTED" block above described a rig that no longer exists and read as
+  "teardown done" while newer staging sat live — an active trap, now marked stale in place.
+- **Residual table R1-R4 — 4 of 4 closed.** R1 user variant PASS 2026-07-14 (exec 126714);
+  **R1 team variant PASS 2026-07-26 (exec 127325)** — fixture 4056 reassigned to real sandbox
+  team **605550** (`assignmentType:team`, userID → 0), fresh trigger comment 7137 posted to win
+  the `LimbleGrabLatestTaskComment` strict-`>` tiebreak, s5 re-fired: `Supplier Found?` false →
+  `User Assigned?` false → `Team Assigned?` true → `Get Assigned Team` (605550,
+  `automaticallyCreated:0`) → `Post Contractor Comment (Team)` **commentID 7138** with the
+  mention rendered as `<font color = '#4684d0'>@Coastal TEST Maint Team (S2-2 DELETE)</font>`.
+  Asymmetry preserved: 29 nodes ran, no `Insert Error Log Row`, no status flip (4056 still 8054),
+  `meta1` still null. R2 covered by s6a/b/c (2026-07-13/14). R3 passed as A3 E1/E2 (2026-07-13).
+  R4 folded into C4 by OQ-039.
+
+**Found while closing this out (2026-07-26):** the R1-team fire exposed a **cutover-blocking
+regression in the OQ-018 pagination fix** — `Get Limble Users` threw
+`last can't be used on undefined value` on every Step 1 run (exec 127324). Fixed same day and
+re-proven by exec 127325; full write-up in OQ-018's addendum and build-spec section 9.1. The
+transferable lesson: OQ-018 had been signed off on a config round-trip read plus a raw-REST
+contract probe, and **neither is execution proof** — a node change is unverified until the node
+has run once. Worth applying to every "applied to n8n, round-trip verified" claim in this repo.
+
+**Still owed, tracked elsewhere (not reopening this entry):** the OQ-019 escalation-admin
+config-table read has not been exercised end to end — s5 takes the supplier-miss path, which
+writes no error row, so exec 127325 did not touch it. One targeted error-path re-run is owed
+(build-spec section 10 "Re-test owed").
 
 ---
 
@@ -1462,7 +1643,7 @@ spec §4.2/§6.
 
 ---
 
-## OQ-035 — [open] EHS Create WO: `last(Questions)` only inspects last question — flag
+## OQ-035 — [resolved] EHS Create WO: `last(Questions)` only inspects last question — flag
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-08
@@ -1479,8 +1660,41 @@ Owner decides whether iterating all unacceptable questions (and attaching all th
 wanted fix, or whether "last question only" is intended behavior. Ported faithfully (last-only)
 for now under the 1:1 posture.
 
-**Status:** Open — faithful port ships last-only; flagged for owner decision. Detail: EHS Create
-WO build spec §4.4.
+**Resolved:** 2026-07-26
+**Resolution:** **Intended behavior — not a bug. No change.** Answered from the engagement's own
+source document rather than needing owner/Coastal intent: `Coastal - Limble Integration Review -
+EHS Integration (v1.3.2).docx` describes last-question-only as the *design*, in the
+signed-proposal expectations and again in the final-integration spec:
+
+- "**The last question in this SOP** asks if any of the deficiencies from the other items in the
+  SOP require a WO to be created." (Expectations)
+- "capture **the last question** of the 'Facility Inspection Checklist' SOP and create a Limble WO
+  if that last item is selected as 'Not Acceptable'"
+- "evaluate **the last question item** (the section called '**Deficiency Summary and Work Order
+  Creation**')" … "grab the list of deficiencies **typed in the question's text box**"
+
+The last question is a **roll-up summary question**: the inspector types every deficiency needing
+a WO into its free-text box (the `Verification` field the port reads) and attaches the photo
+there. Earlier checklist items are inputs to that judgment, not independent WO sources. The
+fixtures confirm the shape — `Questions[].QuestionText` on the final element is literally
+`"Deficiency Summary and Work Order Creation"`.
+
+The once-proposed alternative (iterate all unacceptable questions) would be **wrong**: it would
+spawn WOs for items the inspector deliberately left out of the summary, duplicate deficiencies
+already listed in the summary text, and break the documented parent/child WO model (one parent
+WO per inspection, child WOs spawned per deficiency via the template's button instruction).
+
+**Residual, tracked not fixed:** the port takes the **positional** last element, while the docx
+identifies the question **by name**. If EHS ever appends a question after the Deficiency Summary
+section or reorders the form, positional-last silently reads the wrong question — wrong
+deficiency text on the WO, or a silent no-op. Make shipped it positional; keeping it positional
+is the faithful port. Title-match hardening (match `QuestionText ==
+"Deficiency Summary and Work Order Creation"`, fall back to positional) was offered and
+**declined** — owner's call, EHS form is stable. Revisit only if Coastal changes the SOP.
+
+No code change; nothing to retest. A7 cases B and G already assert this behavior and pass — their
+wording was corrected 2026-07-26 to describe it as correct-by-design rather than a tolerated
+quirk. Detail: EHS Create WO build spec section 4.4.
 
 ---
 
@@ -1512,7 +1726,7 @@ build spec §4.1/§8.
 
 ---
 
-## OQ-037 — `CoastalEHSFormFilter` dedupe never replaces (UpdateDtm/UpdatedDtm typo) — flag
+## OQ-037 — [resolved] `CoastalEHSFormFilter` dedupe never replaces (UpdateDtm/UpdatedDtm typo) + drafts never excluded
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-08 (found while building `docs/build-specs/ehs-create-wo.n8n.json`)
@@ -1527,22 +1741,133 @@ if (form.UpdatedDtm > filteredForms[j].UpdateDtm && form.RecurringTaskCompleteDt
 }
 ```
 
-`filteredForms[j].UpdateDtm` is a typo — the field on these objects is `UpdatedDtm`. So
-`filteredForms[j].UpdateDtm` is always `undefined`, and `anything > undefined` is always
-`false` in JS. The replace branch can never fire. Net effect: for any site with more than one
-matching inspection in the 24h window, the function keeps whichever inspection it happened to
-see **first**, not the latest-completed one the comment/design intends. This has shipped in
-production Make since before this migration — not something introduced by the port.
+The two sides of the `>` are spelled differently (`UpdatedDtm` vs `UpdateDtm`) but reference the
+**same object shape**, so one of them is necessarily wrong. Proof that they're the same shape,
+from `docs/functions.js` alone: `filteredForms` is initialized `[]` (`:66`) and has exactly two
+writes — `filteredForms.push(form)` (`:95`) and `filteredForms[j] = form` (`:87`) — both
+assigning `form`, which is only ever `formList[i].data.Entity` (`:71`). No other mutation, no
+other source.
+
+**Established (airtight, no external schema needed):** the replace branch is **dead code**. The
+misspelled side resolves to `undefined`; JS relational compare coerces `undefined` to `NaN`, so
+*both* `x > undefined` and `undefined > x` are `false`. Net effect: for any site with more than
+one matching inspection in the 24h window, the function keeps whichever inspection it happened
+to see **first** (i.e. EHS response order — arbitrary), not the latest-completed one the
+comment/design intends. Runtime-confirmed at A6: test A1 (`FIC-1001`) won over the newer +
+completed A2, task 4192 (`docs/test-plan/test-sequence.md` line 152). Shipped in production Make
+since before this migration — not introduced by the port.
+
+**NOT established — which side is the typo.** Corrected 2026-07-26; the original wording of this
+entry asserted `filteredForms[j].UpdateDtm` was the error, which the evidence does not support:
+
+| Source | Spelling | Weight |
+| --- | --- | --- |
+| `functions.js:80` left side; `:78`/`:84`/`:93` comments | `UpdatedDtm` (x4) | author's own usage, but internally inconsistent — that *is* the bug |
+| `functions.js:80` right side | `UpdateDtm` (x1) | same |
+| Both EHS blueprint exports | **zero occurrences of either** | field is only touched inside the JS function; no mapper evidence exists |
+| EHS review docx (v1.3.2) line 72 | `UpdateDtm` (x1) | only **non-circular** external hint — and it points *against* the original call. Prose, not schema, and the docx has known drift (OQ-047 caught four) |
+| `docs/test-plan/fixtures/ehs/ehs-inspection-fetch.json`, `generated/mock-ehs.workflow.json` | `UpdatedDtm` | **circular** — we authored these to match `:80`'s left side, so A6 cannot corroborate the real field name |
+
+Naming convention is no tiebreak: the sibling field is `RecurringTaskCompleteDtm`, not
+`Completed`, so EHS mixes participle forms. Likely origin of the mismatch: `:65` shows
+`filteredForms` was originally a flat projection (`rowUID`/`updateDate`/`formNumber`/
+`businessEntity`); the refactor to storing whole `form` objects didn't carry both sides of the
+compare over cleanly. Neither spelling is a leftover from that old shape — it used `updateDate`.
+
+**Prerequisite before any fix is chosen (added 2026-07-26):** obtain one **real** EHS
+`AuditInspection/fetch` payload and read the actual field name. This gates the fix *direction* —
+if EHS really emits `UpdateDtm`, the correction belongs on the **left** side, **and** the mock
+fixtures above are wrong, **and** A6's EHS fixture data needs regenerating. Blast radius is
+contained: nothing else in the built workflow reads this field. Three ways to settle it:
+1. One read-only live `GET` against EHS with the current key — decisive, but OQ-003 bars live
+   EHS calls (mock rigs only), so it needs owner sanction.
+2. Ask Coastal / EHS Insight for a sample payload or schema — folds into OQ-009 and the OQ-047
+   batch already queued for them.
+3. Pull a real payload from Make's execution history on the still-running PROD scenario —
+   zero-risk and immediate if console access is available.
 
 **Resolution criteria:**
-Owner decides: (a) port bit-for-bit including the bug (current default under the 1:1 posture,
-OQ-001) — same site could get judged on a stale inspection if it has multiple runs in the
-window; or (b) sanction a fix (correct field name) as a new addition to the sanctioned-fix
-list, changing behavior from what's shipped today.
+Two decisions, in order. **First**, settle the prerequisite above (which spelling is real).
+**Then** owner decides: (a) port bit-for-bit including the bug (current default under the 1:1
+posture, OQ-001) — same site could get judged on a stale inspection if it has multiple runs in
+the window; or (b) sanction a one-character fix (correct the wrong side) as a new addition to
+the sanctioned-fix list, changing behavior from what's shipped today; or (c) a fuller fix —
+drop non-completed forms *before* dedupe, then keep max `UpdatedDtm` per site. Note (b) does not
+fully close the hole: the first `push` (`:95`) has **no** completed-check, so an in-progress
+inspection can still win over a completed one whose `UpdatedDtm` is older. Only (c) closes that,
+at the cost of a larger behavior change (a site whose only in-window inspection is incomplete
+would produce zero WOs instead of one) needing its own test case beyond A1/A2.
 
-**Status:** Open. `docs/build-specs/ehs-create-wo.n8n.json` ports the function bit-for-bit
-including the typo (per OQ-001's default), with the bug called out in the node's notes/comment.
-Not fixed pending owner decision.
+**Downstream consequence worth weighing in the decision:** the surviving inspection's `RowUID`
+is written to the created task's `meta1`, and "Update EHS Inspection From Limble WO" reads
+`meta1` to route completion notes back (EHS Update build spec lines 165-167, 199-202). A wrong
+pick therefore writes closure notes onto the **wrong EHS inspection record**, not just stale
+deficiency text/image on the WO. Downstream also has no completion gate of its own — the only
+check is `questionList.Answer == "0"`.
+
+**PREREQUISITE MET 2026-07-26 — field name confirmed from live EHS.** Owner authorized a
+read-only exception to OQ-003; 5 live `GET /api/v4/entity/AuditInspection/fetch/{RowUID}` calls
+against `coastalwasteinc.ehsinsight.com` returned HTTP 200 with real inspection Entities (run
+for OQ-038, see that entry's Addendum 2). **EHS emits `UpdatedDtm`** — present on all 5
+payloads, alongside `CreatedDtm`, `RecurringTaskCompleteDtm`, `DueDate`, `EscalationDate`,
+`DatePerformed`, `TimePerformed`. **There is no `UpdateDtm` field.** This resolves the table
+above decisively and non-circularly:
+
+- **The typo is the right-hand side**, `filteredForms[j].UpdateDtm` (`functions.js:80`) — the
+  original call in this entry was correct after all, and the docx line 72 `UpdateDtm` is simply
+  another docx drift (a fifth, joining OQ-047's four). The author's 4x `UpdatedDtm` usage
+  matches reality.
+- **Our fixtures were accidentally right.** `ehs-inspection-fetch.json` and
+  `generated/mock-ehs.workflow.json` already use `UpdatedDtm`, which matches live EHS — so the
+  circularity worry is moot and **no fixture or mock regeneration is needed** whichever fix
+  option is chosen. That removes the cost the resolution plan had attached to this item.
+- **Fix is a 1-char edit** on the `filteredForms[j].UpdateDtm` side of the comparison, in the
+  ported Code node in `isLUx7cUjkmKggD2`.
+
+**New finding 2026-07-26 — the draft exclusion has never run either.** Grepped for
+`RecurringTaskCompleteDtm` across the whole source: it appears in exactly **two** places,
+`functions.js:81` and `:82` — **both inside the dead replace branch**. Zero occurrences in
+either EHS blueprint export; no completion gate anywhere else in the graph (the only downstream
+check is `questionList.Answer == "0"`). But the EHS review docx (v1.3.2) line 69 documents the
+requirement plainly: *"check a record's 'RecurringTaskCompleteDtm' field to ensure that only
+those SOPs that have been submitted are grabbed (i.e. no drafts of an SOP)."* Because the sole
+implementation of that check sits in unreachable code, **drafts have never been excluded in
+production.** This reframes option (c) from scope creep into restoring a documented requirement,
+and it is why (c) was chosen over the 1-char (b).
+
+**Frequency — this is not a rare edge case.** The live `AuditInspection/list` probe (see the
+OQ-003 addendum, 6th call) returned **86 inspections across only 31 distinct `BusinessEntity`
+values** in a 72h window. Same-site duplicates are routine, so docx line 70's stated premise
+(*"it is assumed that this SOP will not be conducted more than once a day (per location)"*) is
+false in prod. Caveat: that count spans all 21 question sets over 72h, not the
+"Facility Inspection Checklist" selector in a 24h window, so collisions on the real code path are
+**likely but unquantified** — narrowing it needs one more list call, deliberately not run.
+
+**Resolved:** 2026-07-26
+**Resolution: option (c), the full fix — sanctioned.** Both requirements the docx documents are
+restored in the ported Code node, and neither was working before:
+1. **docx line 69** — drop un-submitted drafts *before* dedupe (moved out of the dead branch to a
+   pre-dedupe `continue` guard).
+2. **docx line 72** — `filteredForms[j].UpdateDtm` → `UpdatedDtm`, so latest-wins actually fires.
+
+String comparison on `UpdatedDtm` is kept as-is rather than Date-parsed: live payloads are
+`YYYY-MM-DD HH:mm:ss`, fixed-width and zero-padded, so lexicographic order is chronological.
+Joins the sanctioned-fix list (OQ-005/006/008/012/017/021/022/026/030/034/036/038).
+
+**Applied to the live workflow** `isLUx7cUjkmKggD2`, node `n07` "Filter To Latest Completed"
+(`jsCode` + `notes` both rewritten; read back and verified; workflow **still inactive**).
+No edit to `docs/functions.js` — that file is the record of what the Make source actually
+shipped, not a live artifact. No fixture or mock regeneration needed (fixtures already use
+`UpdatedDtm`).
+
+**Behavior delta to expect on re-test:** a site whose only in-window SOP is a draft now yields
+**zero** WOs where it previously yielded one cut from a draft; and for a site with several
+submitted SOPs, the **latest** now wins instead of the first-seen.
+
+**Status:** Resolved — fix applied. **Test debt, not closed by this entry:** A6's A1/A2 case
+expectation **inverts** (A2/`FIC-1002` should now win, not A1/`FIC-1001`), and option (c) needs a
+new draft-exclusion case that A1/A2 does not cover. A6 must be re-run; see
+`docs/test-plan/ehs-test-plan.md` and `docs/test-plan/test-sequence.md`.
 
 ---
 
@@ -1576,13 +1901,116 @@ intended tag is `@EHSWO;` on both sides, and EHS-Create's `@EHS;` is the drifted
 **correct EHS-Create to stamp `@EHSWO;`** (leave EHS-Update's gate unchanged). Joins the
 sanctioned-fix list (OQ-005/006/008/012/017/021/022/026/030/034/036).
 
-Applied at the **design** level now, per the owner's concurrent "design-only, hold n8n writes"
+**Addendum 2026-07-26 — live prod confirmation, with impact quantified.** The "has never worked
+in production" claim above was inference from the blueprints; it is now **verified against
+Coastal prod Limble** (read-only, `limble-mcp-CLIENT`, `get_tasks
+name="EHS Facility Inspection Checklist Deficiencies%"` — complete set, 10 results under a 25
+limit). Every one of the **10 EHS WOs created between 2025-10-30 and 2026-07-13** carries
+`@EHS;` in `description` and `customTags: ["@EHS"]`. **Zero carry `@EHSWO;`.** Five are
+completed (`dateCompleted` set, several with real `completionNotes`, e.g. task 2202 "Door has
+been replaced and is functional once more"). So EHS-Update's gate has matched nothing for
+~10 months: **five completed remediations never posted their notes back to the EHS inspection
+record**, and the "Limble WO Completion Notes" custom field the docx describes has stayed empty
+for all of them. The fix is already applied to the n8n port (2026-07-20, EHS Create WO build
+spec section 12), so cutover closes the loop going forward. **Two follow-ups this raises, both
+owner calls, tracked in `oq-resolution-plan.md` item 7c:** (a) whether Coastal should be told
+the write-back has been silently dead since go-live, and (b) whether the ~5 already-completed
+inspections warrant a manual backfill. Neither blocks cutover. Found while resolving OQ-047.
+
+**REVERSED 2026-07-27 — fix direction flipped to `@EHS;` on both sides (Ethan's call, applied).**
+The 2026-07-08 resolution above (correct EHS-Create to stamp `@EHSWO;`) is **superseded**. After
+being shown Addendum 2's proof, Ethan directed the opposite fix: leave the WO tag as `@EHS;` and
+change **EHS-Update's gate** to match. His stated reasons: the client appears to have deviated
+from the documented plan, he no longer has user access to Coastal's Limble, and he is updating
+the review docx accordingly (expect a version past v1.3.2 — the docx's two `@EHSWO;` references
+become `@EHS;`).
+
+**Supporting evidence that makes this the better direction** (found while confirming, beyond
+what Ethan cited): prod holds **5 EHS WOs that are still OPEN** — 2787, 2877, 3097, 3163, 3237,
+all `dateCompleted: 0`, all tagged `@EHS;`. Under the original `@EHSWO;` fix those five would
+stay permanently orphaned: they get completed *after* cutover, the gate wouldn't match, and
+nobody is going to hand-edit five live WO descriptions. Gating on `@EHS;` picks them up
+automatically. No collision risk either — the Coupa side uses `@CoupaWO;`, `@EHS;` and
+`@EHSWO;` are mutually exclusive as substrings in both directions, and Limble already has
+`@EHS` registered in `customTags`.
+
+**Applied 2026-07-27** (instance `FM360_Account` confirmed first; both workflows remain
+**inactive**):
+1. `isLUx7cUjkmKggD2` node **n21** `Create Deficiency Task` — `jsonBody` description tag
+   `@EHSWO;` → **`@EHS;`** (reverting the 2026-07-20 change). Node notes updated with a
+   do-not-re-apply warning.
+2. `8JvtesynrYtZbw7U` node **n04** `WO is an EHS WO?` — gate `rightValue` `@EHSWO;` →
+   **`@EHS;`**. Replaced the whole `parameters.conditions` object rather than dot-indexing into
+   `conditions[0]` (per the n8n-MCP array-path trap). The update call **timed out**; a read-back
+   showed it had in fact applied, so no retry was issued — timeout is not a failure signal.
+
+Both nodes read back and verified post-change. **Still to do — updated 2026-07-27 (later the same
+day):** the A6 and A7 assertions that named `@EHSWO;` have since been re-pointed at `@EHS;`, and
+the **Update side is now execution-verified** — A7 **U1 re-ran as exec 127376** with the gate
+matching `@EHS;` (1 item, true branch) through to a successful mock EHS write. Sandbox parents
+**4218** and **4202** were re-PATCHed to `@EHS;` first. Independently re-confirmed 2026-07-27 by a
+later session: live n21 reads `… @EHS;` and carries a do-not-re-apply note.
+
+**FULLY EXECUTION-VERIFIED END-TO-END — 2026-07-27, later the same day.** The two gaps left above
+are both closed:
+- **U4 re-fired on the correct fixture.** 4223 (the real U4 parent — my earlier attempt hit
+  **4202**, a scrapped skeleton, and is discarded) was PATCHed to `@EHS;` and re-run as
+  **exec 127384**: gate matched, `Collect Child Links` held its always-1-item contract with
+  `childLinks: []`, write-back `{Success: true}`. The zero-children rewire survives the gate flip.
+- **Create side executed.** Owner Execute-clicked `isLUx7cUjkmKggD2` (**exec 127388**): all 5
+  created tasks (**4234–4238**) carry `description … @EHS;` and `customTags: ["@EHS"]`, read back
+  from Limble rather than from config. A6's description assertion is closed.
+- **CLOSED LOOP Create→Update PROVEN — exec 127410.** Task **4237**, created by Create with its own
+  `@EHS;` stamp, was completed and fired at Update: the gate matched Create's *genuine* output,
+  `meta1: EHS-INSP-D` routed to the matching mock inspection, write-back `{Success: true}`,
+  timestamp `(Completed 07/27/2026 02:23 PM)` correct for America/New_York. This closes the gap the
+  test plan had explicitly deferred ("until a real Create→Update closed-loop test") and is the
+  first proof the two literals match **in practice rather than by assumption** — the entire
+  substance of OQ-038.
+
+Both workflows left **inactive**. Caveat on the closed-loop run: 4237's `completionNotes` is empty
+because the Limble API cannot set that field at all — completion had to go through
+`{"status":1,...}` rather than `statusID`, and `completionNotes`/`dateCompleted` are both rejected
+on PATCH (contract recorded in `docs/test-plan/limble-sandbox-fixtures.md`). Note *concatenation*
+was already proven by U1/U4, so the closed-loop result stands on its own.
+
+**Addendum 2 — 2026-07-26: PROVEN from the EHS side, no longer inference.** Owner authorized a
+one-off live read-only exception to OQ-003 (5 GETs, no writes) to settle this. Ran
+`GET /api/v4/entity/AuditInspection/fetch/{RowUID}` against
+`coastalwasteinc.ehsinsight.com` for the 5 completed WOs' `meta1` RowUIDs. All returned HTTP 200:
+
+| Limble WO | EHS `CreatedDtm` | EHS `UpdatedDtm` | WO completed | `UDFLimbleWOCompletionNotes` |
+| --- | --- | --- | --- | --- |
+| 2165 | 2025-10-30 18:33:04 | **2025-10-30 18:33:04** | 2026-02-03 | empty |
+| 2202 | 2025-11-10 13:59:27 | **2025-11-10 13:59:27** | 2025-11-11 | non-empty (see below) |
+| 2370 | 2025-12-12 20:45:42 | **2025-12-12 20:45:42** | 2026-01-06 | empty |
+| 2405 | 2025-12-27 11:26:33 | **2025-12-27 11:26:33** | 2026-07-02 | empty |
+| 2551 | 2026-01-29 15:22:23 | **2026-01-29 15:22:23** | 2026-02-17 | empty |
+
+`UpdatedDtm == CreatedDtm` **to the second on all five** — not one record has been written to
+since the inspector submitted it, while every corresponding WO completed days-to-months later.
+The write-back has never fired. Confirmed, not inferred.
+
+The single non-empty field (2202) is **not** a write-back and must not be misread as one: it
+carries no `(Completed <date>) / All discrepancies listed…` packet wrapper (the format the docx
+specifies), its record's `UpdatedDtm` equals `CreatedDtm` so it existed at submission time, and
+its text ("Everything is working properly other than the rear garage door that is schedule for
+replacement.") differs from that WO's actual Limble `completionNotes` ("Door has been replaced
+and is functional once more…"). Inspector-typed in EHS, not integration-written.
+
+~~Applied at the **design** level now, per the owner's concurrent "design-only, hold n8n writes"
 directive: `docs/build-specs/ehs-create-wo-build-spec.md` (§3 create-task description template +
 §8 summary table) and the EHS/Limble test-plan docs. The one-line edit to the **live** workflow
 `isLUx7cUjkmKggD2` (description literal `@EHS;` → `@EHSWO;` on the create-task node) is **queued** —
 apply it when the write/test phase is greenlit, then verify a real Create→Update closed-loop run.
 The EHS-Update test fixture stamps `@EHSWO;` as the *correct* Create output (previously framed as a
-workaround).
+workaround).~~
+
+> ⚠️ **The struck paragraph above is SUPERSEDED — do not act on it.** Addendum 2 is dated
+> 2026-07-26 but sits *below* the **REVERSED 2026-07-27** block, so it is not the entry's latest
+> word despite being last in the file. The `@EHS;` → `@EHSWO;` create-task edit it calls "queued"
+> was applied 2026-07-20 and then **reverted 2026-07-27**; the fixtures no longer stamp `@EHSWO;`
+> as correct. **Current state: `@EHS;` on both sides.** Read the REVERSED block for the live truth.
 
 ---
 
@@ -1852,7 +2280,8 @@ instruction-update assertions.
 
 A6 EHS Create WO suite is no longer OQ-042-blocked; it needs these two node fixes plus the
 `Create Deficiency Task` (n21) fixes (due→epoch, `metadata`→top-level `String(meta1)` per OQ-024,
-`@EHS;`→`@EHSWO;` per OQ-038).
+and the OQ-038 tag — which as of the **2026-07-27 reversal** means the description tag *stays*
+`@EHS;` here; the 7/20 `@EHSWO;` edit was reverted and the fix moved to EHS-Update's gate).
 
 ## OQ-043 — [resolved] EHS Create WO: filter-inside-loop batch-kill (zero-input skip anti-pattern)
 
@@ -2011,3 +2440,221 @@ zero-instruction fixtures created bare (no template) at 98472:
   (test-plan's `bZ78rLHH8sJfDbtN` is stale).
 The OQ-044 bundle trigger is moot for OQ-045 scope; OQ-044 itself remains open on its own
 merits (Coupa lookup bare-`[]` shape unknown). Fixtures 4228/4229 added to cutover teardown.
+
+---
+
+## OQ-046 — [resolved] EHS Create WO: `listTeams limit=500` unpaginated — sweep in the paginate fix or leave faithful?
+
+**Type:** PENDING DECISION
+**Added:** 2026-07-26
+
+**Question / Description:**
+EHS Create WO fetches the "EHS Approver Assignee" team in a single unpaginated call —
+Make blueprint modules 88/92/96, `fuse-limble-app:listTeams` with mapper
+`{name: "EHS Approver Assignee", limit: "500"}` (the three collapse to one n8n node under
+OQ-034). Same shape as OQ-018's `listUsers limit=500`. OQ-018's resolution deliberately
+scoped itself to Step 1's user fetch and left this one dangling: "EHS Create WO's
+`listTeams limit=500` is the same pattern — deliberately NOT covered here, needs its own OQ
+if the owner wants it swept in." This entry closes that dangle.
+
+If the cap were ever crossed, the failure is silent in the same way as OQ-018: the
+location's team drops off the page, the `Team At Location` filter matches nothing, and the
+WO create loses its assignment (or the day's remaining forms drop — see OQ-043).
+
+**Resolution criteria:**
+Owner decides: sweep in a paginate fix for symmetry with OQ-018, or leave the faithful
+single call.
+
+**Resolved:** 2026-07-26
+**Resolution:** **No change — faithful single call stands.** Owner decision after live prod
+recount the same day: Coastal has **48 Limble teams org-wide, 45 of them named
+"EHS Approver Assignee"** (one per location) — 9% of the 500 cap. Materially lower risk than
+OQ-018 for three reasons, so "same class as OQ-018" does not carry over:
+1. The call is **name-filtered server-side**, so unrelated team growth never consumes the page.
+2. Team count tracks **location count**, not headcount — Coastal needs roughly 10x location
+   growth to reach 500, versus OQ-018's user count which drifts with hiring churn.
+3. The fix is not free here: `/v2/teams` pagination is **unprobed** (users turned out
+   cursor-based, `cursor` = last userID exclusive-after — teams may differ), and patching the
+   node reopens the A6 EHS Create WO suite that passed 2026-07-21.
+Also noted, unrelated to the cap: `/v2/teams` already has a completeness hole — role-teams
+(e.g. 107065) are not listed by the endpoint at all (OQ-040 recon). Pagination would not
+address that. Revisit only if Coastal's location count approaches the low hundreds.
+
+---
+
+## OQ-047 — EHS Create WO: four docx-vs-blueprint drifts (team name, date filter, priority, due date)
+
+**Type:** OPEN QUESTION
+**Added:** 2026-07-26 (surfaced while resolving OQ-035 — a full read of the EHS review docx for
+that resolution turned these up as a side effect)
+
+**Question / Description:**
+`Coastal - Limble Integration Review - EHS Integration (v1.3.2).docx` and
+`Coastal - Create WO From EHS Inspection (PROD).json` disagree in four places. Per CLAUDE.md the
+blueprint is the *actual* implementation and the docx is the *intended* design, so each needs a
+call on which side is wrong.
+
+| # | Docx says | Blueprint does | Verdict |
+| --- | --- | --- | --- |
+| 1 | Team named **"EHS Assignees"** | `listTeams name = "EHS Approver Assignee"` | **Closed — docx is wrong, code is right** (verified below) |
+| 2 | Filter inspections on **`DatePerformed`** in past 24h | `GET .../AuditInspection/list?CreatedAfter={{addHours(now;-24)}}` | **Open — functional difference** |
+| 3 | Default priority **3** (low) | `createATask priority = 2` | **Open — likely template-vs-integration, confirm** |
+| 4 | Due date **= day of creation** | `due = addDays(now; 7)` (ported as `$now.plus({days:7})` epoch seconds) | **Open — likely template-vs-integration, confirm** |
+
+**#1 — resolved 2026-07-26, no action.** Verified read-only against Coastal **prod** Limble
+(`limble-mcp-CLIENT`, `get_current_customer_info` = "Coastal Waste & Recycling"): `/v2/teams`
+returns **48 teams**, of which **45 are named exactly `EHS Approver Assignee`**, one per
+location (`automaticallyCreated: 0`). Zero teams named "EHS Assignees". The blueprint's literal
+is correct and the n8n port inherits it safely; the docx phrasing is a documentation slip. This
+also corroborates OQ-046's 45/48 recount. **No change to the build.**
+
+**#2 — the one with real behavioral bite.** `CreatedAfter` filters on record-creation time;
+`DatePerformed` filters on when the inspection was actually performed. They diverge whenever an
+inspector starts a form one day and submits it the next (draft created Monday, performed and
+submitted Tuesday): the daily run keys off creation, so a late-submitted inspection created
+outside the 24h window is **never picked up at all** — its deficiencies silently never become
+WOs. `CoastalEHSFormFilter`'s `RecurringTaskCompleteDtm` check does not rescue this; it only
+filters what the `list` call already returned. Note the window is 24h against a daily 4:00 PM
+schedule (OQ-011/OQ-014) — a tight-but-not-exact fit already flagged in the EHS Create WO build
+spec section 9.
+
+**#3 / #4 — CLOSED 2026-07-26 by owner, no change.** Owner accepted the recommendation below:
+`priority: 2` and `due = created + 7 days` stand as intended prod behavior; the docx's
+priority-3 / due-same-day lines describe template 842's stored defaults (or, for priority, the
+org default), which the integration deliberately overrides. **No edit to `Create Deficiency
+Task` (n21); no A6 re-run.** Evidence that drove it:
+
+Both docx statements sit in the "Limble
+Template" section, which describes template **842**'s stored defaults, not what the integration
+sends; the integration explicitly overrides both. Rather than ask, this was measured against the
+**live prod WOs the Fuse scenario has already created** — read-only via `limble-mcp-CLIENT`,
+`get_tasks name="EHS Facility Inspection Checklist Deficiencies%"`, which returned the complete
+set of **10 WOs, 2025-10-30 → 2026-07-13** (10 < the 25 limit, so not truncated):
+
+| Finding | Result across all 10 |
+| --- | --- |
+| Priority | `priority: 2` / `priorityID: 55430` (**Medium**) on **10/10** — never edited down |
+| Due date | `due − createdDate` = **604800s (7.000d)** on 9/10; task 2165 = 7.042d (Nov-2025 DST boundary) — **zero** same-day |
+| Org default priority | `get_priorities`: **Low** (55431) is `isDefault: true` — i.e. the docx's "priority 3" is the *org/system* default, which the integration deliberately overrides |
+| Engagement | 5/10 completed, several with real `completionNotes` — these WOs are actively worked, not ignored |
+
+So both overrides have stood unchallenged for ~10 months of live operation, on WOs Coastal
+demonstrably uses. That is materially stronger evidence of accepted intent than the docx's
+template-defaults paragraph. Caveat recorded honestly, and accepted with the decision:
+"unedited for 10 months" evidences acceptance, not explicit intent — it cannot fully exclude
+"nobody noticed." Template 842's *stored* defaults were not read directly (not exposed by the
+MCP task tools), so whether the docx accurately describes the template — as opposed to just
+restating the org default — remains unverified, and does not matter to the port either way
+since the integration overrides both fields regardless.
+
+**#2 — UPDATE 2026-07-26: `DatePerformed` confirmed to exist; only the *filter* support is
+still unknown.** The 5 authorized live fetches (see OQ-038 Addendum 2) show `DatePerformed` as a
+real field on every inspection Entity, so the docx was describing something that exists — the
+fix has a target. Two things the payloads settle, and one they don't:
+- **Exists:** `DatePerformed` (plus `TimePerformed` as a separate field).
+- **Granularity gotcha:** `DatePerformed` is **date-only** — all 5 read `YYYY-MM-DD 00:00:00`,
+  while `CreatedDtm` carries a real clock time. A naive swap to `DatePerformed > now-24h` would
+  therefore compare against midnight, not a rolling 24h, and changes which day's inspections
+  land in the window. Any fix must account for that, not just rename the param.
+- **Still unknown:** whether `AuditInspection/list` *accepts* a `DatePerformed` filter param.
+  That needs a list-endpoint probe, which was outside the authorized 5-fetch scope.
+- **No drift in this sample:** all 5 have `DatePerformed`, `RecurringTaskCompleteDtm`, and
+  `CreatedDtm` on the **same calendar day** — i.e. these inspections were created and performed
+  same-day, so none of them would have been missed. 5 same-day samples do not prove
+  cross-midnight submissions never happen, but they are weak evidence the miss rate is low.
+
+**Original framing (kept for the record) — not answerable from Limble.** Whether EHS's
+`AuditInspection/list` supports a `DatePerformed` filter is an EHS-side contract question, and
+no EHS MCP exists (CLAUDE.md Tooling). Limble also cannot measure the *symptom*: a missed
+inspection produces no Limble WO at all, so there is nothing to observe — absence of evidence.
+One suggestive-but-inconclusive datum from the same query: **10 WOs across 45 EHS-enabled
+locations in 10 months (~1/month)** is low if every site runs a monthly checklist, but is
+equally explained by WO-worthy deficiencies simply being rare. Separating the two needs an
+EHS-side inspection count. Stays blocked behind OQ-003.
+
+**Resolution criteria:**
+- #1: **closed** 2026-07-26 — docs-only slip, prod verified, no action.
+- #3 / #4: **closed** 2026-07-26 — owner accepted as intended behavior, no change, no re-test.
+- #2: **the only item still open, and it is blocked on EHS access, not on a decision.** Needs
+  either an EHS API contract answer (does `AuditInspection/list` filter on `DatePerformed`?) or
+  an EHS-side inspection count to size the miss rate. Revisit at cutover under the **C6** EHS-Create-WO first-run watch
+  (`docs/test-plan/test-sequence.md`, where it is now a checklist item), when real EHS
+  responses are visible for the first time. If fixed then,
+  the mock rig (`mock-ehs.workflow.json`) and the A6 suite need the new query param.
+
+**Status:** Open on **#2 only** — three of four drifts closed 2026-07-26 with no build change.
+#2 is a **silent-data-loss path**, not a cosmetic drift: an inspection drafted one day and
+submitted the next falls outside the `CreatedAfter` window, never becomes a WO, and nothing
+logs that it happened. Carried to the **C6** cutover watch as an explicit checklist item in
+`docs/test-plan/test-sequence.md`. Nothing blocks the current build; the
+port is faithful to the blueprint on all four. Detail: EHS Create WO build spec sections 3
+and 4.
+
+**Side finding — OQ-038 confirmed live, with a 10-month blast radius.** The same 10 prod WOs
+all carry `@EHS;` in `description` and `customTags: ["@EHS"]`; **not one carries `@EHSWO;`**,
+and 5 of them are completed. Since "Update EHS Inspection" gates on `@EHSWO;`, the EHS
+write-back loop **has never fired in production** — every EHS WO completed since 2025-10-30
+failed to push its completion notes back to the EHS inspection. OQ-038 diagnosed this from the
+blueprint alone; this is the live confirmation and it quantifies the impact. **Fix direction
+reversed 2026-07-27:** instead of the port stamping `@EHSWO;` (applied 7/20, since reverted),
+the WO tag stays `@EHS;` and **EHS-Update's gate moved to `@EHS;`** — see OQ-038's REVERSED
+block. Cutover closes the loop either way; this direction additionally adopts the 5 prod EHS
+WOs still open.
+Also incidentally confirmed: `meta1` carries the EHS RowUID as a UUID **string**
+(`755623db-1423-4bed-89be-66730aa8999b`), consistent with the port's `String()` handling
+(OQ-024); and **8 of 10** WOs are team-assigned (`userID: 0`, `teamID` set), so the
+team-lookup path is the normal case, not an edge case.
+
+---
+
+## OQ-048 — Cutover target moved: port all 7 workflows to dedicated `coastal.n8n.fm360consulting.com` instance
+
+**Type:** ACTION ITEM
+**Added:** 2026-07-30
+
+**Question / Description:**
+Owner ruling 2026-07-30 (in-session): the cutover target is no longer
+`fm360.n8n.fm360consulting.com`. A dedicated **Coastal-Waste** n8n instance now exists at
+**`https://coastal.n8n.fm360consulting.com`** (visible in the n8n MCP instance list as of
+2026-07-30), and all 7 workflows must be ported there before go-live. FM360 becomes the
+build/test sandbox for this engagement. Owner's stated split of labor, verbatim intent:
+
+1. **Us:** port the workflows over and create **placeholder credentials and data tables** on
+   the new instance.
+2. **Owner:** manually populates the credential values.
+
+Owner sizing: "This shouldn't be a huge job" — everything already works on the FM360 sandbox.
+
+**Implications / sub-decisions to settle before or during the port:**
+
+- **New workflow IDs** — the OQ-007 ID table describes FM360 only. Record a new ID table for
+  the coastal instance; update DEPLOYMENT.md and build-spec references.
+- **Credential + Data Table IDs change** — every node reference must be repointed on the
+  ported copies: token table `QAj62weJaWmRBJ76`, error-log table `6GbR5Rxezl7hqk9i`,
+  Integration Config `L0npQPPEXQI9JRzX`. The `failMode` config table `YkCIlyx7lUUNs7vG` is
+  test-harness-only — decide whether it ports at all.
+- **Sequencing vs. the [M] pass (handoff-6482)** — the pending mock-URL reverts and
+  sandbox→prod credential swaps should likely be folded INTO the port (create the coastal
+  copies already in cutover configuration: real hosts, prod-credential placeholders) instead
+  of first editing the FM360 copies and then exporting them. Avoids doing every edit twice.
+  FM360 copies then stay in test configuration as the regression rig.
+- **Webhook URLs change host** — OQ-020's three Limble webhook repoints must target
+  `coastal.n8n...` webhook URLs. Fortunate timing: no repoint has happened yet.
+- **Placeholder credentials, per known failure mode** — placeholders must be same-type,
+  clearly-named placeholders (never another client's live credential; `genericAuthType` must
+  match the real credential's type or the real one is unselectable at swap time).
+- **Mocks/seeder (`F05TiUurpc2kqxe0`, `EBIzCJ0XJaJ5jUpp`, `qyMChP0DKfI04r4a`)** — presumably
+  stay on FM360 (test rigs, not production). Mock hosts remain reachable cross-instance over
+  plain HTTPS if a smoke pass on coastal is wanted before owner populates real values.
+- **Verification standard** — a config round-trip is not execution proof. Minimum: validate
+  each ported workflow + at least one execution per workflow on the coastal instance (webhook
+  ones can smoke-fire against the FM360 mocks) before calling the port done.
+- **Operational limits** — serialize all n8n writes in one session/agent (shared MCP binding,
+  duplicate-create failure mode is documented); ~100 MCP calls/day quota may force the port
+  across sessions; re-list workflows immediately before each create.
+
+**Resolution criteria:**
+Port executed and execution-verified on `coastal.n8n.fm360consulting.com`; new workflow-ID
+table recorded (supersedes OQ-007's for cutover purposes); placeholder credentials/data
+tables created and named; DEPLOYMENT.md retargeted; owner confirms credential values
+populated. CLAUDE.md target note updated 2026-07-30 as part of recording this ruling.
