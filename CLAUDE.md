@@ -244,9 +244,13 @@ and how far to trust each system's facts:
     name unstable: has appeared as `FM360_Account` and `FM360` (renamed, new instance ID, by an
     MCP reconnect 2026-07-27) — same host either way.
   - **`https://coastal.n8n.fm360consulting.com`** (display name `Coastal-Waste`) — the **go-live
-    target**. All 7 workflows must be ported here before cutover; we create placeholder
-    credentials/data tables, the owner populates credential values. Port not yet executed —
-    see OQ-048 for the sub-decisions and the new-ID bookkeeping.
+    target**. **Port EXECUTED 2026-08-01**: all 7 workflows exist here (inactive, cutover
+    config — real hosts, placeholder credentials), plus 3 data tables and 4 placeholder
+    credentials the owner still must populate. The authoritative new-ID table is
+    `docs/oq-048-port-ledger.md`; OQ-048 stays open until credentials are populated.
+    CREATE-verification rule learned the hard way: a create is verified only by a workflow
+    LIST on the intended instance — ID-addressed read-backs succeed cross-instance
+    (Step 1 initially strayed onto DrinkPak via a binding flip; deleted + redone).
 
   Other accounts are separate clients with their own names and URLs (e.g. `DrinkPak` →
   `https://drinkpak.n8n.fm360consulting.com`), so a name check alone can pass while you are on

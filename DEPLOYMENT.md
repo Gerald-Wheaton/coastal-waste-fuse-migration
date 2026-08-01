@@ -15,6 +15,17 @@ Token Regen, Step 3, Error Log Export, EHS-Create, EHS-Update; Step 1/Step 2 not
 pass, last known inactive after suite-end deactivation). The live test scoreboard is
 `docs/test-plan/test-sequence.md`; this doc is only the pre-publish cutover gate.
 
+**2026-08-01 — OQ-048 PORT EXECUTED.** The go-live target is now
+`https://coastal.n8n.fm360consulting.com` (owner ruling 2026-07-30). All 7 workflows exist
+there, inactive, **already in cutover config** (real Coupa/EHS hosts, prod templateID 842,
+restored recipients, placeholder credentials) — which ABSORBS this doc's per-workflow [M]
+staging-revert boxes for the coastal copies: the FM360 copies deliberately KEEP their test
+config as the regression rig, so do NOT run the URL/cred/recipient reverts against FM360.
+New coastal IDs (workflows, data tables, placeholder credentials, webhook URLs) + transform
+receipts: **`docs/oq-048-port-ledger.md`** (authoritative until folded in here). Remaining
+before activation: owner populates 4 placeholder credentials + real Coupa PROD scope
+(section 1), OQ-019/OQ-020 [EXT] items, section 7 Eastern re-run (FM360 side).
+
 Phase A suite status: **A1 Step 2 ✅** (incl. S2-2 team-comment — PASS 2026-07-24, exec 127081,
 OQ-040 resolved) · **A2 Token Regen ✅** · **A3 Error Log Export ✅** · **A4 Step 1 ✅** (team
 contractor-comment variant unblocked by OQ-040, not separately re-run — optional) · **A5
@@ -73,8 +84,8 @@ the workflows themselves changed. One net-new [EXT] surfaced: the Coupa request-
 | Credential | Used by | Sandbox → Prod swap needed |
 | --- | --- | --- |
 | **Limble** (HTTP Header/Bearer auth against Limble API) | Step 1, Step 2, Step 3, EHS-Create, EHS-Update | **✅ Loaded into n8n credential store 2026-07-03 (OQ-015 resolved); `.env` scrubbed.** Build/test runs on the sandbox credential (`MX0lwgfyFiGUBh5W`); before go-live, repoint every Limble-calling node's credential to Coastal's prod credential (`qn6u8jEK085DoHT8`) — tracked per-workflow below. |
-| **Coastal Coupa OAuth Client Credentials** (`httpCustomAuth`, per OQ-005) | Token Regeneration, Step 1, Step 2, Step 3 | **✅ Loaded into n8n credential store 2026-07-03 (OQ-015 resolved)** — client_id/secret sourced from Make datastore `324` (client `coastal_waste (PROD)`). The `oauth_token`/`access_token` is ephemeral, minted daily by Token Regeneration. Target host `coastalwasteinc.coupahost.com`. Never write the real values into this repo — n8n credential store only. **Retrieval path confirmed by Ethan 2026-07-27:** the Fuse datastore is "CLIENTS - API Acct Information and Key" (= datastore `324`), row `coastal_waste (PROD)`, fields `client_id` / `client_secret` / `scope`; Fuse refreshes the token daily at midnight (matches the ported daily 12:00AM cron). Ethan advises grabbing the **current** values when ready to capture — re-verify client_id/secret against that row at cutover (ours were captured 2026-07-03), and pull `scope` from the same row (see the [EXT] scope box in section 1). |
-| **EHS Insight API key** (`X-ApiKey` header) | EHS-Create, EHS-Update | **⚠️ ROTATION UNVERIFIED — row corrected 2026-07-27 (was wrongly ✅).** A key was loaded into credential `ZEf4C1rpYSbBgLbX` on 2026-07-03, but the OLD exposed key (`apikey-160448cf-...`, 9 plaintext occurrences in the blueprint exports) **still returned HTTP 200 against live EHS on 2026-07-26/27** — the authorized OQ-038 verification reads used it. So either rotation never happened or the old key was never revoked; the credential's stored value cannot be read back via MCP to tell which. **Treat as NOT rotated until Coastal confirms the old key is dead** — it grants working access to their production safety system from two git-tracked files. (The `__EHS_INSIGHT_CREDENTIAL_ID__` placeholder was resolved 2026-07-20 — credential attached to all EHS nodes, see sections 5/6.) |
+| **Coastal Coupa OAuth Client Credentials** (`httpCustomAuth`, per OQ-005) | Token Regeneration, Step 1, Step 2, Step 3 | **✅✅ PROD creds loaded on COASTAL 2026-08-01 — and the 2026-07-03 capture below turned out to be TEST-environment creds** (owner discovered this while populating: the real values came from Fuse's Token Regeneration workflow, not the datastore row as first captured; Ethan's "grab current values at capture time" advice was load-bearing). Coastal credential `kH7NaehFRB3s2RLt` now holds the actual PROD client_id/secret; the coastal token-table row also carries the real PROD `scope` (~150 entries, space-joined) plus a live prod-minted starter token whose embedded scope claim matches — verified 2026-08-01. The FM360 copy below retains the TEST creds, which is consistent with its test-rig role. Historical: **Loaded into n8n credential store 2026-07-03 (OQ-015 resolved)** — client_id/secret sourced from Make datastore `324` (client `coastal_waste (PROD)`). The `oauth_token`/`access_token` is ephemeral, minted daily by Token Regeneration. Target host `coastalwasteinc.coupahost.com`. Never write the real values into this repo — n8n credential store only. **Retrieval path confirmed by Ethan 2026-07-27:** the Fuse datastore is "CLIENTS - API Acct Information and Key" (= datastore `324`), row `coastal_waste (PROD)`, fields `client_id` / `client_secret` / `scope`; Fuse refreshes the token daily at midnight (matches the ported daily 12:00AM cron). Ethan advises grabbing the **current** values when ready to capture — re-verify client_id/secret against that row at cutover (ours were captured 2026-07-03), and pull `scope` from the same row (see the [EXT] scope box in section 1). |
+| **EHS Insight API key** (`X-ApiKey` header) | EHS-Create, EHS-Update | **ROTATION REMOVED FROM ENGAGEMENT SCOPE — owner ruling 2026-08-01:** deployment ships on the existing key; rotation + old-key revocation is **transferred to the client team** (owner is documenting the handoff note). Standing facts for that team: the key sits in plaintext in 2 git-tracked blueprint exports (9 occurrences) and was verified working against live EHS on 2026-07-27; when rotated, update n8n credential `ZLLpBIVYKWS99BwK` on `coastal.n8n.fm360consulting.com` (both EHS workflows read it — no node edits needed). Historical status: **⚠️ ROTATION UNVERIFIED — row corrected 2026-07-27 (was wrongly ✅).** A key was loaded into credential `ZEf4C1rpYSbBgLbX` on 2026-07-03, but the OLD exposed key (`apikey-160448cf-...`, 9 plaintext occurrences in the blueprint exports) **still returned HTTP 200 against live EHS on 2026-07-26/27** — the authorized OQ-038 verification reads used it. So either rotation never happened or the old key was never revoked; the credential's stored value cannot be read back via MCP to tell which. **Treat as NOT rotated until Coastal confirms the old key is dead** — it grants working access to their production safety system from two git-tracked files. (The `__EHS_INSIGHT_CREDENTIAL_ID__` placeholder was resolved 2026-07-20 — credential attached to all EHS nodes, see sections 5/6.) |
 | **Integrations Ionos** (email sending, per OQ-010) | Token Regeneration (failure alert), Coupa Integration Error Log Export | **✅ Loaded into n8n credential store 2026-07-03 (OQ-015 resolved).** No sandbox/prod split — same credential throughout. |
 
 **Flag:** `docs/OG-workflows/Coastal - Create WO From EHS Inspection (PROD).json` and
@@ -109,15 +120,18 @@ to agree on the same ID:
 All 7 target n8n workflow IDs assigned (owner-provisioned shells). Write only to the named ID.
 Write authorization is still granted one scenario at a time per OQ-003.
 
-| Workflow | n8n Workflow ID | Active? |
-| --- | --- | --- |
-| Coupa Token Regeneration | `oCAl4h0SZenEtbNs` | ☐ |
-| Create Requisition in Coupa (Step 1) | `WJSs6apAdVH5yKkq` | ☐ |
-| Check For New PRs Ordered & Update Limble WO (Step 2) | `WYJyHdQGcdeD8wEr` | ☐ |
-| WO Completed; Update Coupa PO (Step 3) | `NH1giNups8iICMZe` | ☐ |
-| Create WO From EHS Inspection | `isLUx7cUjkmKggD2` | ☐ |
-| Update EHS Inspection From Limble WO | `8JvtesynrYtZbw7U` | ☐ |
-| Coupa Integration Error Log Export | `hR5YnDixecDz9HzJ` | ☐ |
+**2026-08-01: activation targets are now the COASTAL IDs** (OQ-048 port). FM360 IDs stay as
+the test/regression rig — never activate those at cutover.
+
+| Workflow | FM360 ID (test rig) | Coastal ID (GO-LIVE) | Active? |
+| --- | --- | --- | --- |
+| Coupa Token Regeneration | `oCAl4h0SZenEtbNs` | `1phqgrpFuSZOFqxS` | ☐ |
+| Create Requisition in Coupa (Step 1) | `WJSs6apAdVH5yKkq` | `4fFRbDT7bluYEPc7` | ☐ |
+| Check For New PRs Ordered & Update Limble WO (Step 2) | `WYJyHdQGcdeD8wEr` | `vwo0YcZewnyodSzL` | ☐ |
+| WO Completed; Update Coupa PO (Step 3) | `NH1giNups8iICMZe` | `2T9TghNyHbp6LWhH` | ☐ |
+| Create WO From EHS Inspection | `isLUx7cUjkmKggD2` | `6mAzjD1LG6AcDV5p` | ☐ |
+| Update EHS Inspection From Limble WO | `8JvtesynrYtZbw7U` | `uhmXW1jlImUdXQVw` | ☐ |
+| Coupa Integration Error Log Export | `hR5YnDixecDz9HzJ` | `0twTCK5xGFsB9k79` | ☐ |
 
 ### Email recipients (OQ-010 — dev override, restore before go-live)
 
@@ -144,6 +158,13 @@ time:
 2. In Limble's webhook/integration settings, update the subscription for that event type to the
    new n8n URL.
 3. Confirm old Fuse subscriptions are removed/disabled so Limble doesn't fire both.
+
+**2026-08-01 (OQ-048 port): the three coastal production URLs are now known** — register
+THESE, not fm360 ones:
+
+- Step 1 (New Task Comment): `https://coastal.n8n.fm360consulting.com/webhook/coastal-coupa-create-requisition-step1`
+- Step 3 (Task Completed): `https://coastal.n8n.fm360consulting.com/webhook/coastal-coupa-wo-completed-step3`
+- EHS Update (Task Completed): `https://coastal.n8n.fm360consulting.com/webhook/coastal-ehs-update-inspection`
 
 ### Schedule timezone — RESOLVED (OQ-014, owner decision 2026-07-25): America/New_York
 
@@ -460,15 +481,16 @@ cutover gates (credential swap, webhook repoint, real-EHS manual test), not suit
       `6GbR5Rxezl7hqk9i`) — drained by A3 E1 against real rows
 - [x] Delete-only-exported-records fix in place (OQ-006) — **proven at A3 E1** (exec 126681):
       delete scoped to reported ids [12,13] only; unreported row 9003 survived
-- [ ] **[M]** Email recipient restored to `ethan@fm360consulting.com` (currently gerald@ dev-only)
-- [ ] **[M — staged 2026-07-27, needs only your Execute click]** Re-run report once
-      post-OQ-014: contents + scoped delete already ✅ A3 E1/E2; the one unverified bit is
-      the **Eastern** timestamp rendering (A3 ran pre-flip, Denver). **Seed rows are ready:**
-      the error-log table was cleaned during the [M] pass (mock rows 16–22 deleted) but rows
-      **23/24** were deliberately kept as the fixture — Execute the workflow, check the
-      report renders Eastern, and the scoped delete drains them, leaving the table empty.
-      Recipient is still gerald@ (held on purpose — restore ethan@ only AFTER this re-run,
-      or the test report emails Ethan).
+- [x] Email recipient `ethan@fm360consulting.com` — **carried by the COASTAL copy from its
+      creation (OQ-048 port)**; the FM360 copy deliberately keeps gerald@ forever as the test
+      rig (2026-08-01 disposition — no FM360 restore needed).
+- [x] **Eastern re-run PASSED 2026-08-01 — exec 127523 (owner Execute on FM360 copy).**
+      Report rendered rows 23/24 with **America/New_York** timestamps (stored UTC
+      2026-07-27T01:28Z → rendered `07/26/2026, 09:28 PM`; Denver would be 07:28 PM), email
+      accepted at gerald@ (SMTP 250, from integrations@), delete scoped to exactly ids
+      [23, 24], table read-back empty. Closes OQ-014's last unverified rendering path.
+      (Bonus same day: coastal copy exec 424 = empty-table no-op, proving the repointed
+      coastal table read — E2 shape.)
 - [ ] **[GO]** Activate on the 15-minute schedule — ID long assigned (OQ-007)
 
 ---

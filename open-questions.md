@@ -2658,3 +2658,21 @@ Port executed and execution-verified on `coastal.n8n.fm360consulting.com`; new w
 table recorded (supersedes OQ-007's for cutover purposes); placeholder credentials/data
 tables created and named; DEPLOYMENT.md retargeted; owner confirms credential values
 populated. CLAUDE.md target note updated 2026-07-30 as part of recording this ruling.
+
+**ADDENDUM 2026-08-01 — port EXECUTED; entry stays open only for owner population.**
+All 7 workflows created on coastal (inactive, cutover config), 3 data tables + 4 placeholder
+credentials created. Authoritative ID table + per-workflow transform receipts:
+`docs/oq-048-port-ledger.md`. Sub-decisions ratified by owner in-session 2026-07-31:
+cutover-config-direct port shape; failMode table (`YkCIlyx7lUUNs7vG`) does NOT port;
+verification standard = `n8n_validate_workflow` + node inspection + grep gates (no coastal
+execution pre-cutover — supersedes this entry's "execution-verified" phrasing per OQ-039).
+New coastal workflow IDs: Token Refresh `1phqgrpFuSZOFqxS`, Step 1 `4fFRbDT7bluYEPc7`,
+Step 2 `vwo0YcZewnyodSzL`, Step 3 `2T9TghNyHbp6LWhH`, EHS Create `6mAzjD1LG6AcDV5p`,
+EHS Update `uhmXW1jlImUdXQVw`, Error Log Export `0twTCK5xGFsB9k79`. Tables: token
+`u818Gq3vZSTXdgeh`, error-log `On8bmdryDYfoBjMG`, config `dhGuWwRx1a8uIvp3`. Placeholder
+creds: Limble `V3fUTHSMtAkRUHlT`, EHS `ZLLpBIVYKWS99BwK`, Coupa `kH7NaehFRB3s2RLt`, Ionos
+`XbGIxN8MFDM3DJoS`. Incident: Step 1's first create strayed onto DrinkPak via a shared-binding
+flip (ID-addressed read-backs are instance-blind); stray deleted, create redone,
+physical-presence verified by coastal LIST (7/7). **Remaining to close:** owner populates the
+4 credentials, real Coupa PROD scope on the token-table row, OQ-019 confirmation, and OQ-020
+webhook registration against the 3 coastal URLs (in the ledger).
