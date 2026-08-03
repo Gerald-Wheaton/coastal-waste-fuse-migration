@@ -92,6 +92,24 @@ or get `ethan@` added.
 **Still alerts on nothing:** silent logic failures (HTTP 200 with an unexpected shape, an empty array
 pruning the chain). Only caught by noticing expected work stopped.
 
+### Accepted risk — wrong-but-accepted Coupa write (owner decision 2026-08-03)
+
+Do **not** re-raise this as a defect or an oversight; it was decided with the tradeoffs on the table.
+Full record in DEPLOYMENT.md "BURN-IN WATCH → ACCEPTED RISK" and OQ-028's second 2026-08-03 addendum.
+
+- **Scope (narrower than it sounds):** per OQ-044, Step 1's Coupa lookups all use
+  `fullResponse: true` with `Found?` IFs on `$json.body.length > 0`, so empty/`{}`/wrapper-no-match
+  responses **do** route to the error branch and **do** email. The residual is a **2xx with
+  unexpected field names** → missing value → Coupa accepts it → wrong-but-real requisition/invoice,
+  green execution, no alert.
+- **Why not tested:** Coupa TEST (`coastalwasteinc-test.coupahost.com`, TEST creds still in FM360's
+  Coupa credential) and the mock capture-table rigs are **both blocked by the wiped Limble sandbox**
+  — re-seeding needs UI work, no template API. Read-back verification nodes were rejected as a
+  bigger risk than the gap this close to departure.
+- **To close it properly (~1 day, post-departure):** rebuild the Limble sandbox fixtures, repoint
+  FM360's Coupa URLs to the TEST host, run Step 1 / Step 3 writes for real. This is the unclosed
+  half of OQ-028.
+
 ## What Worked
 
 - **Node-level `mode=preview` / `mode=filtered` on executions instead of trusting status.** Every

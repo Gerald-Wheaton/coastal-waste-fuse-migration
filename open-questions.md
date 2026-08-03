@@ -1540,6 +1540,30 @@ the PO lookup becomes 0 items in n8n and prunes the rest of the chain silently �
 error row. Fuse read `body[1]` and would have errored. Benign in that the 5-min poll retries, but
 an `ordered` requisition with no visible PO produces zero signal.
 
+**ADDENDUM 2026-08-03 (second) — the unclosed half, and the owner's ACCEPTED-RISK decision.**
+
+Today's probe closed Step 2's read envelopes. It did **not** cover the **Coupa POST** paths — Step 1's
+requisition create and Step 3's invoice attach — which cannot be probed read-only. Asked whether that
+class could be force-tested before the owner's absence (from 2026-08-05), the honest answer was
+"only partly," because the two viable rigs are blocked:
+- **Coupa TEST instance** `coastalwasteinc-test.coupahost.com` (this entry's original proposal; TEST
+  client_id/secret are still held in the FM360 Coupa credential) — driving Step 1 needs a Limble task
+  fixture, and the sandbox was **wiped 2026-08-01**; re-seeding needs UI work (no template API).
+- **Mock capture-table assertion** on the still-active FM360 rigs — same fixture blocker, and it
+  asserts our guessed shape rather than Coupa's.
+- Adding **read-back verification** nodes to the live workflows was judged a larger risk than the gap
+  (unverified nodes on the 50-node money path, days before departure).
+
+**Owner decision 2026-08-03: accept the risk, document only.** Recorded in DEPLOYMENT.md's
+"BURN-IN WATCH → ACCEPTED RISK" section with the precise scope, why each test route was rejected, the
+compensating controls (weekly absence checks; Fuse disabled-not-deleted as the stop lever), and the
+~1-day post-departure work that would close it properly.
+
+Scope note so this is not overstated: the risk is **not** "any bad Coupa write is silent." Per
+OQ-044, empty/`{}`/wrapper-no-match responses all route to Step 1's error branch and do email. The
+residual is a **2xx response with unexpected field names** yielding a missing value that Coupa
+accepts — a wrong-but-real requisition or invoice, green execution, no alert.
+
 ---
 
 ## OQ-029 — [resolved] Step 2 built (`WYJyHdQGcdeD8wEr`) missing OQ-008 error-log subgraph

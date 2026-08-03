@@ -94,10 +94,47 @@ which hook maps to which workflow.
 ### What is genuinely untested and may fail on first real use
 
 - **Step 1 requisition create** and **Step 3 invoice push** — Coupa POSTs, never executed. A hard
-  failure will email; a wrong-but-accepted write will not.
+  failure will email; a wrong-but-accepted write will not. See the accepted risk below.
 - **EHS Create's WO-creation branch** (~26 of 34 nodes) — fires only on a deficiency day
   (~1/month). Highest consequence: a missed safety-deficiency WO.
 - **EHS Update's write path** — fires only on an `@EHS;`-tagged completion.
+
+### ACCEPTED RISK (owner decision 2026-08-03): wrong-but-accepted Coupa write
+
+**Decision: accept and document — no further testing before the unattended window.** Recorded here
+so it is not mistaken for an oversight.
+
+**The risk, stated precisely.** It is NOT "any bad Coupa write goes unnoticed." OQ-044 established
+that all four of Step 1's Coupa lookups use `fullResponse: true` and every `Found?` IF tests
+`$json.body.length > 0`, so bare `[]`, `{}`, and wrapper-no-match responses **all route to the
+error branch** → error-log row → 15-minute email. The residual is narrower: a **successful** Coupa
+response whose *field names* differ from what the mappers expect, yielding a missing value that
+Coupa then **accepts with a 2xx**. That produces a requisition or invoice that exists but is wrong,
+with a green execution and no alert.
+
+**Why it was not force-tested.** Three of the four available routes are blocked or
+counterproductive:
+1. **Coupa TEST instance** (`coastalwasteinc-test.coupahost.com`, TEST client_id/secret retained in
+   the FM360 Coupa credential) — viable in principle, but driving Step 1 needs a Limble task
+   fixture and the sandbox was **wiped 2026-08-01** (loc 98472 and A6 locs 98872–98878 return
+   `[]`). Re-seeding requires UI work; template creation has no API.
+2. **Mock capture-table assertion** on FM360 — same Limble-fixture blocker, and it tests our guess
+   of Coupa's shape rather than Coupa's actual shape.
+3. **Read-back verification nodes** (GET after create, assert, error on mismatch) — the only option
+   that would protect during the absence, but it means adding unverified nodes to the live 50-node
+   money path days before departure. Judged a larger risk than the gap.
+4. **Prod canary** — would put a real fake requisition in Coastal's procurement system; needs
+   client consent and crosses the no-prod-writes boundary.
+
+**How this would actually be caught.** Not by an alert. Either someone notices a Coupa
+requisition/invoice that looks wrong, or Coastal's AP process rejects it downstream. The
+compensating control is the weekly absence checks above plus the fact that **Fuse remains
+disabled-not-deleted**, so a bad batch can be stopped by deactivating the n8n workflow and
+reverting the hook.
+
+**What would close it properly (post-departure work, ~1 day):** rebuild the Limble sandbox
+fixtures, repoint FM360's Coupa URLs to the TEST host, and run Step 1 / Step 3 writes for real.
+That is the unclosed half of OQ-028 — today's read-only probe covered Step 2's GET envelopes only.
 
 Phase A suite status: **A1 Step 2 ✅** (incl. S2-2 team-comment — PASS 2026-07-24, exec 127081,
 OQ-040 resolved) · **A2 Token Regen ✅** · **A3 Error Log Export ✅** · **A4 Step 1 ✅** (team
