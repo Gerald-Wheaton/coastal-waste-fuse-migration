@@ -67,6 +67,31 @@ correct early gate exits, not work performed.** Verify at NODE level, never stat
    went through the Limble **API**, not a webhook-admin UI, so the "who has access" question
    dissolved. Swap was per-workflow atomic (activate → repoint), no dual-processing window.
 
+## Alerting gap found and closed (OQ-049) — read this if you are covering
+
+The owner asked whether the system "self-evaluates" well enough to leave unattended from
+2026-08-05. Auditing that found **unhandled failures reached nobody**: EHS Create and EHS Update
+have no error handling at all, Step 3 routes only 3 of 13 nodes to the error log, Token Refresh's
+**store** node has no error branch (mint succeeds, save fails, everything downstream runs on a stale
+token, only trace is `status: error` in a list nobody reads), and **no workflow had
+`settings.errorWorkflow` set**.
+
+Fixed, sanctioned as OQ-049: **`Coastal - Unhandled Error Alert` (`E4eyrICfuZLTFyyr`, ACTIVE)**,
+wired as `errorWorkflow` on all 7. **Coastal now has 8 workflows — a count of 7 is stale.**
+
+**The trap worth remembering:** created inactive first (documentation says error workflows need no
+activation). A deliberate-failure test showed the alert **never fired** — zero executions, no error
+anywhere, while every config read-back passed. On the draft/publish model an inactive workflow has no
+published version to invoke. Activating it fixed it; re-test PASSED (exec 1325, SMTP 250). Had the
+test been skipped, the owner would have left believing coverage existed.
+
+**Watcher: Ethan Morris.** Full instructions in DEPLOYMENT.md "BURN-IN WATCH". Key point: `ethan@`
+gets the 15-min **handled**-error export; **unhandled** alerts go to `integrations@` only — read both
+or get `ethan@` added.
+
+**Still alerts on nothing:** silent logic failures (HTTP 200 with an unexpected shape, an empty array
+pruning the chain). Only caught by noticing expected work stopped.
+
 ## What Worked
 
 - **Node-level `mode=preview` / `mode=filtered` on executions instead of trusting status.** Every

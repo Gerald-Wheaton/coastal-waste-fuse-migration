@@ -9,11 +9,16 @@ this doc has one section per workflow instead of one flat list.
 that must be true right before you flip a workflow live, not part of the build spec itself. Build
 specs live in `docs/build-specs/`.
 
-Status as of 2026-07-27: build complete; **Phase A testing complete** (A8 wrap-up aside). All 7 target
-workflows exist and are **deployed inactive** (5 confirmed inactive via live read 2026-07-23 —
-Token Regen, Step 3, Error Log Export, EHS-Create, EHS-Update; Step 1/Step 2 not re-listed this
-pass, last known inactive after suite-end deactivation). The live test scoreboard is
-`docs/test-plan/test-sequence.md`; this doc is only the pre-publish cutover gate.
+> **CURRENT STATUS (2026-08-03): LIVE — all 7 ACTIVE on `coastal.n8n.fm360consulting.com`.**
+> Cutover executed 2026-08-01 ~18:07 UTC. This doc is the pre-publish gate and is now largely
+> historical; for live state read `docs/oq-048-port-ledger.md` ("Post-cutover review —
+> 2026-08-03") and `docs/test-plan/test-sequence.md`. **The `[M]` boxes still unchecked in
+> sections 1–6 apply to the FM360 regression copies, which intentionally keep test config — they
+> are NOT outstanding cutover work.**
+
+Historical status (2026-07-27, superseded): build complete; **Phase A testing complete** (A8
+wrap-up aside). All 7 target workflows exist and were then **deployed inactive**. The live test
+scoreboard is `docs/test-plan/test-sequence.md`; this doc is only the pre-publish cutover gate.
 
 **2026-08-01 — OQ-048 PORT EXECUTED.** The go-live target is now
 `https://coastal.n8n.fm360consulting.com` (owner ruling 2026-07-30). All 7 workflows exist
@@ -31,6 +36,68 @@ is therefore closed: 4 credentials populated (all 4 now proven by live calls —
 OQ-020 repoints done at cutover, section 7 Eastern re-run PASSED (exec 127523). What remains
 is **Phase C shepherd watch**, not gating work — and the unproven paths listed in section 7's
 2026-08-03 note.
+
+---
+
+## BURN-IN WATCH — owner away from 2026-08-05
+
+**Watcher: Ethan Morris** (owner away from 2026-08-05). Ethan — read this section first.
+
+Note on your coverage: `ethan@fm360consulting.com` already receives the **15-minute error-log
+export** (handled errors from Step 1/2/3). It does **not** currently receive the
+**unhandled-failure** alert, which goes to `integrations@fm360consulting.com` — so make sure you
+are reading that inbox too, or ask for `ethan@` to be added to
+`Coastal - Unhandled Error Alert` (`E4eyrICfuZLTFyyr`).
+
+### The one thing to internalize
+
+**A green execution list does NOT mean the integration is working.** Two independent reasons:
+
+1. A node with `onError: continueErrorOutput` routes into an error branch and the execution still
+   finishes `status: "success"`. Deer Valley reported success every 6 h for 3 days while its token
+   refresh was completely dead.
+2. Most Coastal executions are **early gate exits** — 10–30 ms webhook runs that correctly decide
+   "not my event." Green and 20 ms is normal, not evidence of work.
+
+Judge health by **email and by absence of expected work**, not by the execution list.
+
+### Alert channels — what arrives where
+
+| Channel | Covers | Goes to |
+| --- | --- | --- |
+| `Coastal - Unhandled Error Alert` (`E4eyrICfuZLTFyyr`, OQ-049) | Any **unhandled** throw in any of the 7 | `integrations@fm360consulting.com` |
+| `Coupa - Integration Error Log Export` (every 15 min) | **Handled** errors that wrote an error-log row (Step 1/2/3) | `ethan@fm360consulting.com` |
+| Token Refresh's own alert node | The `/oauth2/token` call failing | `integrations@fm360consulting.com` |
+
+**Nothing alerts on silent logic failures** — HTTP 200 with an unexpected shape, or an empty array
+pruning the chain. Those are caught only by noticing expected work stopped happening.
+
+### Weekly absence checks (5 minutes, catches the silent class)
+
+1. **Token freshness** — data table `u818Gq3vZSTXdgeh` row 1: `refreshed_at` should be **today**
+   04:00:30 UTC. If it is stale, every Coupa call is running on a dead token. This is the single
+   highest-value check; the token's `exp` is exactly `iat + 86400`, so **one missed refresh is an
+   outage.**
+2. **Step 2 is polling** — `vwo0YcZewnyodSzL` should show an execution every 5 minutes.
+3. **EHS daily ran** — `6mAzjD1LG6AcDV5p` at 20:00 UTC / 16:00 ET each day.
+4. **Error-log table** `On8bmdryDYfoBjMG` should normally be **empty** (the 15-min export drains
+   it). Rows sitting there for more than ~20 min means the export or its SMTP is failing.
+
+### Escalation / rollback
+
+Every Fuse/Make scenario is **disabled, not deleted**. To revert one workflow: deactivate it in
+n8n, re-enable the matching Fuse scenario, and PATCH the Limble webhook back to its original
+`hook.fuse.limblecmms.com` endpoint. Original endpoints and the hook→workflow mapping are in
+`docs/oq-048-port-ledger.md` ("Cutover log — rollback reference"). Resolved **OQ-020** records
+which hook maps to which workflow.
+
+### What is genuinely untested and may fail on first real use
+
+- **Step 1 requisition create** and **Step 3 invoice push** — Coupa POSTs, never executed. A hard
+  failure will email; a wrong-but-accepted write will not.
+- **EHS Create's WO-creation branch** (~26 of 34 nodes) — fires only on a deficiency day
+  (~1/month). Highest consequence: a missed safety-deficiency WO.
+- **EHS Update's write path** — fires only on an `@EHS;`-tagged completion.
 
 Phase A suite status: **A1 Step 2 ✅** (incl. S2-2 team-comment — PASS 2026-07-24, exec 127081,
 OQ-040 resolved) · **A2 Token Regen ✅** · **A3 Error Log Export ✅** · **A4 Step 1 ✅** (team

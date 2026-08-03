@@ -261,3 +261,18 @@ performed. Node-level verification, not status-level:
 - **EHS Update write path** (`uhmXW1jlImUdXQVw`) — webhook runs are 14–30 ms gate-outs; no
   `@EHS;`-tagged completion has arrived. The OQ-045 zero-instruction `alwaysOutputData` fix
   remains execution-verified by proxy only.
+
+### Alerting added 2026-08-03 (OQ-049) — 8th workflow on coastal
+
+The day-3 review surfaced that **unhandled** failures reached nobody: EHS Update and EHS Create have
+no error handling at all, Step 3 routes only 3 of its nodes to the error log, Token Refresh's
+**store** node has no error branch, and no workflow had `settings.errorWorkflow` set. With the owner
+away from 2026-08-05 there is no shepherd, so this was sanctioned as a fix (OQ-049).
+
+- **`Coastal - Unhandled Error Alert` — `E4eyrICfuZLTFyyr`** (ACTIVE, 2 nodes): `errorTrigger` →
+  `emailSend` to `integrations@` via `XbGIxN8MFDM3DJoS`.
+- `settings.errorWorkflow = E4eyrICfuZLTFyyr` on **all 7** production workflows.
+- **Proven by execution, not config** — exec **1325**: Error Trigger received real context, email
+  returned SMTP 250. The first attempt with the handler left **inactive produced ZERO executions**
+  (no published version to invoke, fails silently) — see OQ-049 for the full finding.
+- Coastal now holds **8 workflows**. Note for future audits: a count of 7 is now WRONG.

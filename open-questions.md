@@ -62,6 +62,7 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-046](#oq-046) | EHS Create WO: `listTeams limit=500` unpaginated — OQ-018's dangling follow-up; sweep in the paginate fix or leave faithful? | PENDING DECISION | Resolved | 2026-07-26 |
 | [OQ-047](#oq-047) | EHS Create WO: four docx-vs-blueprint drifts — team name, priority 2 vs 3, due +7d vs same-day **[all 3 closed 2026-07-26, no change]**; only `CreatedAfter` vs `DatePerformed` remains **[EHS-blocked, deferred to C4 cutover watch]** | OPEN QUESTION | Open (1 of 4) | 2026-07-26 |
 | [OQ-048](#oq-048) | Cutover target moved: port all 7 workflows fm360 → dedicated `coastal.n8n.fm360consulting.com` instance; we create placeholder credentials/data tables, owner populates values | ACTION ITEM | Resolved | 2026-07-30 |
+| [OQ-049](#oq-049) | **SANCTIONED FIX:** unhandled n8n failures reach nobody — add an instance error workflow (`errorWorkflow` on all 7) before the owner's unattended window | PENDING DECISION | Resolved | 2026-08-03 |
 
 ---
 
@@ -2776,3 +2777,122 @@ reaching Coupa, so no requisition created, no PO read, no invoice pushed. Step 2
 **envelopes** were separately verified out-of-band 2026-08-03 (see the OQ-028 addendum). The EHS
 WO-creation branch (~26 of 34 nodes) and the EHS Update write path also remain unexercised,
 awaiting a deficiency day and an `@EHS;`-tagged completion respectively.
+
+---
+
+## OQ-049 — [resolved] SANCTIONED FIX: unhandled n8n failures reach nobody — add an instance error workflow
+
+**Type:** PENDING DECISION
+**Added:** 2026-08-03
+**Source:** Owner question 2026-08-03 — "given I am leaving Wednesday, is this to a point where it
+will self-evaluate (an error being apparent enough from the workflow and emailed to the appropriate
+parties)?"
+
+**Question / Description:**
+The question forced an audit of what actually reaches a human when something breaks. Result: error
+surfacing is **asymmetric and incomplete**, and the gap is invisible from the execution list.
+
+Per-workflow, as built (verified by structure read, 2026-08-03):
+
+| Workflow | Error handling | Reaches a human? |
+| --- | --- | --- |
+| Token Refresh | `Refresh Coupa OAuth Token` → `onError: continueErrorOutput` → email `integrations@` (+ `retryOnFail` ×3) | Yes, for that node only |
+| Step 2 | 5 `Err: *` Set nodes covering effectively every HTTP node → error-log table → 15-min export email | Yes, broad |
+| Step 3 | `Insert Error Log Row` exists but **only 3 nodes route to it** (`Coupa: Attach Invoice`, both `Post Comment` nodes) | Partial |
+| EHS Update | **No error handling whatsoever** — `EHS: Update Inspection` has no error branch, nothing downstream | **No** |
+| EHS Create | No error logging (OQ-004 as-is decision) | **No** |
+
+Two structural holes this exposed:
+1. **A node with no error branch throws, and nobody is told.** Step 3's `Coupa: Get PO`, `Get Task`,
+   `Get Instructions`, `Extract Invoice Response`, `Get Coupa Token` all lack error outputs. Worst
+   case found: Token Refresh's **store** node `Update Coastal Coupa OAuth Token` has no error
+   branch — if it fails, the token is minted but never saved, every downstream Coupa workflow runs
+   on a stale token, and the only trace is `status: error` in a list nobody reads.
+2. **No safety net.** `settings` on the coastal workflows carried only
+   `{executionOrder, timezone}` — **no `errorWorkflow`**, so unhandled throws produced no
+   notification at all.
+
+**Why this is proposed as a fix rather than left faithful:** OQ-004 declined EHS error logging and
+OQ-039/OQ-028 deferred live-shape verification to a **Phase C shepherd watch**. Both decisions
+assumed a human watching. The owner leaving 2026-08-05 removes the shepherd, so the premise the
+as-is decision rested on no longer holds. This adds **operational alerting only** — it does not
+change any ported business logic, node, or mapping.
+
+**Resolution criteria:**
+Owner sanction; an error workflow wired to all 7; and — per this file's own standing rule — the
+alert path proven by an actual execution, not a config read-back.
+
+**Resolved:** 2026-08-03
+**Resolution:** **Sanctioned by the owner and implemented same day.**
+
+- Created **`Coastal - Unhandled Error Alert`** (`E4eyrICfuZLTFyyr`) on coastal: `errorTrigger` →
+  `emailSend` via the **proven** `Integrations Ionos` credential (`XbGIxN8MFDM3DJoS`, SMTP 250 on
+  exec 1294). `n8n_validate_workflow`: valid, 0 errors, 0 warnings.
+
+**THE ERROR WORKFLOW MUST BE ACTIVE — found by testing, not by reading.** It was first created
+**inactive**, on the widely-documented understanding that n8n invokes error workflows directly and
+they need no activation. A deliberate-failure test proved that wrong on this instance: temp workflow
+`XzmDoRZHuTD4P47r` (schedule trigger → Code node that throws) failed in production mode as designed
+(`status: error`, 21:18:00Z), its **published** graph correctly carried
+`errorWorkflow: E4eyrICfuZLTFyyr` — and the error workflow logged **zero executions**. The alert
+never fired. Cause: on the draft/publish model an inactive workflow has **no published version**, so
+there is nothing for n8n to invoke; it fails **silently**, with no error anywhere. Fixed by
+activating `E4eyrICfuZLTFyyr` (side-effect-free — an Error Trigger does not poll, listen, or
+schedule; the workflow runs only when a caller fails).
+
+**This is the exact failure class this entry exists to prevent**, and a config read-back would have
+passed it: `settings.errorWorkflow` was correct on all 7, the handler validated clean, and the whole
+arrangement was non-functional. Had the test been skipped, the owner would have left believing
+unhandled failures were covered when nothing would have been sent. Restates the standing rule with a
+new example: **a config round-trip is not execution proof — and neither is documentation.**
+
+**VERIFIED WORKING — re-test PASSED 2026-08-03, exec 1325.** After activating the handler, the same
+throwaway workflow was re-armed (cron `23 17 * * *`) and failed at 21:23:00Z (exec 1324). The error
+workflow then ran as exec **1325**, `mode: "error"`, 2/2 nodes, 573 ms:
+- `Error Trigger` received full context — `workflow.name`/`workflow.id`, `execution.id` 1324,
+  `execution.url`, the real error message, and `lastNodeExecuted: "Throw On Purpose"`. Every
+  expression in the email template therefore resolves against real Error Trigger output.
+- `Alert: Unhandled Workflow Failure` returned **SMTP 250**, `accepted: [integrations@, gerald@]`,
+  `rejected: []`, real `messageId`.
+
+Cleanup completed same session: throwaway workflow `XzmDoRZHuTD4P47r` **deleted**; the temporary
+`gerald@` test recipient **reverted** so the alert goes to `integrations@` only. Final coastal board
+verified by LIST: **8 workflows** — the 7 production plus `E4eyrICfuZLTFyyr`, all active.
+
+**Secondary finding — refines the standing draft/publish lesson.** The recipient revert was a
+*node-parameter* edit (versioned, unlike `settings`) on an **active** workflow, and it published
+**immediately**: `mode=active` showed the new `toEmail` and `activeVersionId` advanced to
+`1c412698…` at 21:24:29. So a **standalone** `updateNode` on an active workflow does auto-publish
+here; the earlier PC-Maintenance case where a patch did NOT ship was a **bundled**
+updateNode+deactivate+activate call. The rule to carry forward is "don't bundle content saves with
+activation ops," not "every active-workflow edit needs a bounce."
+
+**Known last-mile gap (accepted):** `E4eyrICfuZLTFyyr` has no `errorWorkflow` of its own, so if the
+alert email itself fails, nothing reports it. Pointing it at itself would risk a loop. Accepted as
+the standard last-hop limitation; the weekly absence checks in DEPLOYMENT's "Burn-in watch" section
+are the compensating control.
+- Email body names the workflow, execution id, failed node, error message, and execution URL, and
+  **states its own coverage limits** so a future reader is not misled: it fires for unhandled
+  failures only; handled errors ride the 15-min error-log export to `ethan@`; and silent logic
+  failures (HTTP 200 with an unexpected shape, an empty array pruning the chain) alert on **nothing**
+  and can only be caught by noticing that expected work stopped. It also carries the rollback lever.
+- `settings.errorWorkflow = E4eyrICfuZLTFyyr` set on **all 7** production workflows
+  (`1phqgrpFuSZOFqxS`, `4fFRbDT7bluYEPc7`, `vwo0YcZewnyodSzL`, `2T9TghNyHbp6LWhH`,
+  `6mAzjD1LG6AcDV5p`, `uhmXW1jlImUdXQVw`, `0twTCK5xGFsB9k79`), plus the temp test workflow.
+
+**Load-bearing finding — workflow `settings` are NOT versioned on the draft/publish model.** The
+concern going in was that this instance has `activeVersionId`, so per the standing lesson an API
+edit to an ACTIVE workflow does not ship until a deactivate→activate bounce — which would have
+meant bouncing 7 live workflows and briefly dropping 3 webhooks. Tested on one workflow first:
+after the patch, `mode=active` (the **published** graph) returned
+`settings.errorWorkflow: E4eyrICfuZLTFyyr` while `activeVersionId` stayed `c917b8b6…`
+(unchanged from 2026-08-01). **Conclusion: `settings` is workflow-level metadata that applies
+immediately; only the node graph is versioned.** No bounce, no downtime, no webhook gap. Worth
+remembering — it makes `errorWorkflow`, `timezone`, and `executionTimeout` safe to change on a
+live workflow.
+
+**Residual gap this does NOT close (state plainly to Coastal):** silent logic failures. A Coupa
+call returning HTTP 200 with an unexpected shape, or an empty array pruning the rest of the chain,
+produces a green execution, no error row, and no email. Detecting that class still requires someone
+noticing an absence — no new POs appearing on Limble WOs, or no EHS WOs created after a deficiency.
+See the empty-`[]` watch item in OQ-028's 2026-08-03 addendum.
