@@ -15,24 +15,30 @@ Owner rulings 2026-07-31 (in-session, ratified via interview):
 
 | Table | FM360 ID (test) | Coastal ID (cutover) | Seed state |
 | --- | --- | --- | --- |
-| Coastal - Coupa OAuth Token | `QAj62weJaWmRBJ76` | `u818Gq3vZSTXdgeh` | row id 1: `client=coastal_waste`, blank `oauth_token`, scope = Phase-A stub `core.requisition.read core.purchase_order.read` — **[EXT] real PROD scope pending** (DEPLOYMENT section 1) |
+| Coastal - Coupa OAuth Token | `QAj62weJaWmRBJ76` | `u818Gq3vZSTXdgeh` | row id 1: `client=coastal_waste`. **Seed state superseded — LIVE as of 2026-08-01 (see "Owner population" below):** real PROD `scope` (~150 `core.*` entries) and a live daily-minted `oauth_token`. Re-verified 2026-08-03 (Step 2 exec 1291 read the row; `refreshed_at`/`updatedAt` = 04:00:30Z that morning). Original seed was blank `oauth_token` + Phase-A stub scope |
 | Coastal - Coupa Integration Error Log | `6GbR5Rxezl7hqk9i` | `On8bmdryDYfoBjMG` | empty |
-| Coastal - Integration Config | `L0npQPPEXQI9JRzX` | `dhGuWwRx1a8uIvp3` | row id 1: `escalation_admin_user_id=317887` — **pending OQ-019 confirmation** (note in row) |
+| Coastal - Integration Config | `L0npQPPEXQI9JRzX` | `dhGuWwRx1a8uIvp3` | row id 1: `escalation_admin_user_id=317887` — **OQ-019 confirmed-by-use 2026-08-01** (owner: "continue to reference this ID"); no longer pending |
 
 Schemas copied column-for-column from FM360 (verified via listTables 2026-07-31):
 token = client/oauth_token/refreshed_at(date)/scope; error-log =
 limbleWONum/errorCode/errorMsg/timestamp(date); config = key/value/notes.
 
-## Credentials (placeholders created 2026-07-31 — owner populates values)
+## Credentials (created 2026-07-31 as placeholders — **ALL 4 POPULATED 2026-08-01**)
+
+Names below are the as-created placeholder names; the owner dropped the `[PLACEHOLDER …]`
+suffix on population and the credential **IDs did not change**. All 4 are now proven by live
+calls (2026-08-03 review): Limble PROD header via real task fetches, EHS key via real EHS
+GETs, Coupa httpCustomAuth via the daily token mint, Ionos SMTP via Error Log Export exec 1294.
+The "Owner action" column is historical. See "Owner population — COMPLETE 2026-08-01" below.
 
 | Credential | Type | Coastal ID | Replaces (FM360) | Owner action |
 | --- | --- | --- | --- | --- |
-| Coastal Waste Limble PROD [PLACEHOLDER - populate value] | httpHeaderAuth | `V3fUTHSMtAkRUHlT` | `MX0lwgfyFiGUBh5W` (sandbox) / `qn6u8jEK085DoHT8` (prod, FM360-only) | paste prod Limble `Authorization` header value |
-| Coastal Waste - EHS API Key [PLACEHOLDER - populate ROTATED key] | httpHeaderAuth | `ZLLpBIVYKWS99BwK` | `ZEf4C1rpYSbBgLbX` | paste **rotated** EHS key (header `X-ApiKey`); old key must be revoked first |
-| Coastal Coupa OAuth Client Credentials [PLACEHOLDER - populate value] | httpCustomAuth | `kH7NaehFRB3s2RLt` | FM360 Coupa cred | populate custom-auth JSON with PROD client_id/client_secret (capture path: Fuse datastore 324, row `coastal_waste (PROD)` — Ethan confirmed 2026-07-27). Placeholder JSON shape is a guess: `{"body":{"client_id":...,"client_secret":...}}` — **verify against the FM360 credential's real JSON shape when populating; the Token Regen mint request depends on it** |
-| Integrations Ionos [PLACEHOLDER - populate value] | smtp | `XbGIxN8MFDM3DJoS` | FM360 Ionos cred | populate real Ionos SMTP user/password/host/port |
+| Coastal Waste Limble PROD | httpHeaderAuth | `V3fUTHSMtAkRUHlT` | `MX0lwgfyFiGUBh5W` (sandbox) / `qn6u8jEK085DoHT8` (prod, FM360-only) | paste prod Limble `Authorization` header value |
+| Coastal Waste - EHS API Key | httpHeaderAuth | `ZLLpBIVYKWS99BwK` | `ZEf4C1rpYSbBgLbX` | paste **rotated** EHS key (header `X-ApiKey`); old key must be revoked first |
+| Coastal Coupa OAuth Client Credentials | httpCustomAuth | `kH7NaehFRB3s2RLt` | FM360 Coupa cred | populate custom-auth JSON with PROD client_id/client_secret (capture path: Fuse datastore 324, row `coastal_waste (PROD)` — Ethan confirmed 2026-07-27). Placeholder JSON shape is a guess: `{"body":{"client_id":...,"client_secret":...}}` — **verify against the FM360 credential's real JSON shape when populating; the Token Regen mint request depends on it** |
+| Integrations Ionos | smtp | `XbGIxN8MFDM3DJoS` | FM360 Ionos cred | populate real Ionos SMTP user/password/host/port |
 
-## Workflows (port pending)
+## Workflows (port COMPLETE — 7/7 created, all ACTIVE since cutover 2026-08-01)
 
 | Workflow | FM360 ID | Coastal ID | Validated | Webhook path |
 | --- | --- | --- | --- | --- |
@@ -185,3 +191,73 @@ Post-cutover day-1 (2026-08-01 evening):
   standing regression environment.
 - **EHS key rotation removed from engagement scope** (owner ruling 2026-08-01): client team
   carries rotation post-handoff; facts + procedure recorded in DEPLOYMENT section 0 EHS row.
+
+## Post-cutover review — 2026-08-03 (day 3 live)
+
+Reviewed all coastal execution history. **Every execution since cutover is `status: success`,
+with zero errors** — but most of that green comes from correct early gate exits, not from work
+performed. Node-level verification, not status-level:
+
+**Proven live**
+
+- **Token Refresh** (`1phqgrpFuSZOFqxS`) — fired 08-02 and 08-03 at 04:00:30Z (= midnight ET).
+  Exec 982 ran 4/4 nodes **including the store node** `Update Coastal Coupa OAuth Token`, on a
+  real `{access_token, token_type, expires_in}` response; the 5th node (failure alert) correctly
+  did not run. This is the Deer-Valley silent-failure check (a token refresh whose HTTP node
+  error-branches to an alert still reports `success`) — it passes.
+- **Token row** carries a live JWT + real PROD scope; `refreshed_at`/`updatedAt` advance daily.
+  Note: JWT `exp` = `iat + 86400`, i.e. the token expires exactly when the next daily refresh
+  runs. Faithful to Fuse's daily-midnight design, but the margin is ~zero — **one missed refresh
+  run is an outage.** Watch item, not a defect.
+- **Limble PROD reads** — Step 2's `Get 'PO Requested' Status ID` resolves to `statusID 5782`
+  with `name: "PO Requested"` (the name in the response self-validates the ID, ruling out a
+  wrong-status silent zero); Step 1/Step 3 `Get Task` return full real task objects.
+- **Limble webhook delivery** — all 3 coastal endpoints receiving real events; body shape
+  `{taskID, status, category, user}`.
+- **EHS GETs** — real envelopes `{ResultCode, List[]}` and `{ResultCode, Entity{…}}` parse clean.
+- **EHS Create cron** — 3/3 daily runs on time (execs 461 / 853 / 1293 at 20:00:00Z). Durations
+  12.3 s / 33.0 s / 3.6 s = inspection-volume variance, **not** a trend. All three ended at
+  `Any Deficient Forms?` false → 0 WOs, consistent with the ~1/month deficiency baseline.
+- **Error Log Export + Ionos SMTP, on the COASTAL copy** — see DEPLOYMENT section 7
+  (2026-08-03 note). Previously proven only on the FM360 copy at A3 E1.
+
+**Still unproven live — the real Phase C risk**
+
+- **Every Coupa call except `/oauth/token` is still unexercised by the workflows themselves.**
+  Step 2 exits at `Get 'PO Requested' WOs` → 0 items (Coupa never contacted); Step 1 exits at
+  `Is CoupaWO in PO Create?`; Step 3 exits at `WO is Coupa Related?`. No requisition created, no
+  PR/PO read, no invoice pushed in 3 days.
+- **HOWEVER — Step 2's Coupa response ENVELOPES are now verified (2026-08-03, out-of-band
+  read-only probe, owner-run).** This was the PC-Maintenance-PB5 / CWI-FIX-06 risk; it is closed
+  for Step 2:
+  - `GET /api/requisitions/{id}` + `Accept: application/json` → **HTTP 200, bare JSON object**
+    (37 keys), with `.id` and `.status` present (`'draft'` on the sample). So
+    `Get Associated Requisition` → `Is Requisition Ordered?` (`$json.status == "ordered"`)
+    resolves correctly — **no wrapper, no silent-`undefined` drop.**
+  - `GET /api/purchase_orders?requisition-header[id]={id}` → **HTTP 200, bare JSON array**, as
+    the node note assumes (n8n splits to items). The literal-bracket query key is accepted (no
+    400). Sample returned `[]` because the test requisition was `draft`.
+  - **Coupa field names are kebab-case** (`buyer-note`, `created-at`, `line-count`,
+    `estimated-tax-amount`). Step 2's only multi-word read already uses bracket notation —
+    `$("Get PO Created From Req.").item.json["po-number"]` — so it is correct. Any future Coupa
+    field read must use bracket notation, not dot.
+  - Probe method note: the JWT was integrity-gated locally (iat/exp/client_id checked against
+    the stored row) before any request, so a `401` could not be mistaken for an envelope result.
+    Four in-session attempts were denied by the Bash permission classifier; the owner ran it.
+  - **Residual CLOSED same day:** `GET /api/purchase_orders?limit=1` returned a real PO —
+    `po-number` present and non-null, `id` present (sample `10370`), 39 keys all kebab-case.
+    **Step 2's Coupa contract is fully verified: both envelopes + both field names.** Noted for
+    future changes: one PO is ~64 KB, and `requisition-header` is a nested object on the PO.
+  - **Watch item (not a defect, 1:1 posture):** an empty `[]` from the PO lookup becomes 0 items
+    in n8n and prunes the rest of the chain silently — no WO update, no error row. Fuse read
+    `body[1]` and would have errored. Benign in that a later 5-min poll retries, but it means an
+    `ordered` requisition with no visible PO produces zero signal.
+- **The empty backlog is genuine, not a query artifact:** an independent Limble prod query for
+  `statusIDs=5782` also returns `[]`, agreeing with the workflow's own HTTP node. Three days is
+  too few to characterize the expected event rate — do not read the silence as either healthy
+  or broken without Coastal's baseline.
+- **EHS WO-creation half** of `6mAzjD1LG6AcDV5p` (create / attachment / location-mapping,
+  ~26 of 34 nodes) — awaits a deficiency day.
+- **EHS Update write path** (`uhmXW1jlImUdXQVw`) — webhook runs are 14–30 ms gate-outs; no
+  `@EHS;`-tagged completion has arrived. The OQ-045 zero-instruction `alwaysOutputData` fix
+  remains execution-verified by proxy only.

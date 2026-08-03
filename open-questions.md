@@ -33,7 +33,7 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-017](#oq-017) | Step 1: "Add Quote" onerror logs wrong module's error — fix?              | PENDING DECISION | Resolved | 2026-07-02 |
 | [OQ-018](#oq-018) | Step 1: listUsers limit=500, no pagination — silent miss past 500 users    | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-019](#oq-019) | Hardcoded Limble admin user 317887 in all Step 1 error paths — who is it?  | OPEN QUESTION | Resolved | 2026-07-02 |
-| [OQ-020](#oq-020) | Limble webhook re-registration at cutover (hooks 775/776/777 → n8n URLs)   | OPEN QUESTION | Open | 2026-07-02 |
+| [OQ-020](#oq-020) | Limble webhook re-registration at cutover (hooks 775/776/777 → n8n URLs)   | OPEN QUESTION | Resolved | 2026-07-02 |
 | [OQ-021](#oq-021) | Step 1 spec: sign-off on proposed consolidations (§4)                      | PENDING DECISION | Resolved | 2026-07-02 |
 | [OQ-022](#oq-022) | Step 1 improvement candidates awaiting sanction (idempotency, retries, etc.) | PENDING DECISION | Resolved | 2026-07-02 |
 | [OQ-023](#oq-023) | Sanction read-only Limble MCP recon before Step 1 build (OQ-003 amendment)   | PENDING DECISION | Resolved | 2026-07-03 |
@@ -61,7 +61,7 @@ Items marked [resolved] are kept for history and ignored on future scans.
 | [OQ-045](#oq-045) | Step 1/Step 3: zero-instruction WO skips collapsed-aggregator Code nodes → silent stop where source continued (low reachability) — document or fix? | PENDING DECISION | Resolved | 2026-07-25 |
 | [OQ-046](#oq-046) | EHS Create WO: `listTeams limit=500` unpaginated — OQ-018's dangling follow-up; sweep in the paginate fix or leave faithful? | PENDING DECISION | Resolved | 2026-07-26 |
 | [OQ-047](#oq-047) | EHS Create WO: four docx-vs-blueprint drifts — team name, priority 2 vs 3, due +7d vs same-day **[all 3 closed 2026-07-26, no change]**; only `CreatedAfter` vs `DatePerformed` remains **[EHS-blocked, deferred to C4 cutover watch]** | OPEN QUESTION | Open (1 of 4) | 2026-07-26 |
-| [OQ-048](#oq-048) | Cutover target moved: port all 7 workflows fm360 → dedicated `coastal.n8n.fm360consulting.com` instance; we create placeholder credentials/data tables, owner populates values | ACTION ITEM | Open | 2026-07-30 |
+| [OQ-048](#oq-048) | Cutover target moved: port all 7 workflows fm360 → dedicated `coastal.n8n.fm360consulting.com` instance; we create placeholder credentials/data tables, owner populates values | ACTION ITEM | Resolved | 2026-07-30 |
 
 ---
 
@@ -826,7 +826,7 @@ reset to `""`; Step 1 deactivated again. Details in `docs/test-plan/test-sequenc
 
 ---
 
-## OQ-020 — Limble webhook re-registration at cutover (hooks 775/776/777 → n8n URLs)
+## OQ-020 — [resolved] Limble webhook re-registration at cutover (hooks 775/776/777 → n8n URLs)
 
 **Type:** OPEN QUESTION
 **Added:** 2026-07-02
@@ -850,6 +850,35 @@ registrations with the n8n production webhook URLs.
 **Resolution criteria:**
 Owner states the cutover mechanics (who, when, atomic vs. overlap) — likely belongs in
 DEPLOYMENT.md once decided. Non-blocking for specs/builds; blocking for go-live.
+
+**Resolved:** 2026-08-03
+**Resolution:** **Executed at cutover 2026-08-01 — repoints done via the Limble API, not a
+webhook-admin UI, so the "who has access" question dissolved.** All three Limble-side
+registrations were PATCHed to the coastal webhook URLs and verified `enabled=1`:
+
+| Limble hook | Repointed to | Workflow |
+| --- | --- | --- |
+| 1742 | `.../webhook/coastal-coupa-create-requisition-step1` | Step 1 |
+| 1743 | `.../webhook/coastal-coupa-wo-completed-step3` | Step 3 |
+| 1744 | `.../webhook/coastal-ehs-update-inspection` | EHS Update |
+
+**Atomic vs. overlap — answered by execution:** the swap was done **per workflow, atomically**,
+each repoint issued immediately after that workflow was activated (R4 Step 1, R5 Step 3, R7 EHS
+Update), so no side-by-side window existed where both Fuse and n8n could process the same event.
+Fuse scenarios were disabled-not-deleted, and the original `hook.fuse.limblecmms.com` mailbox
+URLs are recorded in `docs/oq-048-port-ledger.md` as the rollback targets — a revert is a
+full-body PATCH of `{endpoint, type}` per hook.
+
+**Hook-ID note (this entry's title is misleading and stays as written for history):** the
+Make-side hook IDs 775/776/777 never mapped visibly to the Limble-side webhookIDs 1742/1743/1744
+— the mailbox strings are opaque, as the 2026-07-03 recon noted. The mapping above was
+established by *which coastal URL each was pointed at*, not by decoding the old mailboxes, so
+"which Make hook was which" was never answered and no longer matters.
+
+**Live confirmation (2026-08-03):** all three coastal webhook endpoints are receiving real Limble
+events — webhook-mode executions on `4fFRbDT7bluYEPc7`, `2T9TghNyHbp6LWhH`, and
+`uhmXW1jlImUdXQVw` with body `{taskID, status, category, user}`. Delivery is proven; the
+downstream write paths gate out on current data and are tracked under Phase C.
 
 ---
 
@@ -1467,6 +1496,49 @@ config-table read has not been exercised end to end — s5 takes the supplier-mi
 writes no error row, so exec 127325 did not touch it. One targeted error-path re-run is owed
 (build-spec section 10 "Re-test owed").
 
+**ADDENDUM 2026-08-03 — the guessed Coupa response shapes are now VERIFIED against real Coupa
+(read-only probe). Entry stays resolved; this records the deferred verification landing.**
+
+This entry's core risk was that the mock-Coupa rig's response shapes were *authored from the
+source blueprint's mapper*, which re-encodes the very assumption under test — an offline fixture
+pass could therefore prove nothing about real envelopes. That risk is now closed for Step 2's two
+Coupa GETs, via three read-only GETs against `coastalwasteinc.coupahost.com` using the live
+prod token:
+
+| Contract | Real result | Verdict |
+| --- | --- | --- |
+| `GET /api/requisitions/{id}` (`Get Associated Requisition`) | HTTP 200, top-level **bare object**, 37 keys, `.id` + `.status` present (`'draft'` on sample) | **PASS** — `Is Requisition Ordered?` (`$json.status == "ordered"`) resolves |
+| `GET /api/purchase_orders?requisition-header[id]=` (`Get PO Created From Req.`) | HTTP 200, top-level **bare array**; literal-bracket query key accepted, no 400 | **PASS on shape** — n8n splits to items as the node note assumes |
+
+**Net-new fact the mocks never surfaced: Coupa field names are kebab-case** (`buyer-note`,
+`created-at`, `line-count`, `estimated-tax-amount`). Step 2's only multi-word read already uses
+bracket notation — `$("Get PO Created From Req.").item.json["po-number"]` — so it is correct, but
+**any future Coupa field read must use bracket notation, not dot**. A dot read of a kebab-case
+field yields `undefined` silently.
+
+**Method note (matters for trusting this result):** the JWT was integrity-gated locally
+(`iat`/`exp`/`client_id` checked against stored row `u818Gq3vZSTXdgeh`) *before* any request, so a
+transcription error could not surface as a `401` and be misread as an envelope finding. Four
+in-session attempts were denied by the Bash permission classifier; the owner ran the probe.
+
+**Residual CLOSED same day (2026-08-03)** by a fourth read-only GET,
+`GET /api/purchase_orders?limit=1` — a **real PO payload** confirms both fields Step 2 reads:
+`po-number` present and **non-null**, `id` present (sample value `10370`). 39 keys, every one
+kebab-case, `status` present on the PO as well. **Step 2's Coupa contract is now fully verified
+end to end** — requisition envelope, PO-list envelope, and both PO field names.
+
+Two observations from the real payload, neither a defect:
+- A single PO is **~64 KB** (39 keys including `order-lines`, `attachments`, `custom-fields`,
+  `reason-insight-events`, `current-integration-history-records`). Step 2 fetches one PO per
+  requisition (1:1), so this is fine — but note it for any future change that fetches POs in bulk.
+- `requisition-header` is a nested object on the PO, i.e. the requisition→PO link is readable from
+  either direction if a future fix ever needs it.
+
+**Watch item, not a defect (1:1 posture — would need its own sanctioned fix):** an empty `[]` from
+the PO lookup becomes 0 items in n8n and prunes the rest of the chain silently — no WO update, no
+error row. Fuse read `body[1]` and would have errored. Benign in that the 5-min poll retries, but
+an `ordered` requisition with no visible PO produces zero signal.
+
 ---
 
 ## OQ-029 — [resolved] Step 2 built (`WYJyHdQGcdeD8wEr`) missing OQ-008 error-log subgraph
@@ -2053,10 +2125,10 @@ mock guesses) fails loudly at first live runs — acceptable under the shepherd 
 stays open as the C4 watch tracking item. The stale `Coastal_Waste (TEST)` token row (id 1 in
 `QAj62weJaWmRBJ76`, expired JWT) should be deleted at cutover table cleanup.
 
-## OQ-040 — Step 2 team-comment path unprovable in sandbox (View Only role-team)
+## OQ-040 — [resolved] Step 2 team-comment path unprovable in sandbox (View Only role-team)
 
 **Type:** OPEN QUESTION
-**Status:** Open
+**Status:** Resolved
 **Added:** 2026-07-13
 
 **Question / Description:**
@@ -2607,7 +2679,7 @@ team-lookup path is the normal case, not an edge case.
 
 ---
 
-## OQ-048 — Cutover target moved: port all 7 workflows to dedicated `coastal.n8n.fm360consulting.com` instance
+## OQ-048 — [resolved] Cutover target moved: port all 7 workflows to dedicated `coastal.n8n.fm360consulting.com` instance
 
 **Type:** ACTION ITEM
 **Added:** 2026-07-30
@@ -2676,3 +2748,31 @@ flip (ID-addressed read-backs are instance-blind); stray deleted, create redone,
 physical-presence verified by coastal LIST (7/7). **Remaining to close:** owner populates the
 4 credentials, real Coupa PROD scope on the token-table row, OQ-019 confirmation, and OQ-020
 webhook registration against the 3 coastal URLs (in the ledger).
+
+**Resolved:** 2026-08-03
+**Resolution:** **Port complete, cutover executed, every close condition met.** Cutover ran
+2026-08-01 ~18:07 UTC: all 7 coastal workflows ACTIVE, all 3 Limble hooks repointed and verified
+`enabled=1` (OQ-020, now also resolved), all 7 Fuse scenarios disabled-not-deleted as the
+rollback lever. The four items this entry was held open for are all done — 4 credentials
+populated (PLACEHOLDER suffix dropped, IDs unchanged), real Coupa PROD `scope` (~150 `core.*`
+entries) on token row `u818Gq3vZSTXdgeh`, OQ-019 confirmed-by-use, OQ-020 repoints executed.
+
+Closed on **live-call evidence, not config read-back** (per this file's own standing rule that a
+round-trip read is not execution proof). Verified during the 2026-08-03 day-3 review — full
+detail in `docs/oq-048-port-ledger.md` "Post-cutover review — 2026-08-03":
+- **Coupa httpCustomAuth** (`kH7NaehFRB3s2RLt`) — daily token mint working; exec 982 (08-03
+  04:00:30Z) ran 4/4 nodes **including the store node**, real `{access_token, token_type,
+  expires_in}`, alert node correctly did not fire. Also ran clean 08-02.
+- **Limble PROD header** (`V3fUTHSMtAkRUHlT`) — real prod task fetches and status lookups
+  (`statusID 5782` returned with `name: "PO Requested"`, self-validating the ID).
+- **EHS key** (`ZLLpBIVYKWS99BwK`) — 3/3 daily EHS runs parsing real `{ResultCode, List[]}` /
+  `{ResultCode, Entity{…}}` envelopes.
+- **Ionos SMTP** (`XbGIxN8MFDM3DJoS`) — the last credential with no live evidence, proven by
+  Error Log Export exec 1294: SMTP 250, envelope `integrations@` → `ethan@`, `rejected: []`.
+
+**Explicitly NOT claimed by this closure** (tracked under Phase C, not under OQ-048): no Coupa
+call beyond `/oauth/token` has been made *by the workflows* — Step 1/2/3 all gate out before
+reaching Coupa, so no requisition created, no PO read, no invoice pushed. Step 2's two Coupa GET
+**envelopes** were separately verified out-of-band 2026-08-03 (see the OQ-028 addendum). The EHS
+WO-creation branch (~26 of 34 nodes) and the EHS Update write path also remain unexercised,
+awaiting a deficiency day and an `@EHS;`-tagged completion respectively.

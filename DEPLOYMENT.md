@@ -22,9 +22,15 @@ restored recipients, placeholder credentials) — which ABSORBS this doc's per-w
 staging-revert boxes for the coastal copies: the FM360 copies deliberately KEEP their test
 config as the regression rig, so do NOT run the URL/cred/recipient reverts against FM360.
 New coastal IDs (workflows, data tables, placeholder credentials, webhook URLs) + transform
-receipts: **`docs/oq-048-port-ledger.md`** (authoritative until folded in here). Remaining
-before activation: owner populates 4 placeholder credentials + real Coupa PROD scope
-(section 1), OQ-019/OQ-020 [EXT] items, section 7 Eastern re-run (FM360 side).
+receipts: **`docs/oq-048-port-ledger.md`** (authoritative until folded in here).
+
+**CUTOVER EXECUTED 2026-08-01 ~18:07 UTC — all 7 coastal workflows ACTIVE, all 3 Limble hooks
+repointed, all 7 Fuse scenarios disabled-not-deleted.** Every pre-activation gate listed here
+is therefore closed: 4 credentials populated (all 4 now proven by live calls — see the
+2026-08-03 review note in section 7), real Coupa PROD scope set, OQ-019 confirmed-by-use,
+OQ-020 repoints done at cutover, section 7 Eastern re-run PASSED (exec 127523). What remains
+is **Phase C shepherd watch**, not gating work — and the unproven paths listed in section 7's
+2026-08-03 note.
 
 Phase A suite status: **A1 Step 2 ✅** (incl. S2-2 team-comment — PASS 2026-07-24, exec 127081,
 OQ-040 resolved) · **A2 Token Regen ✅** · **A3 Error Log Export ✅** · **A4 Step 1 ✅** (team
@@ -140,8 +146,8 @@ Every email-sending node currently routes to `gerald@fm360consulting.com` only, 
 
 | Node / Workflow | Real recipient(s) | Status |
 | --- | --- | --- |
-| "Token Refresh Failed" — Coupa Token Regeneration | `integrations@fm360consulting.com` (owner decision 2026-07-25; also the from-address — self-addressed on purpose) | ☐ pending restore |
-| Coupa Integration Error Log Export report | `ethan@fm360consulting.com` (confirmed — matches source Make blueprint) | ☐ pending restore |
+| "Token Refresh Failed" — Coupa Token Regeneration | `integrations@fm360consulting.com` (owner decision 2026-07-25; also the from-address — self-addressed on purpose) | ☑ **done on COASTAL** (carried from the OQ-048 port; OQ-013 alert recipient restored 2026-08-01). FM360 copy keeps gerald@ permanently as the test rig — no restore there |
+| Coupa Integration Error Log Export report | `ethan@fm360consulting.com` (confirmed — matches source Make blueprint) | ☑ **done on COASTAL, live-verified 2026-08-03** (exec 1294: SMTP 250, envelope from `integrations@` → to `ethan@`, `rejected: []`). FM360 copy keeps gerald@ permanently — no restore there |
 
 If any additional error/failure-alert emails get added while building Step 1/2/3 or the EHS
 workflows (none exist in the source blueprints today — confirmed via full-repo scan for embedded
@@ -221,8 +227,12 @@ re-verify at each workflow's cutover manual-test row.
       before deletion; the expired JWT was not preserved. (OQ-039 resolved 2026-07-25: no
       test-instance pass; Coupa shapes examined at go-live under the C4 first-shepherd
       watch — OQ-028 is the tracking item.)
-- [ ] **[EXT — needs the PROD value]** **`scope` on the `coastal_waste` row is still the
-      Phase-A mock stub** (`core.requisition.read core.purchase_order.read`). Before the C1
+- [x] **[EXT — RESOLVED 2026-08-01]** **Real PROD `scope` set on the COASTAL token row**
+      (`u818Gq3vZSTXdgeh`, ~150 space-joined `core.*` entries); re-verified live 2026-08-03 via
+      Step 2 exec 1291, and the daily-minted JWT's embedded `scope` claim matches the stored
+      column. The **FM360** row deliberately keeps the Phase-A stub as the test rig. Original
+      item, retained for context: `scope` on the `coastal_waste` row was the
+      Phase-A mock stub (`core.requisition.read core.purchase_order.read`). Before the C1
       first live mint, set the real PROD request scope — authoritative value lives in Make
       datastore `324` (client `coastal_waste (PROD)`, Ethan/owner can read it); the shape
       reference is `docs/coupa-oauth-scope-reference.md`. (Flagged during the 2026-07-27
@@ -491,7 +501,28 @@ cutover gates (credential swap, webhook repoint, real-EHS manual test), not suit
       [23, 24], table read-back empty. Closes OQ-014's last unverified rendering path.
       (Bonus same day: coastal copy exec 424 = empty-table no-op, proving the repointed
       coastal table read — E2 shape.)
-- [ ] **[GO]** Activate on the 15-minute schedule — ID long assigned (OQ-007)
+- [x] **COASTAL copy end-to-end PASSED live 2026-08-03 — exec 1294** (`0twTCK5xGFsB9k79`). A
+      single synthetic row was inserted into the coastal error-log table `On8bmdryDYfoBjMG`,
+      then the scheduled 20:00:45Z run drained it: all 7 nodes executed (599 ms vs the 10–25 ms
+      empty-table baseline), `Build Report` rendered the Fuse-shaped line with a correct
+      America/New_York timestamp (`08/03/2026, 03:59 PM` for stored 19:59Z),
+      `Send Error Report Email` returned **SMTP 250** with envelope from
+      `integrations@fm360consulting.com` → to `ethan@fm360consulting.com`, `rejected: []`, real
+      `messageId`; delete ran id-addressed on `rowIds: [1]` and the table read back empty. **This
+      is what proved the coastal `Integrations Ionos` credential** (`XbGIxN8MFDM3DJoS`) — the last
+      of the 4 populated credentials with no live evidence, and one only exercised when something
+      else fails.
+- [x] OQ-006 scoped delete **re-verified on the coastal table 2026-08-03** as a deterministic
+      2-row test (the 599 ms single-row run can't distinguish scoped-delete from delete-all):
+      rows `id 2` + `id 3` inserted, a filtered `deleteRows` on `id = 2` removed only that row and
+      `id 3` survived. Combined with the node config (`Delete Reported Rows` = `deleteRows` with
+      `keyValue: {{ $json.rowIds }}`, one call per split item) this closes the question on the
+      coastal copy. Test rows cleaned up; table left empty. Note the coastal reader
+      `Get Error Log Rows` is `operation: get, returnAll: true` with **no filter** — not the
+      `timestamp exists` filter Fuse used; equivalent for a full drain, and the race fix lives in
+      the id-scoped delete, not the read.
+- [x] **[GO]** Activated on the 15-minute schedule at cutover 2026-08-01 — running every 15 min
+      since (execs verified through 2026-08-03)
 
 ---
 
